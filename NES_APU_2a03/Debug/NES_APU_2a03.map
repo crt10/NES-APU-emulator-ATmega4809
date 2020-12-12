@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Fri Dec 11 05:04:57 2020
+AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Fri Dec 11 21:21:31 2020
 
 
 EQU  SIGNATURE_000 0000001e
@@ -3006,6 +3006,9 @@ DSEG pulse1_timerL 00002802
 DSEG pulse1_timerH 00002803
 DSEG pulse1_length 00002804
 DEF  zero         r0
+DEF  sample_delayL r1
+DEF  sample_delayH r2
+DEF  frame_counter_clock r3
 DEF  channel_flags r25
 DEF  pulse1_sequence r13
 DEF  pulse1_length_counter r14
@@ -3014,17 +3017,18 @@ DEF  pulse1_volume_divider r16
 DEF  pulse1_volume_decay r17
 CSEG reset        00000000
 CSEG init         0000001a
-CSEG sequence_1_3 0000009f
-CSEG sequence_0_2 00000095
-CSEG pulse1_sequence_routine 000000b0
-CSEG length_converter 0000010b
-CSEG duty_cycle_sequences 00000121
-CSEG pulse1       0000007d
-CSEG pulse1_off   00000091
-CSEG pulse1_on    00000093
-CSEG pulse1_envelope_routine 000000c5
-CSEG pulse1_sweep_routine 000000bc
-CSEG pulse1_sweep_action 000000dd
-CSEG pulse1_sweep_reload 00000106
-CSEG length       00000111
-CSEG sequences    00000127
+CSEG sequence_1_3 000000b4
+CSEG sequence_0_2 0000009a
+CSEG pulse1_sequence_routine 000000d5
+CSEG length_converter 0000012f
+CSEG duty_cycle_sequences 00000145
+CSEG pulse1       00000082
+CSEG pulse1_off   00000096
+CSEG pulse1_on    00000098
+CSEG sample_audio 000000d4
+CSEG pulse1_envelope_routine 000000e9
+CSEG pulse1_sweep_routine 000000e0
+CSEG pulse1_sweep_action 00000101
+CSEG pulse1_sweep_reload 0000012a
+CSEG length       00000135
+CSEG sequences    0000014b
