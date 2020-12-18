@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Fri Dec 18 07:08:43 2020
+AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Fri Dec 18 16:57:54 2020
 
 
 EQU  SIGNATURE_000 0000001e
@@ -3007,13 +3007,13 @@ DSEG pulse1_timerH 00002803
 DSEG pulse1_length 00002804
 DSEG song_frames  00002805
 DSEG song_frame_offset 00002807
-DSEG pulse1_pattern 00002808
-DSEG pulse1_pattern_delay 0000280a
-DSEG pulse1_pattern_offset 0000280b
-DSEG pulse2_pattern_delay 0000280d
-DSEG triangle_pattern_delay 0000280e
-DSEG noise_pattern_delay 0000280f
-DSEG dcpm_pattern_delay 00002810
+DSEG pulse1_pattern 00002809
+DSEG pulse1_pattern_delay 0000280b
+DSEG pulse1_pattern_offset 0000280c
+DSEG pulse2_pattern_delay 0000280e
+DSEG triangle_pattern_delay 0000280f
+DSEG noise_pattern_delay 00002810
+DSEG dcpm_pattern_delay 00002811
 DEF  zero         r0
 DEF  channel_flags r25
 DEF  pulse1_sequence r13
@@ -3023,10 +3023,10 @@ DEF  pulse1_volume_divider r16
 DEF  pulse1_volume_decay r17
 CSEG reset        00000000
 CSEG init         000008bf
-CSEG sequence_3   00000976
-CSEG sequence_0_2 0000095c
-CSEG sequence_1_3 00000966
-CSEG pulse1_sequence_routine 000009ce
+CSEG sequence_3   00000978
+CSEG sequence_0_2 0000095e
+CSEG sequence_1_3 00000968
+CSEG pulse1_sequence_routine 000009d1
 CSEG song0_frames 0000001a
 CSEG song0_channel0_pattern0 00000119
 CSEG song0_channel1_pattern0 000003c2
@@ -3182,26 +3182,26 @@ CSEG song0_channel2_patterns 00000609
 CSEG song0_channel3_patterns 00000838
 CSEG song0_channel4_patterns 00000864
 CSEG note_table   00000868
-CSEG length_converter 00000a28
-CSEG duty_cycle_sequences 00000a3e
-CSEG pulse1       00000944
-CSEG pulse1_off   00000958
-CSEG pulse1_check_timer_08 00000948
-CSEG pulse1_check_timer_08_HIGH 0000094c
-CSEG pulse1_check_timer_08_LOW 0000094f
-CSEG pulse1_check_timer_7FF_HIGH 00000951
-CSEG pulse1_on    0000095a
-CSEG pulse1_check_timer_7FF_LOW 00000955
-CSEG pulse1_envelope_routine 000009e2
-CSEG pulse1_sweep_routine 000009d9
-CSEG sequence_3_decrement_frame_delay 000009c8
-CSEG sequence_3_channel0 0000097f
-CSEG sequence_3_channel0_note 00000990
-CSEG sequence_3_channel0_delay 000009a1
-CSEG sequence_3_channel0_next_pattern 000009a6
-CSEG sequence_3_channel0_increment_offset 000009be
-CSEG sequence_3_exit 000009cb
-CSEG pulse1_sweep_action 000009fa
-CSEG pulse1_sweep_reload 00000a23
-CSEG length       00000a2e
-CSEG sequences    00000a44
+CSEG length_converter 00000a2b
+CSEG duty_cycle_sequences 00000a41
+CSEG pulse1       00000946
+CSEG pulse1_off   0000095a
+CSEG pulse1_check_timer_08 0000094a
+CSEG pulse1_check_timer_08_HIGH 0000094e
+CSEG pulse1_check_timer_08_LOW 00000951
+CSEG pulse1_check_timer_7FF_HIGH 00000953
+CSEG pulse1_on    0000095c
+CSEG pulse1_check_timer_7FF_LOW 00000957
+CSEG pulse1_envelope_routine 000009e5
+CSEG pulse1_sweep_routine 000009dc
+CSEG sequence_3_decrement_frame_delay 000009cb
+CSEG sequence_3_channel0 00000981
+CSEG sequence_3_channel0_note 00000993
+CSEG sequence_3_channel0_delay 000009a4
+CSEG sequence_3_channel0_next_pattern 000009a9
+CSEG sequence_3_exit 000009ce
+CSEG sequence_3_channel0_increment_offset 000009c1
+CSEG pulse1_sweep_action 000009fd
+CSEG pulse1_sweep_reload 00000a26
+CSEG length       00000a31
+CSEG sequences    00000a47

@@ -18,7 +18,7 @@ pulse1_timerH: .byte 1 //$4002 HHHH.HHHH = High 8 bits for timer
 pulse1_length: .byte 1 //$4002 000l.llll = Length counter load
 
 song_frames: .byte 2
-song_frame_offset: .byte 1
+song_frame_offset: .byte 2
 
 pulse1_pattern: .byte 2
 pulse1_pattern_delay: .byte 1
@@ -98,33 +98,35 @@ init:
 	sts pulse1_timerL, r27
 	sts pulse1_timerH, r27
 	sts pulse1_length, r27
-	ldi r27, 0x00
-	sts pulse1_pattern_delay, r27
-	sts pulse2_pattern_delay, r27
-	sts triangle_pattern_delay, r27
-	sts noise_pattern_delay, r27
-	sts dcpm_pattern_delay, r27
-	sts pulse1_pattern_offset, r27
-	sts pulse1_pattern_offset+1, r27
-	sts song_frame_offset, r27
 
+	ldi r27, 0x00
+	sts song_frame_offset, r27
+	sts song_frame_offset+1, r27
 	ldi ZL, LOW(song0_frames << 1)
 	ldi ZH, HIGH(song0_frames << 1)
 	sts song_frames, ZL
 	sts song_frames+1, ZH
 
 	//CHANNEL 1 TEST
-	ldi r27, 0x02
+	ldi r27, 0x00
 	sts song_frame_offset, r27
 	add ZL, r27
 	adc ZH, zero
-
 	lpm r26, Z+
 	lpm r27, Z
 	lsl r26
 	rol r27
 	sts pulse1_pattern, r26
 	sts pulse1_pattern+1, r27
+	ldi r27, 0x00
+	sts pulse1_pattern_delay, r27
+	sts pulse1_pattern_offset, r27
+	sts pulse1_pattern_offset+1, r27
+
+	sts pulse2_pattern_delay, r27
+	sts triangle_pattern_delay, r27
+	sts noise_pattern_delay, r27
+	sts dcpm_pattern_delay, r27
 	
 	//ZERO
 	clr zero
@@ -323,6 +325,7 @@ sequence_3_channel0:
 	brlo sequence_3_channel0_delay
 	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
 	breq sequence_3_channel0_next_pattern
+	rjmp sequence_3_exit
 
 sequence_3_channel0_note:
 	ldi ZL, LOW(note_table << 1) //load in note table
@@ -340,7 +343,7 @@ sequence_3_channel0_note:
 	rjmp sequence_3_channel0
 	
 sequence_3_channel0_delay:
-	subi r27, 0x66
+	subi r27, 0x66 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts pulse1_pattern_delay, r27
 	rcall sequence_3_channel0_increment_offset
 	rjmp sequence_3_exit
@@ -348,21 +351,23 @@ sequence_3_channel0_delay:
 sequence_3_channel0_next_pattern:
 	lds ZL, song_frames
 	lds ZH, song_frames+1
-	lds r27, song_frame_offset
-	//subi r27, -5 //increment the frame offset by 5 since there are 5 channel patterns per frame
-	subi r27, -10
+	lds r26, song_frame_offset //we must offset to the appropriate channel
+	lds r27, song_frame_offset+1
+	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
+	sts song_frame_offset, r26
 	sts song_frame_offset, r27
-	add ZL, r27
-	adc ZH, zero
+	adiw r27:r26, 2 //offset for channel 1 (test)
+	add ZL, r26
+	adc ZH, r27
 
-	lpm r26, Z+
+	lpm r26, Z+ //load the address of the next pattern
 	lpm r27, Z
 	lsl r26
 	rol r27
 	sts pulse1_pattern, r26
 	sts pulse1_pattern+1, r27
 
-	sts pulse1_pattern_offset, zero
+	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
 	sts pulse1_pattern_offset+1, zero
 	rjmp sequence_3_channel0
 

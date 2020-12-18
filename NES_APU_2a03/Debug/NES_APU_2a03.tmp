@@ -39,10 +39,10 @@
   <dcpm_pattern_delay><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>30</LINE></dcpm_pattern_delay>
   <reset><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>48</LINE></reset>
   <init><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>70</LINE></init>
-  <sequence_3><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>299</LINE></sequence_3>
-  <sequence_0_2><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>260</LINE></sequence_0_2>
-  <sequence_1_3><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>274</LINE></sequence_1_3>
-  <pulse1_sequence_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>398</LINE></pulse1_sequence_routine>
+  <sequence_3><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>304</LINE></sequence_3>
+  <sequence_0_2><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>265</LINE></sequence_0_2>
+  <sequence_1_3><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>279</LINE></sequence_1_3>
+  <pulse1_sequence_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>404</LINE></pulse1_sequence_routine>
   <song0_frames><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>1</LINE></song0_frames>
   <song0_channel0_pattern0><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>55</LINE></song0_channel0_pattern0>
   <song0_channel1_pattern0><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>105</LINE></song0_channel1_pattern0>
@@ -198,28 +198,28 @@
   <song0_channel3_patterns><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>184</LINE></song0_channel3_patterns>
   <song0_channel4_patterns><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>208</LINE></song0_channel4_patterns>
   <note_table><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>212</LINE></note_table>
-  <length_converter><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>512</LINE></length_converter>
-  <duty_cycle_sequences><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>523</LINE></duty_cycle_sequences>
-  <pulse1><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>215</LINE></pulse1>
-  <pulse1_off><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>251</LINE></pulse1_off>
-  <pulse1_check_timer_08><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>225</LINE></pulse1_check_timer_08>
-  <pulse1_check_timer_08_HIGH><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>228</LINE></pulse1_check_timer_08_HIGH>
-  <pulse1_check_timer_08_LOW><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>232</LINE></pulse1_check_timer_08_LOW>
-  <pulse1_check_timer_7FF_HIGH><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>240</LINE></pulse1_check_timer_7FF_HIGH>
-  <pulse1_on><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>255</LINE></pulse1_on>
-  <pulse1_check_timer_7FF_LOW><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>245</LINE></pulse1_check_timer_7FF_LOW>
-  <pulse1_envelope_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>426</LINE></pulse1_envelope_routine>
-  <pulse1_sweep_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>412</LINE></pulse1_sweep_routine>
-  <sequence_3_decrement_frame_delay><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>388</LINE></sequence_3_decrement_frame_delay>
-  <sequence_3_channel0><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>311</LINE></sequence_3_channel0>
-  <sequence_3_channel0_note><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>327</LINE></sequence_3_channel0_note>
-  <sequence_3_channel0_delay><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>342</LINE></sequence_3_channel0_delay>
-  <sequence_3_channel0_next_pattern><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>348</LINE></sequence_3_channel0_next_pattern>
-  <sequence_3_channel0_increment_offset><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>369</LINE></sequence_3_channel0_increment_offset>
-  <sequence_3_exit><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>392</LINE></sequence_3_exit>
-  <pulse1_sweep_action><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>455</LINE></pulse1_sweep_action>
-  <pulse1_sweep_reload><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>504</LINE></pulse1_sweep_reload>
-  <length><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>520</LINE></length>
-  <sequences><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>532</LINE></sequences>
+  <length_converter><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>518</LINE></length_converter>
+  <duty_cycle_sequences><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>529</LINE></duty_cycle_sequences>
+  <pulse1><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>220</LINE></pulse1>
+  <pulse1_off><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>256</LINE></pulse1_off>
+  <pulse1_check_timer_08><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>230</LINE></pulse1_check_timer_08>
+  <pulse1_check_timer_08_HIGH><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>233</LINE></pulse1_check_timer_08_HIGH>
+  <pulse1_check_timer_08_LOW><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>237</LINE></pulse1_check_timer_08_LOW>
+  <pulse1_check_timer_7FF_HIGH><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>245</LINE></pulse1_check_timer_7FF_HIGH>
+  <pulse1_on><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>260</LINE></pulse1_on>
+  <pulse1_check_timer_7FF_LOW><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>250</LINE></pulse1_check_timer_7FF_LOW>
+  <pulse1_envelope_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>432</LINE></pulse1_envelope_routine>
+  <pulse1_sweep_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>418</LINE></pulse1_sweep_routine>
+  <sequence_3_decrement_frame_delay><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>394</LINE></sequence_3_decrement_frame_delay>
+  <sequence_3_channel0><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>316</LINE></sequence_3_channel0>
+  <sequence_3_channel0_note><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>333</LINE></sequence_3_channel0_note>
+  <sequence_3_channel0_delay><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>348</LINE></sequence_3_channel0_delay>
+  <sequence_3_channel0_next_pattern><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>354</LINE></sequence_3_channel0_next_pattern>
+  <sequence_3_exit><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>398</LINE></sequence_3_exit>
+  <sequence_3_channel0_increment_offset><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>375</LINE></sequence_3_channel0_increment_offset>
+  <pulse1_sweep_action><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>461</LINE></pulse1_sweep_action>
+  <pulse1_sweep_reload><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>510</LINE></pulse1_sweep_reload>
+  <length><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>526</LINE></length>
+  <sequences><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>538</LINE></sequences>
  </LABELS>
 </ASSEMBLER_INFO>
