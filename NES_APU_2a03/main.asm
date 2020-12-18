@@ -17,6 +17,18 @@ pulse1_timerL: .byte 1 //$4002 LLLL.LLLL = Low 8 bits for timer
 pulse1_timerH: .byte 1 //$4002 HHHH.HHHH = High 8 bits for timer
 pulse1_length: .byte 1 //$4002 000l.llll = Length counter load
 
+song_frames: .byte 2
+song_frame_offset: .byte 1
+
+pulse1_pattern: .byte 2
+pulse1_pattern_delay: .byte 1
+pulse1_pattern_offset: .byte 2
+
+pulse2_pattern_delay: .byte 1
+triangle_pattern_delay: .byte 1
+noise_pattern_delay: .byte 1
+dcpm_pattern_delay: .byte 1
+
 .cseg
 
 //NOTE: r30 and r31 are reserved for conversion routines, since lpm can only be used with the Z register
@@ -26,7 +38,6 @@ pulse1_length: .byte 1 //$4002 000l.llll = Length counter load
 //This was done in order to save clock cycles due to constantly pushing/popping registers
 //NOTE: zero is defined in order to use the cp instruction without the need to load 0x00 into a register beforehand
 .def zero = r0
-.def frame_delay = r1
 .def channel_flags = r25 //[pulse1.pulse2] RSlc.0000 = Reload, Start, Length halt/Loop, Constant volume
 .def pulse1_sequence = r13
 .def pulse1_length_counter = r14
@@ -63,11 +74,11 @@ init:
 	ldi r27, 0 << CLKCTRL_PEN_bp //disable prescaler for 20 MHz on main clock
 	sts CLKCTRL_MCLKCTRLB, r27
 
-	//TEST FOR C4, 1 SECOND, 50% DD
+/*	//TEST FOR C4, 1 SECOND, 50% DD
 	ldi r26, 0x97
 	ldi r27, 0x12
-/*	ldi r26, 0x15
-	ldi r27, 0x09*/
+	ldi r26, 0x15
+	ldi r27, 0x09
 	sts pulse1_timerL, r26
 	sts pulse1_timerH, r27
 	ldi r27, 0b10111111
@@ -76,7 +87,44 @@ init:
 	sts pulse1_length, r27
 	//TEST FOR SWEEP UP
 	ldi r27, 0b11111111
+	sts pulse1_sweep_param, r27*/
+
+	//MEMORY
+	ldi r27, 0b00110000
+	sts pulse1_param, r27
+	ldi r27, 0b00000000
 	sts pulse1_sweep_param, r27
+	ldi r27, 0xFF
+	sts pulse1_timerL, r27
+	sts pulse1_timerH, r27
+	sts pulse1_length, r27
+	ldi r27, 0x00
+	sts pulse1_pattern_delay, r27
+	sts pulse2_pattern_delay, r27
+	sts triangle_pattern_delay, r27
+	sts noise_pattern_delay, r27
+	sts dcpm_pattern_delay, r27
+	sts pulse1_pattern_offset, r27
+	sts pulse1_pattern_offset+1, r27
+	sts song_frame_offset, r27
+
+	ldi ZL, LOW(song0_frames << 1)
+	ldi ZH, HIGH(song0_frames << 1)
+	sts song_frames, ZL
+	sts song_frames+1, ZH
+
+	//CHANNEL 1 TEST
+	ldi r27, 0x02
+	sts song_frame_offset, r27
+	add ZL, r27
+	adc ZH, zero
+
+	lpm r26, Z+
+	lpm r27, Z
+	lsl r26
+	rol r27
+	sts pulse1_pattern, r26
+	sts pulse1_pattern+1, r27
 	
 	//ZERO
 	clr zero
@@ -116,7 +164,8 @@ init:
 	//Frame Counter
 	//NOTE:The frame counter will be defaulted to NTSC mode (60 Hz, 120 Hz, 240 Hz)
 	//Each interrupt will be setup to interrupt every 240 Hz clock
-	//CMP0 = sequence 0, CMP1 = sequence 1, CMP2 = sequence 2, OVF = sequence 4
+	//CMP0 = sequence 0, CMP1 = sequence 1, CMP2 = sequence 2, OVF = sequence 3/sound driver
+	//Sequence 3 will clock the sound driver every 60Hz, in which new audio data is read and written to the registers
 	//Timer period Calculation: (0.00416666666 * 20000000/64)-1 = 1301.08333125 = 0x0515
 	//The ATmega4809 is cofigured to run at 20000000 Hz
 	//0.00416666666 seconds is the period for 240 Hz
@@ -251,10 +300,101 @@ sequence_3:
 	in r27, CPU_SREG
 	push r27
 	cli
+	push r28
+	push r29
 
+	//SOUND DRIVER
+	lds r27, pulse1_pattern_delay
+	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
+	rjmp sequence_3_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+
+sequence_3_channel0:
+	lds ZL, pulse1_pattern //current pattern for pulse 1
+	lds ZH, pulse1_pattern+1
+	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
+	lds r27, pulse1_pattern_offset+1
+	add ZL, r26 //offset the current pattern pointer to point to new byte data
+	adc ZH, r27
+	lpm r27, Z //load the byte data from the current pattern
+
+	cpi r27, 0x67 //check if data is a note (0x00 - 0x066)
+	brlo sequence_3_channel0_note
+	cpi r27, 0xE4 //check if data is a delay (0x67 - 0xE3)
+	brlo sequence_3_channel0_delay
+	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
+	breq sequence_3_channel0_next_pattern
+
+sequence_3_channel0_note:
+	ldi ZL, LOW(note_table << 1) //load in note table
+	ldi ZH, HIGH(note_table << 1)
+	lsl r27 //double the offset for the note table because we are getting byte data
+	add ZL, r27 //add offset
+	adc ZH, zero
+	lpm r26, Z+ //load bytes
+	lpm r27, Z
+	sts TCB0_CCMPL, r26 //load the LOW bits for timer
+	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
+	sts TCB0_CNTL, zero
+	sts TCB0_CNTH, zero
+	rcall sequence_3_channel0_increment_offset
+	rjmp sequence_3_channel0
+	
+sequence_3_channel0_delay:
+	subi r27, 0x66
+	sts pulse1_pattern_delay, r27
+	rcall sequence_3_channel0_increment_offset
+	rjmp sequence_3_exit
+
+sequence_3_channel0_next_pattern:
+	lds ZL, song_frames
+	lds ZH, song_frames+1
+	lds r27, song_frame_offset
+	//subi r27, -5 //increment the frame offset by 5 since there are 5 channel patterns per frame
+	subi r27, -10
+	sts song_frame_offset, r27
+	add ZL, r27
+	adc ZH, zero
+
+	lpm r26, Z+
+	lpm r27, Z
+	lsl r26
+	rol r27
+	sts pulse1_pattern, r26
+	sts pulse1_pattern+1, r27
+
+	sts pulse1_pattern_offset, zero
+	sts pulse1_pattern_offset+1, zero
+	rjmp sequence_3_channel0
+
+sequence_3_channel0_increment_offset:
+	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
+	lds ZH, pulse1_pattern_offset+1
+	adiw Z, 2 //add 2 to the offset. NOTE: 2 is added because we get data in bytes, and byte pointers have 2x the address of word pointers
+	sts pulse1_pattern_offset, ZL
+	sts pulse1_pattern_offset+1, ZH
+	ret
+
+/*sequence_3_get_frame:
+	ldi ZH, HIGH(song0_frames << 1)
+	ldi ZL, LOW(song0_frames << 1)
+	add ZL, r27
+	adc ZH, zero
+	lpm r26, Z+
+	lpm r27, Z
+	sts song_frames, r26
+	sts song_frames+1, r27*/
+
+
+sequence_3_decrement_frame_delay:
+	dec r27
+	sts pulse1_pattern_delay, r27
+
+sequence_3_exit:
+	pop r29
+	pop r28
 	rjmp sequence_1_3+3 //+3 is to skip the stack instructions since we already pushed them
 
-//PULSE 1 ISR
+//PULSE 1 ROUTINES
 pulse1_sequence_routine:
 	in r27, CPU_SREG
 	push r27
