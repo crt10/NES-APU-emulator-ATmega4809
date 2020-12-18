@@ -18,6 +18,7 @@ pulse1_timerH: .byte 1 //$4002 HHHH.HHHH = High 8 bits for timer
 pulse1_length: .byte 1 //$4002 000l.llll = Length counter load
 
 .cseg
+
 //NOTE: r30 and r31 are reserved for conversion routines, since lpm can only be used with the Z register
 //r28 and r29 are reserved for non-interrupt routines
 //r26 and r27 are reserved for interrupt routines, but interrupt routines may use r28 and r29
@@ -25,9 +26,7 @@ pulse1_length: .byte 1 //$4002 000l.llll = Length counter load
 //This was done in order to save clock cycles due to constantly pushing/popping registers
 //NOTE: zero is defined in order to use the cp instruction without the need to load 0x00 into a register beforehand
 .def zero = r0
-.def sample_delayL = r1
-.def sample_delayH = r2
-.def frame_counter_clock = r3
+.def frame_delay = r1
 .def channel_flags = r25 //[pulse1.pulse2] RSlc.0000 = Reload, Start, Length halt/Loop, Constant volume
 .def pulse1_sequence = r13
 .def pulse1_length_counter = r14
@@ -39,7 +38,7 @@ reset:
 	jmp init
 
 .org TCA0_OVF_vect
-	jmp sequence_1_3
+	jmp sequence_3
 
 .org TCA0_CMP0_vect
 	jmp sequence_0_2
@@ -52,6 +51,10 @@ reset:
 
 .org TCB0_INT_vect
 	jmp pulse1_sequence_routine
+
+.nolist
+.include "song_data.asm"
+.list
 
 init:
 	//MAIN CLOCK
@@ -110,47 +113,33 @@ init:
 	sbr channel_flags, 0b10000000 //set reload flag
 
 	//TIMERS
-	//Frame Counter/Audio Sampler (.vgm)
+	//Frame Counter
 	//NOTE:The frame counter will be defaulted to NTSC mode (60 Hz, 120 Hz, 240 Hz)
-	//For our implementation, the sampling for .vgm samples and frame counter will be shared on TCA0
-	//Each interrupt will be setup to interrupt every 44100 Hz clock
+	//Each interrupt will be setup to interrupt every 240 Hz clock
 	//CMP0 = sequence 0, CMP1 = sequence 1, CMP2 = sequence 2, OVF = sequence 4
-	//During each interrupt, a clock cycle counter for the audio sampler (44100 Hz) will be decremented
-	//When the clock cycle counter for the audio sampler is 0, then a new audio sample will be read
-	//During each interrupt, another clock cycle counter for the frame counter (240 Hz) will be decremented
-	//When the clock cycle counter for the frame counter is 0,
-	//then the sequence routine, corresponding to the interrupt called, will be executed
-	//The clock cycle counter for the frame counter will also be reset to 184 clocks (0xE6)
-	//This corresponds to how many 44100 Hz clocks pass, for a single 240 Hz clock: (44100/240 = 183.75) + 1 offset = 184 = 0xB8
-	//Timer period Calculation: (0.00002267573 * 20000000/64)-1 = 6.086165625 = 0x06
+	//Timer period Calculation: (0.00416666666 * 20000000/64)-1 = 1301.08333125 = 0x0515
 	//The ATmega4809 is cofigured to run at 20000000 Hz
-	//0.00002267573 seconds is the period for 44100 Hz
+	//0.00416666666 seconds is the period for 240 Hz
 	//The /64 comes from the prescaler divider used
-	ldi r27, 0x00
-	mov sample_delayL, r27
-	mov sample_delayH, r27
-	ldi r27, 0xB8
-	mov frame_counter_clock, r27
-
 	ldi r27, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
 	sts TCA0_SINGLE_CTRLB, r27
 	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
 	sts TCA0_SINGLE_INTCTRL, r27
-	ldi r27, 0x06 //set the period for CMP0
+	ldi r27, 0x15 //set the period for CMP0
 	sts TCA0_SINGLE_CMP0, r27
-	ldi r27, 0x00
+	ldi r27, 0x05
 	sts TCA0_SINGLE_CMP0 + 1, r27
-	ldi r27, 0x0D //set the period for CMP1
+	ldi r27, 0x2B //set the period for CMP1
 	sts TCA0_SINGLE_CMP1, r27
-	ldi r27, 0x00
+	ldi r27, 0x0A
 	sts TCA0_SINGLE_CMP1 + 1, r27
-	ldi r27, 0x14 //set the period for CMP2
+	ldi r27, 0x41 //set the period for CMP2
 	sts TCA0_SINGLE_CMP2, r27
-	ldi r27, 0x00
+	ldi r27, 0x0F
 	sts TCA0_SINGLE_CMP2 + 1, r27
-	ldi r27, 0x1B //set the period for OVF
+	ldi r27, 0x57 //set the period for OVF
 	sts TCA0_SINGLE_PER, r27
-	ldi r27, 0x00
+	ldi r27, 0x14
 	sts TCA0_SINGLE_PER + 1, r27
 	ldi r27, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
 	sts TCA0_SINGLE_CTRLA, r27
@@ -184,11 +173,14 @@ pulse1:
 	//NOTE: We will just mute the pulse when the current period is < $0008
 	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
 	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
+pulse1_check_timer_08:
 	lds r28, TCB0_CCMPL
 	lds r29, TCB0_CCMPH
+pulse1_check_timer_08_HIGH:
 	cpi r29, 0x01 //check timer HIGH period
-	brlo PC+2 //if the timer HIGH period is $00, check the LOW period
-	rjmp PC+3 //if the timer HIGH period is > $01, check > $07FF condition
+	brlo pulse1_check_timer_08_LOW //if the timer HIGH period is $00, check the LOW period
+	rjmp pulse1_check_timer_7FF_HIGH //if the timer HIGH period is > $01, check > $07FF condition
+pulse1_check_timer_08_LOW:
 	cpi r28, 0x59 //check timer LOW period
 	brlo pulse1_off //if the HIGH period == $00 && LOW period <= $59, pulse off
 
@@ -196,10 +188,12 @@ pulse1:
 	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
 	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
 	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
+pulse1_check_timer_7FF_HIGH:
 	cpi r29, 0x59 //check timer HIGH period
 	brlo pulse1_on //if the HIGH period is < $59, then all conditions have passed and pulse is not muted
-	breq PC+2 //if the HIGH period is == $59, we go check if the LOW period is < $65
+	breq pulse1_check_timer_7FF_LOW //if the HIGH period is == $59, we go check if the LOW period is < $65
 	rjmp pulse1_off //pulse off if HIGH period is > $59
+pulse1_check_timer_7FF_LOW:
 	cpi r28, 0x65 //check timer LOW period
 	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
 	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
@@ -219,30 +213,6 @@ sequence_0_2:
 	push r27
 	cli
 
-	//SAMPLE
-	cp sample_delayL, zero //check if LOW bits of sample delay == 0
-	breq PC+3 //if LOW bits of sample delay == 0, go check if HIGH bits of sample delay == 0
-	dec sample_delayL
-	rjmp PC+7 //if LOW bits of sample delay != 0, go check frame counter clock
-
-	cp sample_delayH, zero //check if HIGH bits of sample delay == 0
-	breq PC+4 //if LOW and HIGH bits of sample delay == 0, then go sample new audio
-	dec sample_delayH //if LOW bits of sample delay == 0 and HIGH bits of sample delay != 0, decrement HIGH bits and LOW bits
-	dec sample_delayL
-	rjmp PC+2
-
-	rcall sample_audio
-
-	//FRAME COUNTER CLOCK
-	cp frame_counter_clock, zero //check if frame counter clock == 0
-	breq PC+3 //if frame counter clock == 0, go execute the frame routine
-	dec frame_counter_clock //if frame counter clock != 0, decrement and exit the interrupt
-	rjmp PC+4
-
-	//FRAME ROUTINE
-	ldi r27, 0xB8
-	mov frame_counter_clock, r27
-
 	//ENVELOPE
 	rcall pulse1_envelope_routine
 
@@ -256,30 +226,6 @@ sequence_1_3:
 	in r27, CPU_SREG
 	push r27
 	cli
-
-	//SAMPLE
-	cp sample_delayL, zero //check if LOW bits of sample delay == 0
-	breq PC+3 //if LOW bits of sample delay == 0, go check if HIGH bits of sample delay == 0
-	dec sample_delayL
-	rjmp PC+7 //if LOW bits of sample delay != 0, go check frame counter clock
-
-	cp sample_delayH, zero //check if HIGH bits of sample delay == 0
-	breq PC+4 //if LOW and HIGH bits of sample delay == 0, then go sample new audio
-	dec sample_delayH //if LOW bits of sample delay == 0 and HIGH bits of sample delay != 0, decrement HIGH bits and LOW bits
-	dec sample_delayL
-	rjmp PC+2
-
-	rcall sample_audio
-
-	//FRAME COUNTER CLOCK
-	cp frame_counter_clock, zero //check if frame counter clock == 0
-	breq PC+3 //if frame counter clock == 0, go execute the frame routine
-	dec frame_counter_clock //if frame counter clock != 0, decrement and exit the interrupt
-	rjmp PC+10
-
-	//FRAME ROUTINE
-	ldi r27, 0xB8
-	mov frame_counter_clock, r27
 
 	//ENVELOPE
 	rcall pulse1_envelope_routine
@@ -301,9 +247,12 @@ sequence_1_3:
 	out CPU_SREG, r27
 	reti
 
-//AUDIO SAMPLE ROUTINE
-sample_audio:
-	ret
+sequence_3:
+	in r27, CPU_SREG
+	push r27
+	cli
+
+	rjmp sequence_1_3+3 //+3 is to skip the stack instructions since we already pushed them
 
 //PULSE 1 ISR
 pulse1_sequence_routine:
