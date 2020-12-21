@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Fri Dec 18 16:57:54 2020
+AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Sun Dec 20 00:53:52 2020
 
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(9): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m4809def.inc'
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(67): Including file 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm'
@@ -52,31 +52,31 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(67): Includ
                                  .def pulse1_volume_decay = r17 //0000.dddd = Decay (This is the output volume of the channel)
                                  
                                  reset:
-000000 940c 08bf                 	jmp init
+000000 940c 2747                 	jmp init
                                  
                                  .org TCA0_OVF_vect
-00000e 940c 0978                 	jmp sequence_3
+00000e 940c 2803                 	jmp sound_driver
                                  
                                  .org TCA0_CMP0_vect
-000012 940c 095e                 	jmp sequence_0_2
+000012 940c 27e9                 	jmp sequence_0_2
                                  
                                  .org TCA0_CMP1_vect
-000014 940c 0968                 	jmp sequence_1_3
+000014 940c 27f3                 	jmp sequence_1_3
                                  
                                  .org TCA0_CMP2_vect
-000016 940c 095e                 	jmp sequence_0_2
+000016 940c 27e9                 	jmp sequence_0_2
                                  
                                  .org TCB0_INT_vect
-000018 940c 09d1                 	jmp pulse1_sequence_routine
+000018 940c 286d                 	jmp pulse1_sequence_routine
                                  
                                  .list
                                  
                                  init:
                                  	//MAIN CLOCK
-0008bf edb8                      	ldi r27, CPU_CCP_IOREG_gc //protected write
-0008c0 93b0 0034                 	sts CPU_CCP, r27
-0008c2 e0b0                      	ldi r27, 0 << CLKCTRL_PEN_bp //disable prescaler for 20 MHz on main clock
-0008c3 93b0 0061                 	sts CLKCTRL_MCLKCTRLB, r27
+002747 edb8                      	ldi r27, CPU_CCP_IOREG_gc //protected write
+002748 93b0 0034                 	sts CPU_CCP, r27
+00274a e0b0                      	ldi r27, 0 << CLKCTRL_PEN_bp //disable prescaler for 20 MHz on main clock
+00274b 93b0 0061                 	sts CLKCTRL_MCLKCTRLB, r27
                                  
                                  /*	//TEST FOR C4, 1 SECOND, 50% DD
                                  	ldi r26, 0x97
@@ -94,80 +94,76 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(67): Includ
                                  	sts pulse1_sweep_param, r27*/
                                  
                                  	//MEMORY
-0008c5 e3b0                      	ldi r27, 0b00110000
-0008c6 93b0 2800                 	sts pulse1_param, r27
-0008c8 e0b0                      	ldi r27, 0b00000000
-0008c9 93b0 2801                 	sts pulse1_sweep_param, r27
-0008cb efbf                      	ldi r27, 0xFF
-0008cc 93b0 2802                 	sts pulse1_timerL, r27
-0008ce 93b0 2803                 	sts pulse1_timerH, r27
-0008d0 93b0 2804                 	sts pulse1_length, r27
+00274d e3b0                      	ldi r27, 0b00110000
+00274e 93b0 2800                 	sts pulse1_param, r27
+002750 e8b0                      	ldi r27, 0b10000000
+002751 93b0 2801                 	sts pulse1_sweep_param, r27
+002753 efbf                      	ldi r27, 0xFF
+002754 93b0 2802                 	sts pulse1_timerL, r27
+002756 93b0 2803                 	sts pulse1_timerH, r27
+002758 93b0 2804                 	sts pulse1_length, r27
                                  
-0008d2 e0b0                      	ldi r27, 0x00
-0008d3 93b0 2807                 	sts song_frame_offset, r27
-0008d5 93b0 2808                 	sts song_frame_offset+1, r27
-0008d7 e3e4                      	ldi ZL, LOW(song0_frames << 1)
-0008d8 e0f0                      	ldi ZH, HIGH(song0_frames << 1)
-0008d9 93e0 2805                 	sts song_frames, ZL
-0008db 93f0 2806                 	sts song_frames+1, ZH
-                                 
-0008dd 93b0 280b                 	sts pulse1_pattern_delay, r27
-0008df 93b0 280e                 	sts pulse2_pattern_delay, r27
-0008e1 93b0 280c                 	sts pulse1_pattern_offset, r27
-0008e3 93b0 280d                 	sts pulse1_pattern_offset+1, r27
-                                 
-0008e5 93b0 280f                 	sts triangle_pattern_delay, r27
-0008e7 93b0 2810                 	sts noise_pattern_delay, r27
-0008e9 93b0 2811                 	sts dcpm_pattern_delay, r27
-                                 
-                                 
+00275a e0b0                      	ldi r27, 0x00
+00275b 93b0 2807                 	sts song_frame_offset, r27
+00275d 93b0 2808                 	sts song_frame_offset+1, r27
+00275f e3e4                      	ldi ZL, LOW(song0_frames << 1)
+002760 e0f0                      	ldi ZH, HIGH(song0_frames << 1)
+002761 93e0 2805                 	sts song_frames, ZL
+002763 93f0 2806                 	sts song_frames+1, ZH
                                  
                                  	//CHANNEL 1 TEST
-0008eb e0b2                      	ldi r27, 0x02
-0008ec 93b0 2807                 	sts song_frame_offset, r27
-0008ee 0feb                      	add ZL, r27
-0008ef 1df0                      	adc ZH, zero
+002765 e0b2                      	ldi r27, 0x02
+002766 0feb                      	add ZL, r27
+002767 1df0                      	adc ZH, zero
+002768 91a5                      	lpm r26, Z+
+002769 91b4                      	lpm r27, Z
+00276a 0faa                      	lsl r26
+00276b 1fbb                      	rol r27
+00276c 93a0 2809                 	sts pulse1_pattern, r26
+00276e 93b0 280a                 	sts pulse1_pattern+1, r27
+002770 e0b0                      	ldi r27, 0x00
+002771 93b0 280b                 	sts pulse1_pattern_delay, r27
+002773 93b0 280c                 	sts pulse1_pattern_offset, r27
+002775 93b0 280d                 	sts pulse1_pattern_offset+1, r27
                                  
-0008f0 91a5                      	lpm r26, Z+
-0008f1 91b4                      	lpm r27, Z
-0008f2 0faa                      	lsl r26
-0008f3 1fbb                      	rol r27
-0008f4 93a0 2809                 	sts pulse1_pattern, r26
-0008f6 93b0 280a                 	sts pulse1_pattern+1, r27
+002777 93b0 280e                 	sts pulse2_pattern_delay, r27
+002779 93b0 280f                 	sts triangle_pattern_delay, r27
+00277b 93b0 2810                 	sts noise_pattern_delay, r27
+00277d 93b0 2811                 	sts dcpm_pattern_delay, r27
                                  	
                                  	//ZERO
-0008f8 2400                      	clr zero
+00277f 2400                      	clr zero
                                  
                                  	//PINS
-0008f9 efbf                      	ldi r27, 0xFF //set all pins in VPORTD to output
-0008fa b9bc                      	out VPORTD_DIR, r27
+002780 efbf                      	ldi r27, 0xFF //set all pins in VPORTD to output
+002781 b9bc                      	out VPORTD_DIR, r27
                                  
                                  	//ENVELOPE
-0008fb e00f                      	ldi pulse1_volume_divider, 0x0F
-0008fc 9110 2800                 	lds pulse1_volume_decay, pulse1_param
-0008fe 701f                      	andi pulse1_volume_decay, 0x0F //mask for VVVV bits
-0008ff 9190 2800                 	lds channel_flags, pulse1_param
-000901 7390                      	andi channel_flags, 0b00110000
-000902 6490                      	sbr channel_flags, 0b01000000 //set start flag
+002782 e00f                      	ldi pulse1_volume_divider, 0x0F
+002783 9110 2800                 	lds pulse1_volume_decay, pulse1_param
+002785 701f                      	andi pulse1_volume_decay, 0x0F //mask for VVVV bits
+002786 9190 2800                 	lds channel_flags, pulse1_param
+002788 7390                      	andi channel_flags, 0b00110000
+002789 6490                      	sbr channel_flags, 0b01000000 //set start flag
                                  	
                                  	//LENGTH
-000903 91d0 2804                 	lds r29, pulse1_length
-000905 d125                      	rcall length_converter
-000906 2eed                      	mov pulse1_length_counter, r29
+00278a 91d0 2804                 	lds r29, pulse1_length
+00278c d12d                      	rcall length_converter
+00278d 2eed                      	mov pulse1_length_counter, r29
                                  
                                  	//SEQUENCE
-000907 91d0 2800                 	lds r29, pulse1_param //load param for sequence table
-000909 0fdd                      	lsl r29 //shift duty cycle bits to LSB
-00090a 1fdd                      	rol r29
-00090b 1fdd                      	rol r29
-00090c 70d3                      	andi r29, 0b00000011 //mask duty cycle bits
-00090d d133                      	rcall duty_cycle_sequences
-00090e 2edd                      	mov pulse1_sequence, r29
+00278e 91d0 2800                 	lds r29, pulse1_param //load param for sequence table
+002790 0fdd                      	lsl r29 //shift duty cycle bits to LSB
+002791 1fdd                      	rol r29
+002792 1fdd                      	rol r29
+002793 70d3                      	andi r29, 0b00000011 //mask duty cycle bits
+002794 d13b                      	rcall duty_cycle_sequences
+002795 2edd                      	mov pulse1_sequence, r29
                                  
                                  	//SWEEP
-00090f 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param
-000911 94f2                      	swap pulse1_sweep //swap data from high byte and low byte
-000912 6890                      	sbr channel_flags, 0b10000000 //set reload flag
+002796 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param
+002798 94f2                      	swap pulse1_sweep //swap data from high byte and low byte
+002799 6890                      	sbr channel_flags, 0b10000000 //set reload flag
                                  
                                  	//TIMERS
                                  	//Frame Counter
@@ -179,28 +175,28 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(67): Includ
                                  	//The ATmega4809 is cofigured to run at 20000000 Hz
                                  	//0.00416666666 seconds is the period for 240 Hz
                                  	//The /64 comes from the prescaler divider used
-000913 e7b0                      	ldi r27, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
-000914 93b0 0a01                 	sts TCA0_SINGLE_CTRLB, r27
-000916 e7b1                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
-000917 93b0 0a0a                 	sts TCA0_SINGLE_INTCTRL, r27
-000919 e1b5                      	ldi r27, 0x15 //set the period for CMP0
-00091a 93b0 0a28                 	sts TCA0_SINGLE_CMP0, r27
-00091c e0b5                      	ldi r27, 0x05
-00091d 93b0 0a29                 	sts TCA0_SINGLE_CMP0 + 1, r27
-00091f e2bb                      	ldi r27, 0x2B //set the period for CMP1
-000920 93b0 0a2a                 	sts TCA0_SINGLE_CMP1, r27
-000922 e0ba                      	ldi r27, 0x0A
-000923 93b0 0a2b                 	sts TCA0_SINGLE_CMP1 + 1, r27
-000925 e4b1                      	ldi r27, 0x41 //set the period for CMP2
-000926 93b0 0a2c                 	sts TCA0_SINGLE_CMP2, r27
-000928 e0bf                      	ldi r27, 0x0F
-000929 93b0 0a2d                 	sts TCA0_SINGLE_CMP2 + 1, r27
-00092b e5b7                      	ldi r27, 0x57 //set the period for OVF
-00092c 93b0 0a26                 	sts TCA0_SINGLE_PER, r27
-00092e e1b4                      	ldi r27, 0x14
-00092f 93b0 0a27                 	sts TCA0_SINGLE_PER + 1, r27
-000931 e0bb                      	ldi r27, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
-000932 93b0 0a00                 	sts TCA0_SINGLE_CTRLA, r27
+00279a e7b0                      	ldi r27, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
+00279b 93b0 0a01                 	sts TCA0_SINGLE_CTRLB, r27
+00279d e7b1                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
+00279e 93b0 0a0a                 	sts TCA0_SINGLE_INTCTRL, r27
+0027a0 e1b5                      	ldi r27, 0x15 //set the period for CMP0
+0027a1 93b0 0a28                 	sts TCA0_SINGLE_CMP0, r27
+0027a3 e0b5                      	ldi r27, 0x05
+0027a4 93b0 0a29                 	sts TCA0_SINGLE_CMP0 + 1, r27
+0027a6 e2bb                      	ldi r27, 0x2B //set the period for CMP1
+0027a7 93b0 0a2a                 	sts TCA0_SINGLE_CMP1, r27
+0027a9 e0ba                      	ldi r27, 0x0A
+0027aa 93b0 0a2b                 	sts TCA0_SINGLE_CMP1 + 1, r27
+0027ac e4b1                      	ldi r27, 0x41 //set the period for CMP2
+0027ad 93b0 0a2c                 	sts TCA0_SINGLE_CMP2, r27
+0027af e0bf                      	ldi r27, 0x0F
+0027b0 93b0 0a2d                 	sts TCA0_SINGLE_CMP2 + 1, r27
+0027b2 e5b7                      	ldi r27, 0x57 //set the period for OVF
+0027b3 93b0 0a26                 	sts TCA0_SINGLE_PER, r27
+0027b5 e1b4                      	ldi r27, 0x14
+0027b6 93b0 0a27                 	sts TCA0_SINGLE_PER + 1, r27
+0027b8 e0bb                      	ldi r27, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
+0027b9 93b0 0a00                 	sts TCA0_SINGLE_CTRLA, r27
                                  
                                  	//NOTE: Channel Timers are clocked (20/2)/(0.8948865) = 11.1746014718 times faster than the NES APU
                                  	//Because of this, we multiply all the NES timer values by 11.1746014718 beforehand 
@@ -209,352 +205,360 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(67): Includ
                                  	//The /2 comes from the prescaler divider used
                                  	//0.8948865 MHz is the speed of the NTSC NES APU
                                  	//Pulse 1
-000934 e0b0                      	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
-000935 93b0 0a81                 	sts TCB0_CTRLB, r27
-000937 e0b1                      	ldi r27, TCB_CAPT_bm //enable interrupts
-000938 93b0 0a85                 	sts TCB0_INTCTRL, r27
-00093a 91b0 2802                 	lds r27, pulse1_timerL //load the LOW bits for timer
-00093c 93b0 0a8c                 	sts TCB0_CCMPL, r27
-00093e 91b0 2803                 	lds r27, pulse1_timerH //load the HIGH bits for timer
-000940 93b0 0a8d                 	sts TCB0_CCMPH, r27
-000942 e0b3                      	ldi r27, TCB_CLKSEL_CLKDIV2_gc | TCB_ENABLE_bm //use prescaler divider of 2 and enable timer
-000943 93b0 0a80                 	sts TCB0_CTRLA, r27
-000945 9478                      	sei //global interrupt enable
+0027bb e0b0                      	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
+0027bc 93b0 0a81                 	sts TCB0_CTRLB, r27
+0027be e0b1                      	ldi r27, TCB_CAPT_bm //enable interrupts
+0027bf 93b0 0a85                 	sts TCB0_INTCTRL, r27
+0027c1 91b0 2802                 	lds r27, pulse1_timerL //load the LOW bits for timer
+0027c3 93b0 0a8c                 	sts TCB0_CCMPL, r27
+0027c5 91b0 2803                 	lds r27, pulse1_timerH //load the HIGH bits for timer
+0027c7 93b0 0a8d                 	sts TCB0_CCMPH, r27
+0027c9 e0b3                      	ldi r27, TCB_CLKSEL_CLKDIV2_gc | TCB_ENABLE_bm //use prescaler divider of 2 and enable timer
+0027ca 93b0 0a80                 	sts TCB0_CTRLA, r27
+0027cc 9478                      	sei //global interrupt enable
                                  
                                  pulse1:
-000946 fed0                      	sbrs pulse1_sequence, 0 //if the sequence output is zero, return
-000947 c012                      	rjmp pulse1_off
+0027cd fed0                      	sbrs pulse1_sequence, 0 //if the sequence output is zero, return
+0027ce c012                      	rjmp pulse1_off
                                  
-000948 14e0                      	cp pulse1_length_counter, zero //if length is zero, return
-000949 f081                      	breq pulse1_off
+0027cf 14e0                      	cp pulse1_length_counter, zero //if length is zero, return
+0027d0 f081                      	breq pulse1_off
                                  
                                  	//NOTE: We will just mute the pulse when the current period is < $0008
                                  	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
                                  	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
                                  pulse1_check_timer_08:
-00094a 91c0 0a8c                 	lds r28, TCB0_CCMPL
-00094c 91d0 0a8d                 	lds r29, TCB0_CCMPH
+0027d1 91c0 0a8c                 	lds r28, TCB0_CCMPL
+0027d3 91d0 0a8d                 	lds r29, TCB0_CCMPH
                                  pulse1_check_timer_08_HIGH:
-00094e 30d1                      	cpi r29, 0x01 //check timer HIGH period
-00094f f008                      	brlo pulse1_check_timer_08_LOW //if the timer HIGH period is $00, check the LOW period
-000950 c002                      	rjmp pulse1_check_timer_7FF_HIGH //if the timer HIGH period is > $01, check > $07FF condition
+0027d5 30d1                      	cpi r29, 0x01 //check timer HIGH period
+0027d6 f008                      	brlo pulse1_check_timer_08_LOW //if the timer HIGH period is $00, check the LOW period
+0027d7 c002                      	rjmp pulse1_check_timer_7FF_HIGH //if the timer HIGH period is > $01, check > $07FF condition
                                  pulse1_check_timer_08_LOW:
-000951 35c9                      	cpi r28, 0x59 //check timer LOW period
-000952 f038                      	brlo pulse1_off //if the HIGH period == $00 && LOW period <= $59, pulse off
+0027d8 35c9                      	cpi r28, 0x59 //check timer LOW period
+0027d9 f038                      	brlo pulse1_off //if the HIGH period == $00 && LOW period <= $59, pulse off
                                  
                                  	//NOTE: Since it'd be too taxing to calculate a target period for every APU clock in the sweep unit,
                                  	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
                                  	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
                                  	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
                                  pulse1_check_timer_7FF_HIGH:
-000953 35d9                      	cpi r29, 0x59 //check timer HIGH period
-000954 f038                      	brlo pulse1_on //if the HIGH period is < $59, then all conditions have passed and pulse is not muted
-000955 f009                      	breq pulse1_check_timer_7FF_LOW //if the HIGH period is == $59, we go check if the LOW period is < $65
-000956 c003                      	rjmp pulse1_off //pulse off if HIGH period is > $59
+0027da 35d9                      	cpi r29, 0x59 //check timer HIGH period
+0027db f038                      	brlo pulse1_on //if the HIGH period is < $59, then all conditions have passed and pulse is not muted
+0027dc f009                      	breq pulse1_check_timer_7FF_LOW //if the HIGH period is == $59, we go check if the LOW period is < $65
+0027dd c003                      	rjmp pulse1_off //pulse off if HIGH period is > $59
                                  pulse1_check_timer_7FF_LOW:
-000957 36c5                      	cpi r28, 0x65 //check timer LOW period
-000958 f408                      	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
-000959 c002                      	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
-                                 
+0027de 36c5                      	cpi r28, 0x65 //check timer LOW period
+0027df f408                      	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
+0027e0 c002                      	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
                                  
                                  pulse1_off:
-00095a 9868                      	cbi VPORTD_OUT, 0
-00095b cfea                      	rjmp pulse1
+0027e1 b80d                      	out VPORTD_OUT, zero
+0027e2 cfea                      	rjmp pulse1
                                  
                                  pulse1_on:
-00095c 9a68                      	sbi VPORTD_OUT, 0
-00095d cfe8                      	rjmp pulse1
+0027e3 91d0 2800                 	lds r29, pulse1_param
+0027e5 70df                      	andi r29, 0x0F //mask for VVVV bits
+0027e6 f3d1                      	breq pulse1_off //if VVVV bits are 0, then there is no volume (channel off)
+                                 
+0027e7 b9dd                      	out VPORTD_OUT, r29
+0027e8 cfe4                      	rjmp pulse1
                                  
                                  //FRAME COUNTER/AUDIO SAMPLE ISR
                                  sequence_0_2:
-00095e b7bf                      	in r27, CPU_SREG
-00095f 93bf                      	push r27
-000960 94f8                      	cli
+0027e9 b7bf                      	in r27, CPU_SREG
+0027ea 93bf                      	push r27
+0027eb 94f8                      	cli
                                  
                                  	//ENVELOPE
-000961 d083                      	rcall pulse1_envelope_routine
+0027ec d0b5                      	rcall pulse1_envelope_routine
                                  
-000962 e5b0                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP2_bm //clear OVF flag
-000963 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
-000965 91bf                      	pop r27
-000966 bfbf                      	out CPU_SREG, r27
-000967 9518                      	reti
+0027ed e5b0                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP2_bm //clear OVF flag
+0027ee 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
+0027f0 91bf                      	pop r27
+0027f1 bfbf                      	out CPU_SREG, r27
+0027f2 9518                      	reti
                                  
                                  sequence_1_3:
-000968 b7bf                      	in r27, CPU_SREG
-000969 93bf                      	push r27
-00096a 94f8                      	cli
+0027f3 b7bf                      	in r27, CPU_SREG
+0027f4 93bf                      	push r27
+0027f5 94f8                      	cli
                                  
                                  	//ENVELOPE
-00096b d079                      	rcall pulse1_envelope_routine
+0027f6 d0ab                      	rcall pulse1_envelope_routine
                                  
                                  	//SWEEP
-00096c fcf3                      	sbrc pulse1_sweep, 3 //check if the sweep enable bit is cleared
-00096d d06e                      	rcall pulse1_sweep_routine
+0027f7 fcf3                      	sbrc pulse1_sweep, 3 //check if the sweep enable bit is cleared
+0027f8 d07f                      	rcall pulse1_sweep_routine
                                  
                                  	//LENGTH
                                  	//NOTE: The length routine is relatively simple, so we will not be using clocks to rjmp and ret to a seperate lable
-00096e fd95                      	sbrc channel_flags, 5 //check if the length counter halt bit is cleared
-00096f c002                      	rjmp PC+3
-000970 10e0                      	cpse pulse1_length_counter, zero //if length counter is already 0, don't decrement
-000971 94ea                      	dec pulse1_length_counter
+0027f9 fd95                      	sbrc channel_flags, 5 //check if the length counter halt bit is cleared
+0027fa c002                      	rjmp sequence_1_3_exit
+0027fb 10e0                      	cpse pulse1_length_counter, zero //if length counter is already 0, don't decrement
+0027fc 94ea                      	dec pulse1_length_counter
                                  
-000972 e2b1                      	ldi r27, TCA_SINGLE_CMP1_bm | TCA_SINGLE_OVF_bm //clear OVF flag
-000973 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
-000975 91bf                      	pop r27
-000976 bfbf                      	out CPU_SREG, r27
-000977 9518                      	reti
+                                 sequence_1_3_exit:
+0027fd e2b1                      	ldi r27, TCA_SINGLE_CMP1_bm | TCA_SINGLE_OVF_bm //clear OVF flag
+0027fe 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
+002800 91bf                      	pop r27
+002801 bfbf                      	out CPU_SREG, r27
+002802 9518                      	reti
                                  
-                                 sequence_3:
-000978 b7bf                      	in r27, CPU_SREG
-000979 93bf                      	push r27
-00097a 94f8                      	cli
-00097b 93cf                      	push r28
-00097c 93df                      	push r29
+                                 sound_driver:
+002803 b7bf                      	in r27, CPU_SREG
+002804 93bf                      	push r27
+002805 94f8                      	cli
+002806 93cf                      	push r28
+002807 93df                      	push r29
                                  
                                  	//SOUND DRIVER
-00097d 91b0 280b                 	lds r27, pulse1_pattern_delay
-00097f 11b0                      	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
-000980 c04a                      	rjmp sequence_3_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+002808 91b0 280b                 	lds r27, pulse1_pattern_delay
+00280a 11b0                      	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
+00280b c05b                      	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
                                  
-                                 sequence_3_channel0:
-000981 91e0 2809                 	lds ZL, pulse1_pattern //current pattern for pulse 1
-000983 91f0 280a                 	lds ZH, pulse1_pattern+1
-000985 91a0 280c                 	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
-000987 91b0 280d                 	lds r27, pulse1_pattern_offset+1
-000989 0fea                      	add ZL, r26 //offset the current pattern pointer to point to new byte data
-00098a 1ffb                      	adc ZH, r27
-00098b 91b4                      	lpm r27, Z //load the byte data from the current pattern
+                                 sound_driver_channel0:
+00280c 91e0 2809                 	lds ZL, pulse1_pattern //current pattern for pulse 1
+00280e 91f0 280a                 	lds ZH, pulse1_pattern+1
+002810 91a0 280c                 	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
+002812 91b0 280d                 	lds r27, pulse1_pattern_offset+1
+002814 0fea                      	add ZL, r26 //offset the current pattern pointer to point to new byte data
+002815 1ffb                      	adc ZH, r27
+002816 91b4                      	lpm r27, Z //load the byte data from the current pattern
                                  
-00098c 36b7                      	cpi r27, 0x67 //check if data is a note (0x00 - 0x066)
-00098d f028                      	brlo sequence_3_channel0_note
-00098e 3eb4                      	cpi r27, 0xE4 //check if data is a delay (0x67 - 0xE3)
-00098f f0a0                      	brlo sequence_3_channel0_delay
-000990 3fbf                      	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
-000991 f0b9                      	breq sequence_3_channel0_next_pattern
-000992 c03b                      	rjmp sequence_3_exit
+002817 35b7                      	cpi r27, 0x57 //check if data is a note (0x00 - 0x56)
+002818 f038                      	brlo sound_driver_channel0_note
+002819 36b7                      	cpi r27, 0x67 //check if data is volume (0x57-0x66)
+00281a f0b0                      	brlo sound_driver_channel0_volume
+00281b 3eb4                      	cpi r27, 0xE4 //check if data is a delay (0x67 - 0xE3)
+00281c f0f0                      	brlo sound_driver_channel0_delay
+00281d 3fbf                      	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
+00281e f109                      	breq sound_driver_channel0_next_pattern
+00281f c04a                      	rjmp sound_driver_exit
                                  
-                                 sequence_3_channel0_note:
-000993 ede0                      	ldi ZL, LOW(note_table << 1) //load in note table
-000994 e1f0                      	ldi ZH, HIGH(note_table << 1)
-000995 0fbb                      	lsl r27 //double the offset for the note table because we are getting byte data
-000996 0feb                      	add ZL, r27 //add offset
-000997 1df0                      	adc ZH, zero
-000998 91a5                      	lpm r26, Z+ //load bytes
-000999 91b4                      	lpm r27, Z
-00099a 93a0 0a8c                 	sts TCB0_CCMPL, r26 //load the LOW bits for timer
-00099c 93b0 0a8d                 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
-00099e 9200 0a8a                 	sts TCB0_CNTL, zero
-0009a0 9200 0a8b                 	sts TCB0_CNTH, zero
-0009a2 d01e                      	rcall sequence_3_channel0_increment_offset
-0009a3 cfdd                      	rjmp sequence_3_channel0
-                                 	
-                                 sequence_3_channel0_delay:
-0009a4 56b6                      	subi r27, 0x66
-0009a5 93b0 280b                 	sts pulse1_pattern_delay, r27
-0009a7 d019                      	rcall sequence_3_channel0_increment_offset
-0009a8 c025                      	rjmp sequence_3_exit
+                                 sound_driver_channel0_note:
+002820 eee0                      	ldi ZL, LOW(note_table << 1) //load in note table
+002821 e4fd                      	ldi ZH, HIGH(note_table << 1)
+002822 0fbb                      	lsl r27 //double the offset for the note table because we are getting byte data
+002823 0feb                      	add ZL, r27 //add offset
+002824 1df0                      	adc ZH, zero
+002825 91a5                      	lpm r26, Z+ //load bytes
+002826 91b4                      	lpm r27, Z
+002827 93a0 0a8c                 	sts TCB0_CCMPL, r26 //load the LOW bits for timer
+002829 93b0 0a8d                 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
+00282b 9200 0a8a                 	sts TCB0_CNTL, zero
+00282d 9200 0a8b                 	sts TCB0_CNTH, zero
+00282f d02d                      	rcall sound_driver_channel0_increment_offset
+002830 cfdb                      	rjmp sound_driver_channel0
                                  
-                                 sequence_3_channel0_next_pattern:
-0009a9 91e0 2805                 	lds ZL, song_frames
-0009ab 91f0 2806                 	lds ZH, song_frames+1
-0009ad 91b0 2807                 	lds r27, song_frame_offset
-                                 	//subi r27, -5 //increment the frame offset by 5 since there are 5 channel patterns per frame
-0009af 5fb6                      	subi r27, -10
-0009b0 93b0 2807                 	sts song_frame_offset, r27
-0009b2 0feb                      	add ZL, r27
-0009b3 1df0                      	adc ZH, zero
+                                 sound_driver_channel0_volume:
+002831 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+002832 91a0 2800                 	lds r26, pulse1_param
+002834 7fa0                      	andi r26, 0xF0 //clear previous VVVV volume bits
+002835 2bab                      	or r26, r27 //move new VVVV bits into pulse1_param
+002836 93a0 2800                 	sts pulse1_param, r26
+002838 6096                      	sbr channel_flags, 6
+002839 d023                      	rcall sound_driver_channel0_increment_offset
+00283a cfd1                      	rjmp sound_driver_channel0
                                  
-0009b4 91a5                      	lpm r26, Z+
-0009b5 91b4                      	lpm r27, Z
-0009b6 0faa                      	lsl r26
-0009b7 1fbb                      	rol r27
-0009b8 93a0 2809                 	sts pulse1_pattern, r26
-0009ba 93b0 280a                 	sts pulse1_pattern+1, r27
+                                 sound_driver_channel0_delay:
+00283b 56b7                      	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
+00283c 93b0 280b                 	sts pulse1_pattern_delay, r27
+00283e d01e                      	rcall sound_driver_channel0_increment_offset
+00283f c02a                      	rjmp sound_driver_exit
                                  
-0009bc 9200 280c                 	sts pulse1_pattern_offset, zero
-0009be 9200 280d                 	sts pulse1_pattern_offset+1, zero
-0009c0 cfc0                      	rjmp sequence_3_channel0
+                                 sound_driver_channel0_next_pattern:
+002840 91e0 2805                 	lds ZL, song_frames
+002842 91f0 2806                 	lds ZH, song_frames+1
+002844 91a0 2807                 	lds r26, song_frame_offset //we must offset to the appropriate channel
+002846 91b0 2808                 	lds r27, song_frame_offset+1
+002848 961a                      	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
+002849 93a0 2807                 	sts song_frame_offset, r26
+00284b 93b0 2808                 	sts song_frame_offset+1, r27
+00284d 9612                      	adiw r27:r26, 2 //offset for channel 1 (test)
+00284e 0fea                      	add ZL, r26
+00284f 1ffb                      	adc ZH, r27
                                  
-                                 sequence_3_channel0_increment_offset:
-0009c1 91e0 280c                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
-0009c3 91f0 280d                 	lds ZH, pulse1_pattern_offset+1
-0009c5 9632                      	adiw Z, 2 //add 2 to the offset. NOTE: 2 is added because we get data in bytes, and byte pointers have 2x the address of word pointers
-0009c6 93e0 280c                 	sts pulse1_pattern_offset, ZL
-0009c8 93f0 280d                 	sts pulse1_pattern_offset+1, ZH
-0009ca 9508                      	ret
+002850 91a5                      	lpm r26, Z+ //load the address of the next pattern
+002851 91b4                      	lpm r27, Z
+002852 0faa                      	lsl r26
+002853 1fbb                      	rol r27
+002854 93a0 2809                 	sts pulse1_pattern, r26
+002856 93b0 280a                 	sts pulse1_pattern+1, r27
                                  
-                                 /*sequence_3_get_frame:
-                                 	ldi ZH, HIGH(song0_frames << 1)
-                                 	ldi ZL, LOW(song0_frames << 1)
-                                 	add ZL, r27
-                                 	adc ZH, zero
-                                 	lpm r26, Z+
-                                 	lpm r27, Z
-                                 	sts song_frames, r26
-                                 	sts song_frames+1, r27*/
+002858 9200 280c                 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
+00285a 9200 280d                 	sts pulse1_pattern_offset+1, zero
+00285c cfaf                      	rjmp sound_driver_channel0
                                  
+                                 sound_driver_channel0_increment_offset:
+00285d 91e0 280c                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
+00285f 91f0 280d                 	lds ZH, pulse1_pattern_offset+1
+002861 9632                      	adiw Z, 2 //add 2 to the offset. NOTE: 2 is added because we get data in bytes, and byte pointers have 2x the address of word pointers
+002862 93e0 280c                 	sts pulse1_pattern_offset, ZL
+002864 93f0 280d                 	sts pulse1_pattern_offset+1, ZH
+002866 9508                      	ret
                                  
-                                 sequence_3_decrement_frame_delay:
-0009cb 95ba                      	dec r27
-0009cc 93b0 280b                 	sts pulse1_pattern_delay, r27
+                                 sound_driver_decrement_frame_delay:
+002867 95ba                      	dec r27
+002868 93b0 280b                 	sts pulse1_pattern_delay, r27
                                  
-                                 sequence_3_exit:
-0009ce 91df                      	pop r29
-0009cf 91cf                      	pop r28
-0009d0 cf9a                      	rjmp sequence_1_3+3 //+3 is to skip the stack instructions since we already pushed them
+                                 sound_driver_exit:
+00286a 91df                      	pop r29
+00286b 91cf                      	pop r28
+00286c cf89                      	rjmp sequence_1_3 + 3 //+3 is to skip the stack instructions since we already pushed them
                                  
                                  //PULSE 1 ROUTINES
                                  pulse1_sequence_routine:
-0009d1 b7bf                      	in r27, CPU_SREG
-0009d2 93bf                      	push r27
-0009d3 94f8                      	cli
+00286d b7bf                      	in r27, CPU_SREG
+00286e 93bf                      	push r27
+00286f 94f8                      	cli
                                  
-0009d4 0cdd                      	lsl pulse1_sequence //shifts sequence to the left
-0009d5 1cd0                      	adc pulse1_sequence, zero //if the shifted bit was a 1, it will be added to the LSB
+002870 0cdd                      	lsl pulse1_sequence //shifts sequence to the left
+002871 1cd0                      	adc pulse1_sequence, zero //if the shifted bit was a 1, it will be added to the LSB
                                  
-0009d6 e0b1                      	ldi r27, TCB_CAPT_bm //clear OVF flag
-0009d7 93b0 0a86                 	sts TCB0_INTFLAGS, r27
-0009d9 91bf                      	pop r27
-0009da bfbf                      	out CPU_SREG, r27
-0009db 9518                      	reti
+002872 e0b1                      	ldi r27, TCB_CAPT_bm //clear OVF flag
+002873 93b0 0a86                 	sts TCB0_INTFLAGS, r27
+002875 91bf                      	pop r27
+002876 bfbf                      	out CPU_SREG, r27
+002877 9518                      	reti
                                  
                                  pulse1_sweep_routine:
-0009dc 2dbf                      	mov r27, pulse1_sweep
-0009dd 70b7                      	andi r27, 0x07 //mask for period divider bits
-0009de f411                      	brne PC+3 //check if divider == 0
+002878 2dbf                      	mov r27, pulse1_sweep
+002879 70b7                      	andi r27, 0x07 //mask for period divider bits
+00287a f4f9                      	brne pulse1_sweep_routine_decrement_divider //check if divider != 0
                                  
-0009df d01d                      	rcall pulse1_sweep_action //if the divider is == 0, update the pulse timer period
-0009e0 c001                      	rjmp PC+2
+                                 pulse1_sweep_routine_action: //if the divider is == 0, update the pulse timer period
+00287b 93df                      	push r29
+00287c 2ddf                      	mov r29, pulse1_sweep
+00287d 95d2                      	swap r29
+00287e 70d7                      	andi r29, 0x07 //mask for shift bits
+00287f f409                      	brne PC+2 //check of shift == 0
+002880 91df                      	pop r29
+002881 c019                      	rjmp pulse1_sweep_routine_check_reload //if the shift == 0, do nothing and return
                                  
-0009e1 94fa                      	dec pulse1_sweep //if the divider != 0, decrement the divider
+002882 91a0 0a8c                 	lds r26, TCB0_CCMPL
+002884 91b0 0a8d                 	lds r27, TCB0_CCMPH
+002886 95b6                      	lsr r27
+002887 95a7                      	ror r26
+002888 95da                      	dec r29
+002889 f7e1                      	brne PC-3 //keep looping/shifting until shift count is 0
                                  
-0009e2 fd97                      	sbrc channel_flags, 7 //if the reload flag is set, reload the sweep divider
-0009e3 d042                      	rcall pulse1_sweep_reload
-0009e4 9508                      	ret
+00288a fef7                      	sbrs pulse1_sweep, 7 //check the negate flag
+00288b c002                      	rjmp PC+3 //if negate flag was clear, go straight to addition
                                  
-                                 pulse1_envelope_routine:
-0009e5 fd96                      	sbrc channel_flags, 6 //check if start flag is cleared
-0009e6 c010                      	rjmp PC+17
+00288c 95a0                      	com r26 //pulse1 uses one's complement if the negate flag is set
+00288d 95b0                      	com r27
                                  
-0009e7 3000                      	cpi pulse1_volume_divider, 0x00 //check if the divider is 0
-0009e8 f011                      	breq PC+3 //if the divider == 0, check loop flag
-0009e9 950a                      	dec pulse1_volume_divider //if the divider != 0, decrement and return
-0009ea 9508                      	ret
+00288e 91d0 0a8c                 	lds r29, TCB0_CCMPL //perform addition to get new timer period
+002890 0fad                      	add r26, r29
+002891 91d0 0a8d                 	lds r29, TCB0_CCMPH
+002893 1fbd                      	adc r27, r29
                                  
-0009eb 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the divider == 0, reset the divider period
-0009ed 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
-0009ee ff95                      	sbrs channel_flags, 5 //check if the loop flag is set
-0009ef c002                      	rjmp PC+3 //if the loop flag is not set, check the decay
-0009f0 e01f                      	ldi pulse1_volume_decay, 0x0F //if the loop flag is set, reset decay and return
-0009f1 9508                      	ret
-                                 
-0009f2 3010                      	cpi pulse1_volume_decay, 0x00 //check if the decay is 0
-0009f3 f409                      	brne PC+2 //if decay != 0, go decrement
-0009f4 9508                      	ret //if decay == 0 && loop flag == 0, do nothing and return
-0009f5 951a                      	dec pulse1_volume_decay
-0009f6 9508                      	ret
-                                 
-0009f7 7b9f                      	cbr channel_flags, 0b01000000 //if the start flag is set, clear it
-0009f8 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the start flag is set, reset the divider period
-0009fa 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
-0009fb e01f                      	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
-0009fc 9508                      	ret
-                                 	
-                                 //PULSE 1 HELPER METHODS
-                                 pulse1_sweep_action:
-0009fd 93df                      	push r29
-0009fe 2ddf                      	mov r29, pulse1_sweep
-0009ff 95d2                      	swap r29
-000a00 70d7                      	andi r29, 0x07 //mask for shift bits
-000a01 f409                      	brne PC+2 //check of shift == 0
-                                 	//rjmp PC+23 //if the shift == 0, do nothing and return
-000a02 c021                      	rjmp PC+34
-                                 
-000a03 91a0 0a8c                 	lds r26, TCB0_CCMPL
-000a05 91b0 0a8d                 	lds r27, TCB0_CCMPH
-000a07 95b6                      	lsr r27
-000a08 95a7                      	ror r26
-000a09 95da                      	dec r29
-000a0a f7e1                      	brne PC-3 //keep looping/shifting until shift count is 0
-                                 
-000a0b fef7                      	sbrs pulse1_sweep, 7 //check the negate flag
-000a0c c002                      	rjmp PC+3 //if negate flag was clear, go straight to addition
-                                 
-000a0d 95a0                      	com r26 //pulse1 uses one's complement if the negate flag is set
-000a0e 95b0                      	com r27
-                                 
-000a0f 91d0 0a8c                 	lds r29, TCB0_CCMPL //perform addition to get new timer period
-000a11 0fad                      	add r26, r29
-000a12 91d0 0a8d                 	lds r29, TCB0_CCMPH
-000a14 1fbd                      	adc r27, r29
-                                 
-000a15 93a0 0a8c                 	sts TCB0_CCMPL, r26 //store the new LOW bits for timer
-000a17 93b0 0a8d                 	sts TCB0_CCMPH, r27 //store the new HIGH bits for timer
+002894 93a0 0a8c                 	sts TCB0_CCMPL, r26 //store the new LOW bits for timer
+002896 93b0 0a8d                 	sts TCB0_CCMPH, r27 //store the new HIGH bits for timer
                                  
                                  	//sts pulse1_timerL, r26
                                  	//sts pulse1_timerH, r27
                                  
-                                 	//Sweep Test
-000a19 2ddf                      	mov r29, pulse1_sweep //invert the negate bit
-000a1a e8b0                      	ldi r27, 0b10000000
-000a1b 27db                      	eor r29, r27
-000a1c 67df                      	ori r29, 0b01111111
+                                 /*	//Sweep Test
+                                 	mov r29, pulse1_sweep //invert the negate bit
+                                 	ldi r27, 0b10000000
+                                 	eor r29, r27
+                                 	ori r29, 0b01111111
                                  
-000a1d 91b0 2801                 	lds r27, pulse1_sweep_param //reload the pulse sweep divider params
-000a1f 95b2                      	swap r27
-000a20 68b0                      	ori r27, 0b10000000
-000a21 23bd                      	and r27, r29
-000a22 2efb                      	mov pulse1_sweep, r27
-000a23 6890                      	sbr channel_flags, 0b10000000
+                                 	lds r27, pulse1_sweep_param //reload the pulse sweep divider params
+                                 	swap r27
+                                 	ori r27, 0b10000000
+                                 	and r27, r29
+                                 	mov pulse1_sweep, r27
+                                 	sbr channel_flags, 0b10000000*/
                                  	
-000a24 91df                      	pop r29
-000a25 9508                      	ret
-                                 	
+002898 91df                      	pop r29
+002899 c001                      	rjmp pulse1_sweep_routine_check_reload
+                                 
+                                 pulse1_sweep_routine_decrement_divider:
+00289a 94fa                      	dec pulse1_sweep //if the divider != 0, decrement the divider
+                                 
+                                 pulse1_sweep_routine_check_reload:
+00289b ff97                      	sbrs channel_flags, 7 //if the reload flag is set, reload the sweep divider
+00289c 9508                      	ret
+                                 
                                  pulse1_sweep_reload:
-000a26 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param //NOTE: since the reload flag is kept in bit 6, we clear the reload flag indirectly
-000a28 94f2                      	swap pulse1_sweep //bring data from high byte to low byte
-000a29 779f                      	cbr channel_flags, 0b10000000 //clear ready flag
-000a2a 9508                      	ret
+00289d 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param //NOTE: since the reload flag is kept in bit 6, we clear the reload flag indirectly
+00289f 94f2                      	swap pulse1_sweep //bring data from high byte to low byte
+0028a0 779f                      	cbr channel_flags, 0b10000000 //clear ready flag
+0028a1 9508                      	ret
+                                 
+                                 pulse1_envelope_routine:
+0028a2 fd96                      	sbrc channel_flags, 6 //check if start flag is cleared
+0028a3 c010                      	rjmp pulse1_envelope_routine_clear_start
+                                 
+0028a4 3000                      	cpi pulse1_volume_divider, 0x00 //check if the divider is 0
+0028a5 f011                      	breq PC+3 //if the divider == 0, check loop flag
+0028a6 950a                      	dec pulse1_volume_divider //if the divider != 0, decrement and return
+0028a7 9508                      	ret
+                                 
+0028a8 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the divider == 0, reset the divider period
+0028aa 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
+0028ab ff95                      	sbrs channel_flags, 5 //check if the loop flag is set
+0028ac c002                      	rjmp pulse1_envelope_routine_decrement_decay //if the loop flag is not set, check the decay
+0028ad e01f                      	ldi pulse1_volume_decay, 0x0F //if the loop flag is set, reset decay and return
+0028ae 9508                      	ret
+                                 
+                                 pulse1_envelope_routine_decrement_decay:
+0028af 3010                      	cpi pulse1_volume_decay, 0x00 //check if the decay is 0
+0028b0 f409                      	brne PC+2 //if decay != 0, go decrement
+0028b1 9508                      	ret //if decay == 0 && loop flag == 0, do nothing and return
+0028b2 951a                      	dec pulse1_volume_decay
+0028b3 9508                      	ret
+                                 
+                                 pulse1_envelope_routine_clear_start:
+0028b4 7b9f                      	cbr channel_flags, 0b01000000 //if the start flag is set, clear it
+0028b5 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the start flag is set, reset the divider period
+0028b7 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
+0028b8 e01f                      	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
+0028b9 9508                      	ret
+                                 	
+                                 //PULSE 1 HELPER METHODS
                                  
                                  //CONVERTERS (TABLES)
                                  //converts and loads 5 bit length to corresponding 8 bit length value into r29
                                  length_converter:
-000a2b e1f4                      	ldi ZH, HIGH(length << 1)
-000a2c e6e2                      	ldi ZL, LOW(length << 1)
-000a2d 0fed                      	add ZL, r29
-000a2e 1df0                      	adc ZH, zero
-000a2f 91d4                      	lpm r29, Z
-000a30 9508                      	ret
+0028ba e5f1                      	ldi ZH, HIGH(length << 1)
+0028bb e8e0                      	ldi ZL, LOW(length << 1)
+0028bc 0fed                      	add ZL, r29
+0028bd 1df0                      	adc ZH, zero
+0028be 91d4                      	lpm r29, Z
+0028bf 9508                      	ret
                                  
-000a31 7f05
-000a32 010a
-000a33 0214
-000a34 0328
-000a35 0450
-000a36 051e
-000a37 0607
-000a38 070d
-000a39 0806
-000a3a 090c
-000a3b 0a18
-000a3c 0b30
-000a3d 0c60
-000a3e 0d24
-000a3f 0e08
-000a40 0f10                      length: .db $05, $7F, $0A, $01, $14, $02, $28, $03, $50, $04, $1E, $05, $07, $06, $0D, $07, $06, $08, $0C, $09, $18, $0A, $30, $0B, $60, $0C, $24, $0D, $08, $0E, $10, $0F
+0028c0 7f05
+0028c1 010a
+0028c2 0214
+0028c3 0328
+0028c4 0450
+0028c5 051e
+0028c6 0607
+0028c7 070d
+0028c8 0806
+0028c9 090c
+0028ca 0a18
+0028cb 0b30
+0028cc 0c60
+0028cd 0d24
+0028ce 0e08
+0028cf 0f10                      length: .db $05, $7F, $0A, $01, $14, $02, $28, $03, $50, $04, $1E, $05, $07, $06, $0D, $07, $06, $08, $0C, $09, $18, $0A, $30, $0B, $60, $0C, $24, $0D, $08, $0E, $10, $0F
                                  
                                  //loads pulse sequence into r29
                                  duty_cycle_sequences:
-000a41 e1f4                      	ldi ZH, HIGH(sequences << 1)
-000a42 e8ee                      	ldi ZL, LOW(sequences << 1)
-000a43 0fed                      	add ZL, r29
-000a44 1df0                      	adc ZH, zero
-000a45 91d4                      	lpm r29, Z
-000a46 9508                      	ret
+0028d0 e5f1                      	ldi ZH, HIGH(sequences << 1)
+0028d1 eaec                      	ldi ZL, LOW(sequences << 1)
+0028d2 0fed                      	add ZL, r29
+0028d3 1df0                      	adc ZH, zero
+0028d4 91d4                      	lpm r29, Z
+0028d5 9508                      	ret
                                  
                                  //pulse sequences: 12.5%, 25%, 50%, 75%
-000a47 0301
+0028d6 0301
 
 
 RESOURCE USE INFORMATION
@@ -574,38 +578,38 @@ counted separately from r26..r31 here.
 "ATmega4809" register use summary:
 x  :   0 y  :   0 z  :  10 r0 :  14 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   4 r14:   4 r15:  11 r16:   7 r17:   6 r18:   0 r19:   0 r20:   0 
-r21:   0 r22:   0 r23:   0 r24:   0 r25:  11 r26:  15 r27: 119 r28:   5 
+r13:   4 r14:   4 r15:   9 r16:   7 r17:   6 r18:   0 r19:   0 r20:   0 
+r21:   0 r22:   0 r23:   0 r24:   0 r25:  11 r26:  24 r27: 116 r28:   5 
 r29:  31 r30:  15 r31:  15 
 Registers used: 14 out of 35 (40.0%)
 
 "ATmega4809" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   8 add   :   7 adiw  :   1 and   :   1 
-andi  :   7 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   4 brge  :   0 brhc  :   0 
-brhs  :   0 brid  :   0 brie  :   0 brlo  :   5 brlt  :   0 brmi  :   0 
+.lds  :   0 .sts  :   0 adc   :   8 add   :   7 adiw  :   3 and   :   0 
+andi  :   9 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   5 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   6 brlt  :   0 brmi  :   0 
 brne  :   4 brpl  :   0 brsh  :   1 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   1 cbr   :   2 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   2 
 clc   :   0 clh   :   0 cli   :   4 cln   :   0 clr   :   1 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   2 cp    :   1 cpc   :   0 
-cpi   :   9 cpse  :   2 dec   :   6 des   :   0 eor   :   1 fmul  :   0 
+cpi   :  10 cpse  :   2 dec   :   6 des   :   0 eor   :   0 fmul  :   0 
 fmuls :   0 fmulsu:   0 icall :   0 ijmp  :   0 in    :   4 inc   :   0 
-jmp   :   6 ld    :   0 ldd   :   0 ldi   :  37 lds   :  27 lpm   :  15 
-lsl   :   5 lsr   :   1 mov   :   6 movw  :   0 mul   :   0 muls  :   0 
-mulsu :   0 neg   :   0 nop   :   0 or    :   0 ori   :   2 out   :   4 
-pop   :   6 push  :   7 rcall :   9 ret   :  11 reti  :   3 rjmp  :  18 
-rol   :   4 ror   :   1 sbc   :   0 sbci  :   0 sbi   :   1 sbic  :   0 
-sbis  :   0 sbiw  :   0 sbr   :   3 sbrc  :   4 sbrs  :   3 sec   :   0 
+jmp   :   6 ld    :   0 ldd   :   0 ldi   :  37 lds   :  29 lpm   :  15 
+lsl   :   5 lsr   :   1 mov   :   4 movw  :   0 mul   :   0 muls  :   0 
+mulsu :   0 neg   :   0 nop   :   0 or    :   1 ori   :   0 out   :   6 
+pop   :   7 push  :   7 rcall :   8 ret   :  10 reti  :   3 rjmp  :  19 
+rol   :   4 ror   :   1 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 
+sbis  :   0 sbiw  :   0 sbr   :   3 sbrc  :   3 sbrs  :   4 sec   :   0 
 seh   :   0 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 
 sev   :   0 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 
-sts   :  55 sub   :   0 subi  :   2 swap  :   4 tst   :   0 wdr   :   0 
+sts   :  56 sub   :   0 subi  :   2 swap  :   3 tst   :   0 wdr   :   0 
 
-Instructions used: 45 out of 114 (39.5%)
+Instructions used: 41 out of 114 (36.0%)
 
 "ATmega4809" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x001492    776   4462   5238   49152  10.7%
+[.cseg] 0x000000 0x0051b0    790  20094  20884   49152  42.5%
 [.dseg] 0x002800 0x002812      0     18     18    6144   0.3%
 [.eseg] 0x000000 0x000000      0      0      0     256   0.0%
 

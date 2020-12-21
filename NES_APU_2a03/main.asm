@@ -49,7 +49,7 @@ reset:
 	jmp init
 
 .org TCA0_OVF_vect
-	jmp sequence_3
+	jmp sound_driver
 
 .org TCA0_CMP0_vect
 	jmp sequence_0_2
@@ -92,7 +92,7 @@ init:
 	//MEMORY
 	ldi r27, 0b00110000
 	sts pulse1_param, r27
-	ldi r27, 0b00000000
+	ldi r27, 0b10000000
 	sts pulse1_sweep_param, r27
 	ldi r27, 0xFF
 	sts pulse1_timerL, r27
@@ -108,8 +108,7 @@ init:
 	sts song_frames+1, ZH
 
 	//CHANNEL 1 TEST
-	ldi r27, 0x00
-	sts song_frame_offset, r27
+	ldi r27, 0x02
 	add ZL, r27
 	adc ZH, zero
 	lpm r26, Z+
@@ -249,13 +248,16 @@ pulse1_check_timer_7FF_LOW:
 	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
 	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
 
-
 pulse1_off:
-	cbi VPORTD_OUT, 0
+	out VPORTD_OUT, zero
 	rjmp pulse1
 
 pulse1_on:
-	sbi VPORTD_OUT, 0
+	lds r29, pulse1_param
+	andi r29, 0x0F //mask for VVVV bits
+	breq pulse1_off //if VVVV bits are 0, then there is no volume (channel off)
+
+	out VPORTD_OUT, r29
 	rjmp pulse1
 
 //FRAME COUNTER/AUDIO SAMPLE ISR
@@ -288,17 +290,18 @@ sequence_1_3:
 	//LENGTH
 	//NOTE: The length routine is relatively simple, so we will not be using clocks to rjmp and ret to a seperate lable
 	sbrc channel_flags, 5 //check if the length counter halt bit is cleared
-	rjmp PC+3
+	rjmp sequence_1_3_exit
 	cpse pulse1_length_counter, zero //if length counter is already 0, don't decrement
 	dec pulse1_length_counter
 
+sequence_1_3_exit:
 	ldi r27, TCA_SINGLE_CMP1_bm | TCA_SINGLE_OVF_bm //clear OVF flag
 	sts TCA0_SINGLE_INTFLAGS, r27
 	pop r27
 	out CPU_SREG, r27
 	reti
 
-sequence_3:
+sound_driver:
 	in r27, CPU_SREG
 	push r27
 	cli
@@ -308,9 +311,9 @@ sequence_3:
 	//SOUND DRIVER
 	lds r27, pulse1_pattern_delay
 	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
-	rjmp sequence_3_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
 
-sequence_3_channel0:
+sound_driver_channel0:
 	lds ZL, pulse1_pattern //current pattern for pulse 1
 	lds ZH, pulse1_pattern+1
 	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
@@ -319,15 +322,17 @@ sequence_3_channel0:
 	adc ZH, r27
 	lpm r27, Z //load the byte data from the current pattern
 
-	cpi r27, 0x67 //check if data is a note (0x00 - 0x066)
-	brlo sequence_3_channel0_note
+	cpi r27, 0x57 //check if data is a note (0x00 - 0x56)
+	brlo sound_driver_channel0_note
+	cpi r27, 0x67 //check if data is volume (0x57-0x66)
+	brlo sound_driver_channel0_volume
 	cpi r27, 0xE4 //check if data is a delay (0x67 - 0xE3)
-	brlo sequence_3_channel0_delay
+	brlo sound_driver_channel0_delay
 	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
-	breq sequence_3_channel0_next_pattern
-	rjmp sequence_3_exit
+	breq sound_driver_channel0_next_pattern
+	rjmp sound_driver_exit
 
-sequence_3_channel0_note:
+sound_driver_channel0_note:
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r27 //double the offset for the note table because we are getting byte data
@@ -339,23 +344,33 @@ sequence_3_channel0_note:
 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
 	sts TCB0_CNTL, zero
 	sts TCB0_CNTH, zero
-	rcall sequence_3_channel0_increment_offset
-	rjmp sequence_3_channel0
-	
-sequence_3_channel0_delay:
-	subi r27, 0x66 //NOTE: the delay values are offset by the highest volume value, which is 0x66
-	sts pulse1_pattern_delay, r27
-	rcall sequence_3_channel0_increment_offset
-	rjmp sequence_3_exit
+	rcall sound_driver_channel0_increment_offset
+	rjmp sound_driver_channel0
 
-sequence_3_channel0_next_pattern:
+sound_driver_channel0_volume:
+	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+	lds r26, pulse1_param
+	andi r26, 0xF0 //clear previous VVVV volume bits
+	or r26, r27 //move new VVVV bits into pulse1_param
+	sts pulse1_param, r26
+	sbr channel_flags, 6
+	rcall sound_driver_channel0_increment_offset
+	rjmp sound_driver_channel0
+
+sound_driver_channel0_delay:
+	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
+	sts pulse1_pattern_delay, r27
+	rcall sound_driver_channel0_increment_offset
+	rjmp sound_driver_exit
+
+sound_driver_channel0_next_pattern:
 	lds ZL, song_frames
 	lds ZH, song_frames+1
 	lds r26, song_frame_offset //we must offset to the appropriate channel
 	lds r27, song_frame_offset+1
 	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
 	sts song_frame_offset, r26
-	sts song_frame_offset, r27
+	sts song_frame_offset+1, r27
 	adiw r27:r26, 2 //offset for channel 1 (test)
 	add ZL, r26
 	adc ZH, r27
@@ -369,9 +384,9 @@ sequence_3_channel0_next_pattern:
 
 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
 	sts pulse1_pattern_offset+1, zero
-	rjmp sequence_3_channel0
+	rjmp sound_driver_channel0
 
-sequence_3_channel0_increment_offset:
+sound_driver_channel0_increment_offset:
 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
 	lds ZH, pulse1_pattern_offset+1
 	adiw Z, 2 //add 2 to the offset. NOTE: 2 is added because we get data in bytes, and byte pointers have 2x the address of word pointers
@@ -379,25 +394,14 @@ sequence_3_channel0_increment_offset:
 	sts pulse1_pattern_offset+1, ZH
 	ret
 
-/*sequence_3_get_frame:
-	ldi ZH, HIGH(song0_frames << 1)
-	ldi ZL, LOW(song0_frames << 1)
-	add ZL, r27
-	adc ZH, zero
-	lpm r26, Z+
-	lpm r27, Z
-	sts song_frames, r26
-	sts song_frames+1, r27*/
-
-
-sequence_3_decrement_frame_delay:
+sound_driver_decrement_frame_delay:
 	dec r27
 	sts pulse1_pattern_delay, r27
 
-sequence_3_exit:
+sound_driver_exit:
 	pop r29
 	pop r28
-	rjmp sequence_1_3+3 //+3 is to skip the stack instructions since we already pushed them
+	rjmp sequence_1_3 + 3 //+3 is to skip the stack instructions since we already pushed them
 
 //PULSE 1 ROUTINES
 pulse1_sequence_routine:
@@ -417,54 +421,16 @@ pulse1_sequence_routine:
 pulse1_sweep_routine:
 	mov r27, pulse1_sweep
 	andi r27, 0x07 //mask for period divider bits
-	brne PC+3 //check if divider == 0
+	brne pulse1_sweep_routine_decrement_divider //check if divider != 0
 
-	rcall pulse1_sweep_action //if the divider is == 0, update the pulse timer period
-	rjmp PC+2
-
-	dec pulse1_sweep //if the divider != 0, decrement the divider
-
-	sbrc channel_flags, 7 //if the reload flag is set, reload the sweep divider
-	rcall pulse1_sweep_reload
-	ret
-
-pulse1_envelope_routine:
-	sbrc channel_flags, 6 //check if start flag is cleared
-	rjmp PC+17
-
-	cpi pulse1_volume_divider, 0x00 //check if the divider is 0
-	breq PC+3 //if the divider == 0, check loop flag
-	dec pulse1_volume_divider //if the divider != 0, decrement and return
-	ret
-
-	lds pulse1_volume_divider, pulse1_param //if the divider == 0, reset the divider period
-	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
-	sbrs channel_flags, 5 //check if the loop flag is set
-	rjmp PC+3 //if the loop flag is not set, check the decay
-	ldi pulse1_volume_decay, 0x0F //if the loop flag is set, reset decay and return
-	ret
-
-	cpi pulse1_volume_decay, 0x00 //check if the decay is 0
-	brne PC+2 //if decay != 0, go decrement
-	ret //if decay == 0 && loop flag == 0, do nothing and return
-	dec pulse1_volume_decay
-	ret
-
-	cbr channel_flags, 0b01000000 //if the start flag is set, clear it
-	lds pulse1_volume_divider, pulse1_param //if the start flag is set, reset the divider period
-	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
-	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
-	ret
-	
-//PULSE 1 HELPER METHODS
-pulse1_sweep_action:
+pulse1_sweep_routine_action: //if the divider is == 0, update the pulse timer period
 	push r29
 	mov r29, pulse1_sweep
 	swap r29
 	andi r29, 0x07 //mask for shift bits
 	brne PC+2 //check of shift == 0
-	//rjmp PC+23 //if the shift == 0, do nothing and return
-	rjmp PC+34
+	pop r29
+	rjmp pulse1_sweep_routine_check_reload //if the shift == 0, do nothing and return
 
 	lds r26, TCB0_CCMPL
 	lds r27, TCB0_CCMPH
@@ -490,7 +456,7 @@ pulse1_sweep_action:
 	//sts pulse1_timerL, r26
 	//sts pulse1_timerH, r27
 
-	//Sweep Test
+/*	//Sweep Test
 	mov r29, pulse1_sweep //invert the negate bit
 	ldi r27, 0b10000000
 	eor r29, r27
@@ -501,16 +467,55 @@ pulse1_sweep_action:
 	ori r27, 0b10000000
 	and r27, r29
 	mov pulse1_sweep, r27
-	sbr channel_flags, 0b10000000
+	sbr channel_flags, 0b10000000*/
 	
 	pop r29
+	rjmp pulse1_sweep_routine_check_reload
+
+pulse1_sweep_routine_decrement_divider:
+	dec pulse1_sweep //if the divider != 0, decrement the divider
+
+pulse1_sweep_routine_check_reload:
+	sbrs channel_flags, 7 //if the reload flag is set, reload the sweep divider
 	ret
-	
+
 pulse1_sweep_reload:
 	lds pulse1_sweep, pulse1_sweep_param //NOTE: since the reload flag is kept in bit 6, we clear the reload flag indirectly
 	swap pulse1_sweep //bring data from high byte to low byte
 	cbr channel_flags, 0b10000000 //clear ready flag
 	ret
+
+pulse1_envelope_routine:
+	sbrc channel_flags, 6 //check if start flag is cleared
+	rjmp pulse1_envelope_routine_clear_start
+
+	cpi pulse1_volume_divider, 0x00 //check if the divider is 0
+	breq PC+3 //if the divider == 0, check loop flag
+	dec pulse1_volume_divider //if the divider != 0, decrement and return
+	ret
+
+	lds pulse1_volume_divider, pulse1_param //if the divider == 0, reset the divider period
+	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
+	sbrs channel_flags, 5 //check if the loop flag is set
+	rjmp pulse1_envelope_routine_decrement_decay //if the loop flag is not set, check the decay
+	ldi pulse1_volume_decay, 0x0F //if the loop flag is set, reset decay and return
+	ret
+
+pulse1_envelope_routine_decrement_decay:
+	cpi pulse1_volume_decay, 0x00 //check if the decay is 0
+	brne PC+2 //if decay != 0, go decrement
+	ret //if decay == 0 && loop flag == 0, do nothing and return
+	dec pulse1_volume_decay
+	ret
+
+pulse1_envelope_routine_clear_start:
+	cbr channel_flags, 0b01000000 //if the start flag is set, clear it
+	lds pulse1_volume_divider, pulse1_param //if the start flag is set, reset the divider period
+	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
+	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
+	ret
+	
+//PULSE 1 HELPER METHODS
 
 //CONVERTERS (TABLES)
 //converts and loads 5 bit length to corresponding 8 bit length value into r29
