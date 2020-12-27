@@ -24,6 +24,17 @@ pulse1_pattern: .byte 2
 pulse1_pattern_delay: .byte 1
 pulse1_pattern_offset: .byte 2
 
+pulse1_volume_macro: .byte 2
+pulse1_volume_macro_offset: .byte 1
+pulse1_arpeggio_macro: .byte 2
+pulse1_arpeggio_macro_offset: .byte 1
+pulse1_pitch_macro: .byte 2
+pulse1_pitch_macro_offset: .byte 1
+pulse1_hi_pitch_macro: .byte 2
+pulse1_hi_pitch_macro_offset: .byte 1
+pulse1_duty_macro: .byte 2
+pulse1_duty_macro_offset: .byte 1
+
 pulse2_pattern_delay: .byte 1
 triangle_pattern_delay: .byte 1
 noise_pattern_delay: .byte 1
@@ -89,6 +100,9 @@ init:
 	ldi r27, 0b11111111
 	sts pulse1_sweep_param, r27*/
 
+	//ZERO
+	clr zero
+
 	//MEMORY
 	ldi r27, 0b00110000
 	sts pulse1_param, r27
@@ -107,8 +121,8 @@ init:
 	sts song_frames, ZL
 	sts song_frames+1, ZH
 
-	//CHANNEL 1 TEST
-	ldi r27, 0x02
+	//CHANNEL 0 TEST
+	ldi r27, 0x00
 	add ZL, r27
 	adc ZH, zero
 	lpm r26, Z+
@@ -118,17 +132,31 @@ init:
 	sts pulse1_pattern, r26
 	sts pulse1_pattern+1, r27
 	ldi r27, 0x00
-	sts pulse1_pattern_delay, r27
-	sts pulse1_pattern_offset, r27
-	sts pulse1_pattern_offset+1, r27
+	sts pulse1_pattern_delay, zero
+	sts pulse1_pattern_offset, zero
+	sts pulse1_pattern_offset+1, zero
 
-	sts pulse2_pattern_delay, r27
-	sts triangle_pattern_delay, r27
-	sts noise_pattern_delay, r27
-	sts dcpm_pattern_delay, r27
-	
-	//ZERO
-	clr zero
+	//channel 0 instrument macros
+	sts pulse1_volume_macro_offset, zero
+	sts pulse1_arpeggio_macro_offset, zero
+	sts pulse1_pitch_macro_offset, zero
+	sts pulse1_hi_pitch_macro_offset, zero
+	sts pulse1_duty_macro_offset, zero
+	sts pulse1_volume_macro, zero
+	sts pulse1_volume_macro+1, zero
+	sts pulse1_arpeggio_macro, zero
+	sts pulse1_arpeggio_macro+1, zero
+	sts pulse1_pitch_macro, zero
+	sts pulse1_pitch_macro+1, zero
+	sts pulse1_hi_pitch_macro, zero
+	sts pulse1_hi_pitch_macro+1, zero
+	sts pulse1_duty_macro, zero
+	sts pulse1_duty_macro+1, zero
+
+	sts pulse2_pattern_delay, zero
+	sts triangle_pattern_delay, zero
+	sts noise_pattern_delay, zero
+	sts dcpm_pattern_delay, zero
 
 	//PINS
 	ldi r27, 0xFF //set all pins in VPORTD to output
@@ -328,9 +356,14 @@ sound_driver_channel0:
 	brlo sound_driver_channel0_volume
 	cpi r27, 0xE4 //check if data is a delay (0x67 - 0xE3)
 	brlo sound_driver_channel0_delay
+	breq sound_driver_channel0_instrument_change
+
+	//binary search for fx flags (0xE5 - 0xFE)
+
+
 	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
 	breq sound_driver_channel0_next_pattern
-	rjmp sound_driver_exit
+	rjmp sound_driver_instrument_routine
 
 sound_driver_channel0_note:
 	ldi ZL, LOW(note_table << 1) //load in note table
@@ -361,7 +394,7 @@ sound_driver_channel0_delay:
 	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts pulse1_pattern_delay, r27
 	rcall sound_driver_channel0_increment_offset
-	rjmp sound_driver_exit
+	rjmp sound_driver_instrument_routine
 
 sound_driver_channel0_next_pattern:
 	lds ZL, song_frames
@@ -371,7 +404,7 @@ sound_driver_channel0_next_pattern:
 	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
 	sts song_frame_offset, r26
 	sts song_frame_offset+1, r27
-	adiw r27:r26, 2 //offset for channel 1 (test)
+	//adiw r27:r26, 2 //offset for channel 1 (test)
 	add ZL, r26
 	adc ZH, r27
 
@@ -386,6 +419,93 @@ sound_driver_channel0_next_pattern:
 	sts pulse1_pattern_offset+1, zero
 	rjmp sound_driver_channel0
 
+sound_driver_channel0_instrument_change:
+	sts pulse1_volume_macro, zero //reset all macros
+	sts pulse1_volume_macro+1, zero
+	sts pulse1_arpeggio_macro, zero
+	sts pulse1_arpeggio_macro+1, zero
+	sts pulse1_pitch_macro, zero
+	sts pulse1_pitch_macro+1, zero
+	sts pulse1_hi_pitch_macro, zero
+	sts pulse1_hi_pitch_macro+1, zero
+	sts pulse1_duty_macro, zero
+	sts pulse1_duty_macro+1, zero
+
+	adiw Z, 2 //point to the byte next to the flag
+	lpm r27, Z //store the instrument offset into r27
+	ldi ZL, LOW(instruments) //point Z to instruments table
+	ldi ZH, HIGH(instruments)
+	add ZL, r27 //point Z to offsetted instrument
+	adc ZH, zero
+	lsl ZL //multiply by 2 to make Z into a byte pointer for the instrument's address
+	rol ZH
+	lpm r26, Z+ //r26:r27 now point to the instrument
+	lpm r27, Z
+
+	lsl r26 //multiply by 2 to make r26:r27 into a byte pointer for the instrument's data
+	rol r27
+	mov ZL, r26
+	mov ZH, r27
+	lpm r27, Z //get macro header byte. NOTE: Each macro type for each intrument is represented by a bit in this byte. 1 indicates that the instrument uses a macro of it's corresponding type.
+	ldi r26, 6 //(6-1) = 5 for the 5 different macro types. NOTE: bit 0 = volume, bit 1 = arpeggio, bit 2 = pitch, bit 3 = hi pitch, bit 4 = duty
+sound_driver_channel0_instrument_change_macro_loop:
+	dec r26
+	breq sound_driver_channel0_instrument_change_exit
+	lsr r27
+	brcs sound_driver_channel0_instrument_change_load_macro
+	rjmp sound_driver_channel0_instrument_change_macro_loop
+
+sound_driver_channel0_instrument_change_load_macro:
+	adiw Z, 2 //point Z to the address of the macro
+	lpm r28, Z+ //r28:r29 now point to the macro
+	lpm r29, Z
+	lsl r28 //multiply by 2 to make r28:r29 into a byte pointer for the macro's address
+	rol r29
+
+	cpi r26, 5
+	breq sound_driver_channel0_instrument_change_load_macro_volume
+	cpi r26, 4
+	breq sound_driver_channel0_instrument_change_load_macro_arpeggio
+	cpi r26, 3
+	breq sound_driver_channel0_instrument_change_load_macro_pitch
+	cpi r26, 2
+	breq sound_driver_channel0_instrument_change_load_macro_hi_pitch
+	rjmp sound_driver_channel0_instrument_change_load_macro_duty
+
+sound_driver_channel0_instrument_change_load_macro_volume:
+	sts pulse1_volume_macro, r28
+	sts pulse1_volume_macro+1, r29
+	rjmp sound_driver_channel0_instrument_change_macro_loop
+	
+sound_driver_channel0_instrument_change_load_macro_arpeggio:
+	sts pulse1_volume_macro, r28
+	sts pulse1_volume_macro+1, r29
+	rjmp sound_driver_channel0_instrument_change_macro_loop
+
+sound_driver_channel0_instrument_change_load_macro_pitch:
+	sts pulse1_pitch_macro, r28
+	sts pulse1_pitch_macro+1, r29
+	rjmp sound_driver_channel0_instrument_change_macro_loop
+
+sound_driver_channel0_instrument_change_load_macro_hi_pitch:
+	sts pulse1_hi_pitch_macro, r28
+	sts pulse1_hi_pitch_macro+1, r29
+	rjmp sound_driver_channel0_instrument_change_macro_loop
+
+sound_driver_channel0_instrument_change_load_macro_duty:
+	sts pulse1_duty_macro, r28
+	sts pulse1_duty_macro+1, r29
+	rjmp sound_driver_channel0_instrument_change_macro_loop
+
+sound_driver_channel0_instrument_change_exit:
+	sts pulse1_volume_macro_offset, zero //reset all macro offsets
+	sts pulse1_arpeggio_macro_offset, zero
+	sts pulse1_pitch_macro_offset, zero
+	sts pulse1_hi_pitch_macro_offset, zero
+	sts pulse1_duty_macro_offset, zero
+	rcall sound_driver_channel0_increment_offset_twice
+	rjmp sound_driver_channel0
+
 sound_driver_channel0_increment_offset:
 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
 	lds ZH, pulse1_pattern_offset+1
@@ -394,9 +514,35 @@ sound_driver_channel0_increment_offset:
 	sts pulse1_pattern_offset+1, ZH
 	ret
 
+sound_driver_channel0_increment_offset_twice: //used for data that takes up 2 bytes worth of space
+	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
+	lds ZH, pulse1_pattern_offset+1
+	adiw Z, 4 //increment the pointer twice
+	sts pulse1_pattern_offset, ZL
+	sts pulse1_pattern_offset+1, ZH
+	ret
+
 sound_driver_decrement_frame_delay:
 	dec r27
 	sts pulse1_pattern_delay, r27
+
+sound_driver_instrument_routine:
+	lds ZL, pulse1_volume_macro
+	lds ZH, pulse1_volume_macro+1
+
+	lds ZL, pulse1_arpeggio_macro
+	lds ZH, pulse1_arpeggio_macro+1
+
+	lds ZL, pulse1_pitch_macro
+	lds ZH, pulse1_pitch_macro+1
+
+	lds ZL, pulse1_hi_pitch_macro
+	lds ZH, pulse1_hi_pitch_macro+1
+
+	lds ZL, pulse1_duty_macro
+	lds ZH, pulse1_duty_macro+1
+
+	rjmp sound_driver_exit
 
 sound_driver_exit:
 	pop r29
