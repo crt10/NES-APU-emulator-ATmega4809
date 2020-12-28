@@ -16,6 +16,7 @@ pulse1_sweep_param: .byte 1 //$4001 EPPP.NSSS = Enable, Period, Negate, Shift
 pulse1_timerL: .byte 1 //$4002 LLLL.LLLL = Low 8 bits for timer
 pulse1_timerH: .byte 1 //$4002 HHHH.HHHH = High 8 bits for timer
 pulse1_length: .byte 1 //$4002 000l.llll = Length counter load
+pulse1_output_volume: .byte 1 //this is the final output volume of pulse 1
 
 song_frames: .byte 2
 song_frame_offset: .byte 2
@@ -54,7 +55,7 @@ dcpm_pattern_delay: .byte 1
 .def pulse1_length_counter = r14
 .def pulse1_sweep = r15 //NSSS.EPPP = Negate sweep flag, Shift, Enable sweep flag, Period divider
 .def pulse1_volume_divider = r16 //0000.PPPP = Period divider
-.def pulse1_volume_decay = r17 //0000.dddd = Decay (This is the output volume of the channel)
+.def pulse1_volume_decay = r17 //0000.dddd = Decay
 
 reset:
 	jmp init
@@ -169,6 +170,7 @@ init:
 	lds channel_flags, pulse1_param
 	andi channel_flags, 0b00110000
 	sbr channel_flags, 0b01000000 //set start flag
+	sts pulse1_output_volume, zero
 	
 	//LENGTH
 	lds r29, pulse1_length
@@ -281,9 +283,9 @@ pulse1_off:
 	rjmp pulse1
 
 pulse1_on:
-	lds r29, pulse1_param
-	andi r29, 0x0F //mask for VVVV bits
-	breq pulse1_off //if VVVV bits are 0, then there is no volume (channel off)
+	lds r29, pulse1_output_volume
+/*	cpse r29, zero
+	rjmp pulse1_off //if VVVV bits are 0, then there is no volume (channel off)*/
 
 	out VPORTD_OUT, r29
 	rjmp pulse1
@@ -350,22 +352,36 @@ sound_driver_channel0:
 	adc ZH, r27
 	lpm r27, Z //load the byte data from the current pattern
 
+sound_driver_channel0_check_if_note:
 	cpi r27, 0x57 //check if data is a note (0x00 - 0x56)
-	brlo sound_driver_channel0_note
+	brsh sound_driver_channel0_check_if_volume
+	rjmp sound_driver_channel0_note
+sound_driver_channel0_check_if_volume:
 	cpi r27, 0x67 //check if data is volume (0x57-0x66)
-	brlo sound_driver_channel0_volume
+	brsh sound_driver_channel0_check_if_delay
+	rjmp sound_driver_channel0_volume
+sound_driver_channel0_check_if_delay:
 	cpi r27, 0xE4 //check if data is a delay (0x67 - 0xE3)
-	brlo sound_driver_channel0_delay
-	breq sound_driver_channel0_instrument_change
+	brsh sound_driver_channel0_check_if_instrument
+	rjmp sound_driver_channel0_delay
+sound_driver_channel0_check_if_instrument:
+	brne sound_driver_channel0_check_if_end
+	rjmp sound_driver_channel0_instrument_change
 
 	//binary search for fx flags (0xE5 - 0xFE)
 
-
+sound_driver_channel0_check_if_end:
 	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
 	breq sound_driver_channel0_next_pattern
 	rjmp sound_driver_instrument_routine
 
 sound_driver_channel0_note:
+	sts pulse1_volume_macro_offset, zero //reset all macro offsets
+	sts pulse1_arpeggio_macro_offset, zero
+	sts pulse1_pitch_macro_offset, zero
+	sts pulse1_hi_pitch_macro_offset, zero
+	sts pulse1_duty_macro_offset, zero
+
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r27 //double the offset for the note table because we are getting byte data
@@ -431,7 +447,7 @@ sound_driver_channel0_instrument_change:
 	sts pulse1_duty_macro, zero
 	sts pulse1_duty_macro+1, zero
 
-	adiw Z, 2 //point to the byte next to the flag
+	adiw Z, 1 //point to the byte next to the flag
 	lpm r27, Z //store the instrument offset into r27
 	ldi ZL, LOW(instruments) //point Z to instruments table
 	ldi ZH, HIGH(instruments)
@@ -439,7 +455,7 @@ sound_driver_channel0_instrument_change:
 	adc ZH, zero
 	lsl ZL //multiply by 2 to make Z into a byte pointer for the instrument's address
 	rol ZH
-	lpm r26, Z+ //r26:r27 now point to the instrument
+	lpm r26, Z+ //r26:r27 now points to the instrument
 	lpm r27, Z
 
 	lsl r26 //multiply by 2 to make r26:r27 into a byte pointer for the instrument's data
@@ -459,8 +475,6 @@ sound_driver_channel0_instrument_change_load_macro:
 	adiw Z, 2 //point Z to the address of the macro
 	lpm r28, Z+ //r28:r29 now point to the macro
 	lpm r29, Z
-	lsl r28 //multiply by 2 to make r28:r29 into a byte pointer for the macro's address
-	rol r29
 
 	cpi r26, 5
 	breq sound_driver_channel0_instrument_change_load_macro_volume
@@ -509,7 +523,7 @@ sound_driver_channel0_instrument_change_exit:
 sound_driver_channel0_increment_offset:
 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
 	lds ZH, pulse1_pattern_offset+1
-	adiw Z, 2 //add 2 to the offset. NOTE: 2 is added because we get data in bytes, and byte pointers have 2x the address of word pointers
+	adiw Z, 1
 	sts pulse1_pattern_offset, ZL
 	sts pulse1_pattern_offset+1, ZH
 	ret
@@ -517,7 +531,7 @@ sound_driver_channel0_increment_offset:
 sound_driver_channel0_increment_offset_twice: //used for data that takes up 2 bytes worth of space
 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
 	lds ZH, pulse1_pattern_offset+1
-	adiw Z, 4 //increment the pointer twice
+	adiw Z, 2 //increment the pointer twice
 	sts pulse1_pattern_offset, ZL
 	sts pulse1_pattern_offset+1, ZH
 	ret
@@ -527,9 +541,64 @@ sound_driver_decrement_frame_delay:
 	sts pulse1_pattern_delay, r27
 
 sound_driver_instrument_routine:
+sound_driver_instrument_routine_channel0_volume:
 	lds ZL, pulse1_volume_macro
 	lds ZH, pulse1_volume_macro+1
+	adiw Z, 0
+	breq sound_driver_instrument_routine_channel0_volume_default //if no volume macro is in use, use default multiplier of F
+	lsl ZL //multiply by 2 to make Z into a byte pointer for the macro's address
+	rol ZH
+	lds r26, pulse1_volume_macro_offset
+	add ZL, r26
+	adc ZH, zero
 
+	inc r26 //increment the macro offset
+	sts pulse1_volume_macro_offset, r26
+
+	lpm r27, Z //load volume data into r27
+	cpi r27, 0xFF //check for macro end flag
+	brne sound_driver_instrument_routine_channel0_volume_calculate //if the data was not the macro end flag, calculate the volume
+
+	adiw Z, 1 //if we are at the macro end flag, check the byte next to it for loop data
+	lpm r27, Z //load loop byte into r27
+	cpi r27, 0xFF //check for no loop
+	breq sound_driver_instrument_routine_channel0_volume_no_loop
+
+sound_driver_instrument_routine_channel0_volume_loop:
+	sts pulse1_volume_macro_offset, r27
+	rjmp sound_driver_instrument_routine_channel0_volume
+
+sound_driver_instrument_routine_channel0_volume_no_loop:
+	subi r26, 2 //reset offset to last valid volume byte
+	sts pulse1_volume_macro_offset, r26
+	rjmp sound_driver_instrument_routine_channel0_volume
+
+sound_driver_instrument_routine_channel0_volume_calculate:
+	ldi ZL, LOW(volumes << 1) //point Z to volume table
+	ldi ZH, HIGH(volumes << 1)
+
+	inc r27
+sound_driver_instrument_routine_channel0_volume_table_offset:
+	dec r27
+	breq sound_driver_instrument_routine_channel0_volume_load
+	adiw Z, 16 //move to next row in volume table
+	rjmp sound_driver_instrument_routine_channel0_volume_table_offset
+
+sound_driver_instrument_routine_channel0_volume_default:
+	lds r27, pulse1_param //a multiplier of F means in no change to the main volume, so we just copy the value into the output
+	andi r27, 0x0F //mask for VVVV volume bits
+	sts pulse1_output_volume, r27
+	rjmp sound_driver_instrument_routine_channel0_arpeggio
+
+sound_driver_instrument_routine_channel0_volume_load:
+	lds r27, pulse1_param //load main volume
+	andi r27, 0x0F //mask for VVVV volume bits
+	add ZL, r27 //offset the volume table by the main volume
+	adc ZH, zero
+	lpm r27, Z
+	sts pulse1_output_volume, r27 //store the new output volume
+	
+sound_driver_instrument_routine_channel0_arpeggio:
 	lds ZL, pulse1_arpeggio_macro
 	lds ZH, pulse1_arpeggio_macro+1
 
@@ -660,8 +729,6 @@ pulse1_envelope_routine_clear_start:
 	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
 	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
 	ret
-	
-//PULSE 1 HELPER METHODS
 
 //CONVERTERS (TABLES)
 //converts and loads 5 bit length to corresponding 8 bit length value into r29
@@ -686,3 +753,22 @@ duty_cycle_sequences:
 
 //pulse sequences: 12.5%, 25%, 50%, 75%
 sequences: .db 0b00000001, 0b00000011, 0b00001111, 0b11111100
+
+//famitracker volumes table: http://famitracker.com/wiki/index.php?title=Volume
+volumes:
+	.db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
+	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02
+	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03
+	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04
+	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05
+	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05, 0x06
+	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07
+	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x08
+	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08, 0x09
+	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A
+	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x05, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B
+	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B, 0x0C
+	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D
+	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E
+	.db 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
