@@ -660,7 +660,10 @@ sound_driver_instrument_routine_channel0_volume:
 
 	lds r27, pulse1_volume_macro_release
 	cp r27, r26
-	breq sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index, keep the offset unchanged
+	breq sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index, check if there is a loop
+	lds r27, pulse1_volume_macro_loop
+	cpi r27, 0xFF //check if loop flag exists
+	brne sound_driver_instrument_routine_channel0_volume_macro_end_flag+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
 	inc r26 //increment the macro offset
 	sts pulse1_volume_macro_offset, r26
 	
