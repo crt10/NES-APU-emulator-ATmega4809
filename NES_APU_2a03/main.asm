@@ -27,14 +27,25 @@ pulse1_pattern_offset: .byte 2
 
 pulse1_volume_macro: .byte 2
 pulse1_volume_macro_offset: .byte 1
+pulse1_volume_macro_loop: .byte 1
+pulse1_volume_macro_release: .byte 1
 pulse1_arpeggio_macro: .byte 2
 pulse1_arpeggio_macro_offset: .byte 1
+pulse1_arpeggio_macro_loop: .byte 1
+pulse1_arpeggio_macro_release: .byte 1
+pulse1_arpeggio_macro_mode: .byte 1
 pulse1_pitch_macro: .byte 2
 pulse1_pitch_macro_offset: .byte 1
+pulse1_pitch_macro_loop: .byte 1
+pulse1_pitch_macro_release: .byte 1
 pulse1_hi_pitch_macro: .byte 2
 pulse1_hi_pitch_macro_offset: .byte 1
+pulse1_hi_pitch_macro_loop: .byte 1
+pulse1_hi_pitch_macro_release: .byte 1
 pulse1_duty_macro: .byte 2
 pulse1_duty_macro_offset: .byte 1
+pulse1_duty_macro_loop: .byte 1
+pulse1_duty_macro_release: .byte 1
 
 pulse2_pattern_delay: .byte 1
 triangle_pattern_delay: .byte 1
@@ -123,7 +134,7 @@ init:
 	sts song_frames+1, ZH
 
 	//CHANNEL 0 TEST
-	ldi r27, 0x00
+	ldi r27, 0x02
 	add ZL, r27
 	adc ZH, zero
 	lpm r26, Z+
@@ -138,11 +149,24 @@ init:
 	sts pulse1_pattern_offset+1, zero
 
 	//channel 0 instrument macros
+	ldi r27, 0xFF
 	sts pulse1_volume_macro_offset, zero
+	sts pulse1_volume_macro_loop, r27
+	sts pulse1_volume_macro_release, r27
 	sts pulse1_arpeggio_macro_offset, zero
+	sts pulse1_arpeggio_macro_loop, r27
+	sts pulse1_arpeggio_macro_release, r27
+	sts pulse1_arpeggio_macro_mode, r27
 	sts pulse1_pitch_macro_offset, zero
+	sts pulse1_pitch_macro_loop, r27
+	sts pulse1_pitch_macro_release, r27
 	sts pulse1_hi_pitch_macro_offset, zero
+	sts pulse1_hi_pitch_macro_loop, r27
+	sts pulse1_hi_pitch_macro_release, r27
 	sts pulse1_duty_macro_offset, zero
+	sts pulse1_duty_macro_loop, r27
+	sts pulse1_duty_macro_release, r27
+
 	sts pulse1_volume_macro, zero
 	sts pulse1_volume_macro+1, zero
 	sts pulse1_arpeggio_macro, zero
@@ -352,28 +376,30 @@ sound_driver_channel0:
 	adc ZH, r27
 	lpm r27, Z //load the byte data from the current pattern
 
-sound_driver_channel0_check_if_note:
-	cpi r27, 0x57 //check if data is a note (0x00 - 0x56)
+sound_driver_channel0_check_if_note: //check if data is a note (0x00 - 0x56)
+	cpi r27, 0x57
 	brsh sound_driver_channel0_check_if_volume
 	rjmp sound_driver_channel0_note
-sound_driver_channel0_check_if_volume:
-	cpi r27, 0x67 //check if data is volume (0x57-0x66)
+sound_driver_channel0_check_if_volume: //check if data is volume (0x57-0x66)
+	cpi r27, 0x67
 	brsh sound_driver_channel0_check_if_delay
 	rjmp sound_driver_channel0_volume
-sound_driver_channel0_check_if_delay:
-	cpi r27, 0xE4 //check if data is a delay (0x67 - 0xE3)
+sound_driver_channel0_check_if_delay: //check if data is a delay (0x67 - 0xE1)
+	cpi r27, 0xE2
 	brsh sound_driver_channel0_check_if_instrument
 	rjmp sound_driver_channel0_delay
-sound_driver_channel0_check_if_instrument:
+sound_driver_channel0_check_if_instrument: //check for instrument flag (0xE2)
+	brne sound_driver_channel0_check_if_release
+	rjmp sound_driver_channel0_instrument_change 
+sound_driver_channel0_check_if_release: //check for note release flag (0xE3)
+	cpi r27, 0xE3
 	brne sound_driver_channel0_check_if_end
-	rjmp sound_driver_channel0_instrument_change
-
-	//binary search for fx flags (0xE5 - 0xFE)
+	rjmp sound_driver_channel0_release
+sound_driver_channel0_check_if_fx: //binary search for fx flags (0xE4 - 0xFE)
 
 sound_driver_channel0_check_if_end:
 	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
-	breq sound_driver_channel0_next_pattern
-	rjmp sound_driver_instrument_routine
+	rjmp sound_driver_channel0_next_pattern
 
 sound_driver_channel0_note:
 	sts pulse1_volume_macro_offset, zero //reset all macro offsets
@@ -412,31 +438,8 @@ sound_driver_channel0_delay:
 	rcall sound_driver_channel0_increment_offset
 	rjmp sound_driver_instrument_routine
 
-sound_driver_channel0_next_pattern:
-	lds ZL, song_frames
-	lds ZH, song_frames+1
-	lds r26, song_frame_offset //we must offset to the appropriate channel
-	lds r27, song_frame_offset+1
-	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
-	sts song_frame_offset, r26
-	sts song_frame_offset+1, r27
-	//adiw r27:r26, 2 //offset for channel 1 (test)
-	add ZL, r26
-	adc ZH, r27
-
-	lpm r26, Z+ //load the address of the next pattern
-	lpm r27, Z
-	lsl r26
-	rol r27
-	sts pulse1_pattern, r26
-	sts pulse1_pattern+1, r27
-
-	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
-	sts pulse1_pattern_offset+1, zero
-	rjmp sound_driver_channel0
-
 sound_driver_channel0_instrument_change:
-	sts pulse1_volume_macro, zero //reset all macros
+	sts pulse1_volume_macro, zero //reset all macro addresses
 	sts pulse1_volume_macro+1, zero
 	sts pulse1_arpeggio_macro, zero
 	sts pulse1_arpeggio_macro+1, zero
@@ -463,6 +466,7 @@ sound_driver_channel0_instrument_change:
 	mov ZL, r26
 	mov ZH, r27
 	lpm r27, Z //get macro header byte. NOTE: Each macro type for each intrument is represented by a bit in this byte. 1 indicates that the instrument uses a macro of it's corresponding type.
+	adiw Z, 2 //point Z to the address of the macro
 	ldi r26, 6 //(6-1) = 5 for the 5 different macro types. NOTE: bit 0 = volume, bit 1 = arpeggio, bit 2 = pitch, bit 3 = hi pitch, bit 4 = duty
 sound_driver_channel0_instrument_change_macro_loop:
 	dec r26
@@ -472,9 +476,8 @@ sound_driver_channel0_instrument_change_macro_loop:
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
 sound_driver_channel0_instrument_change_load_macro:
-	adiw Z, 2 //point Z to the address of the macro
 	lpm r28, Z+ //r28:r29 now point to the macro
-	lpm r29, Z
+	lpm r29, Z+
 
 	cpi r26, 5
 	breq sound_driver_channel0_instrument_change_load_macro_volume
@@ -489,35 +492,138 @@ sound_driver_channel0_instrument_change_load_macro:
 sound_driver_channel0_instrument_change_load_macro_volume:
 	sts pulse1_volume_macro, r28
 	sts pulse1_volume_macro+1, r29
+	rcall sound_driver_channel0_instrument_change_read_header
+	sts pulse1_volume_macro_release, r28
+	sts pulse1_volume_macro_loop, r29
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 	
 sound_driver_channel0_instrument_change_load_macro_arpeggio:
 	sts pulse1_volume_macro, r28
 	sts pulse1_volume_macro+1, r29
+	rcall sound_driver_channel0_instrument_change_read_header_arpeggio
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
 sound_driver_channel0_instrument_change_load_macro_pitch:
 	sts pulse1_pitch_macro, r28
 	sts pulse1_pitch_macro+1, r29
+	rcall sound_driver_channel0_instrument_change_read_header
+	sts pulse1_volume_macro_release, r28
+	sts pulse1_volume_macro_loop, r29
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
 sound_driver_channel0_instrument_change_load_macro_hi_pitch:
 	sts pulse1_hi_pitch_macro, r28
 	sts pulse1_hi_pitch_macro+1, r29
+	rcall sound_driver_channel0_instrument_change_read_header
+	sts pulse1_volume_macro_release, r28
+	sts pulse1_volume_macro_loop, r29
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
 sound_driver_channel0_instrument_change_load_macro_duty:
 	sts pulse1_duty_macro, r28
 	sts pulse1_duty_macro+1, r29
+	rcall sound_driver_channel0_instrument_change_read_header
+	sts pulse1_volume_macro_release, r28
+	sts pulse1_volume_macro_loop, r29
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
 sound_driver_channel0_instrument_change_exit:
-	sts pulse1_volume_macro_offset, zero //reset all macro offsets
-	sts pulse1_arpeggio_macro_offset, zero
-	sts pulse1_pitch_macro_offset, zero
-	sts pulse1_hi_pitch_macro_offset, zero
-	sts pulse1_duty_macro_offset, zero
+	ldi r26, 0x03
+	ldi r27, 0x02
+	sts pulse1_volume_macro_offset, r27 //reset all macro offsets
+	sts pulse1_arpeggio_macro_offset, r26
+	sts pulse1_pitch_macro_offset, r27
+	sts pulse1_hi_pitch_macro_offset, r27
+	sts pulse1_duty_macro_offset, r27
 	rcall sound_driver_channel0_increment_offset_twice
+	rjmp sound_driver_channel0
+
+sound_driver_channel0_instrument_change_read_header:
+	push ZL
+	push ZH
+	mov ZL, r28
+	mov ZH, r29
+	lsl ZL
+	rol ZH
+	lpm r28, Z+
+	lpm r29, Z
+	pop ZH
+	pop ZL
+	ret
+
+sound_driver_channel0_instrument_change_read_header_arpeggio:
+	push ZL
+	push ZH
+	mov ZL, r28
+	mov ZH, r29
+	lsl ZL
+	rol ZH
+	lpm r28, Z+
+	lpm r29, Z+
+	sts pulse1_arpeggio_macro_release, r28
+	sts pulse1_arpeggio_macro_loop, r29
+	lpm r28, Z
+	sts pulse1_arpeggio_macro_mode, r28
+	pop ZH
+	pop ZL
+	ret
+
+sound_driver_channel0_release:
+sound_driver_channel0_release_volume:
+	lds r27, pulse1_volume_macro_release
+	cpi r27, 0xFF //check if volume macro has a release flag
+	breq PC+2 //if the macro has no release flag, don't increment it
+	inc r27
+	sts pulse1_volume_macro_offset, r27 //adjust offset so that it starts after the release flag index
+sound_driver_channel0_release_arpeggio:
+	lds r27, pulse1_arpeggio_macro_release
+	cpi r27, 0xFF //check if arpeggio macro has a release flag
+	breq PC+2
+	inc r27
+	sts pulse1_arpeggio_macro_offset, r27
+sound_driver_channel0_release_pitch:
+	lds r27, pulse1_pitch_macro_release
+	cpi r27, 0xFF //check if pitch macro has a release flag
+	breq PC+2
+	inc r27
+	sts pulse1_pitch_macro_offset, r27
+sound_driver_channel0_release_hi_pitch:
+	lds r27, pulse1_hi_pitch_macro_release
+	cpi r27, 0xFF //check if hi_pitch macro has a release flag
+	breq PC+2
+	inc r27
+	sts pulse1_hi_pitch_macro_offset, r27
+sound_driver_channel0_release_duty:
+	lds r27, pulse1_duty_macro_release
+	cpi r27, 0xFF //check if duty macro has a release flag
+	breq PC+2
+	inc r27
+	sts pulse1_duty_macro_offset, r27
+sound_driver_channel0_release_exit:
+	rcall sound_driver_channel0_increment_offset
+	rjmp sound_driver_channel0
+
+sound_driver_channel0_next_pattern:
+	lds ZL, song_frames
+	lds ZH, song_frames+1
+	lds r26, song_frame_offset //we must offset to the appropriate channel
+	lds r27, song_frame_offset+1
+	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
+	sts song_frame_offset, r26
+	sts song_frame_offset+1, r27
+	adiw r27:r26, 2 //offset for channel 1 (test)
+	add ZL, r26
+	adc ZH, r27
+
+	lpm r26, Z+ //load the address of the next pattern
+	lpm r27, Z
+	lsl r26
+	rol r27
+	sts pulse1_pattern, r26
+	sts pulse1_pattern+1, r27
+
+	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
+	sts pulse1_pattern_offset+1, zero
 	rjmp sound_driver_channel0
 
 sound_driver_channel0_increment_offset:
@@ -552,26 +658,21 @@ sound_driver_instrument_routine_channel0_volume:
 	add ZL, r26
 	adc ZH, zero
 
+	lds r27, pulse1_volume_macro_release
+	cp r27, r26
+	breq sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index, keep the offset unchanged
 	inc r26 //increment the macro offset
 	sts pulse1_volume_macro_offset, r26
-
+	
+sound_driver_instrument_routine_channel0_volume_read:
 	lpm r27, Z //load volume data into r27
 	cpi r27, 0xFF //check for macro end flag
 	brne sound_driver_instrument_routine_channel0_volume_calculate //if the data was not the macro end flag, calculate the volume
 
-	adiw Z, 1 //if we are at the macro end flag, check the byte next to it for loop data
-	lpm r27, Z //load loop byte into r27
-	cpi r27, 0xFF //check for no loop
-	breq sound_driver_instrument_routine_channel0_volume_no_loop
-
-sound_driver_instrument_routine_channel0_volume_loop:
-	sts pulse1_volume_macro_offset, r27
-	rjmp sound_driver_instrument_routine_channel0_volume
-
-sound_driver_instrument_routine_channel0_volume_no_loop:
-	subi r26, 2 //reset offset to last valid volume byte
-	sts pulse1_volume_macro_offset, r26
-	rjmp sound_driver_instrument_routine_channel0_volume
+sound_driver_instrument_routine_channel0_volume_macro_end_flag:
+	lds r27, pulse1_volume_macro_loop //load the loop index
+	sts pulse1_volume_macro_offset, r27 //store the loop index into the offset
+	rjmp sound_driver_instrument_routine_channel0_volume //go back and re-read the volume data
 
 sound_driver_instrument_routine_channel0_volume_calculate:
 	ldi ZL, LOW(volumes << 1) //point Z to volume table

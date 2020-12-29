@@ -1,10 +1,10 @@
 
-AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Sun Dec 27 23:46:42 2020
+AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Mon Dec 28 23:40:55 2020
 
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(9): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m4809def.inc'
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): Including file 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm'
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): Including file 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm'
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(9): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m4809def.inc'
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): Including file 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm'
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): Including file 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm'
                                  
                                  
                                  ; NES_APU_2a03.asm
@@ -33,19 +33,30 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): Includ
                                  
 00280f                           pulse1_volume_macro: .byte 2
 002811                           pulse1_volume_macro_offset: .byte 1
-002812                           pulse1_arpeggio_macro: .byte 2
-002814                           pulse1_arpeggio_macro_offset: .byte 1
-002815                           pulse1_pitch_macro: .byte 2
-002817                           pulse1_pitch_macro_offset: .byte 1
-002818                           pulse1_hi_pitch_macro: .byte 2
-00281a                           pulse1_hi_pitch_macro_offset: .byte 1
-00281b                           pulse1_duty_macro: .byte 2
-00281d                           pulse1_duty_macro_offset: .byte 1
+002812                           pulse1_volume_macro_loop: .byte 1
+002813                           pulse1_volume_macro_release: .byte 1
+002814                           pulse1_arpeggio_macro: .byte 2
+002816                           pulse1_arpeggio_macro_offset: .byte 1
+002817                           pulse1_arpeggio_macro_loop: .byte 1
+002818                           pulse1_arpeggio_macro_release: .byte 1
+002819                           pulse1_arpeggio_macro_mode: .byte 1
+00281a                           pulse1_pitch_macro: .byte 2
+00281c                           pulse1_pitch_macro_offset: .byte 1
+00281d                           pulse1_pitch_macro_loop: .byte 1
+00281e                           pulse1_pitch_macro_release: .byte 1
+00281f                           pulse1_hi_pitch_macro: .byte 2
+002821                           pulse1_hi_pitch_macro_offset: .byte 1
+002822                           pulse1_hi_pitch_macro_loop: .byte 1
+002823                           pulse1_hi_pitch_macro_release: .byte 1
+002824                           pulse1_duty_macro: .byte 2
+002826                           pulse1_duty_macro_offset: .byte 1
+002827                           pulse1_duty_macro_loop: .byte 1
+002828                           pulse1_duty_macro_release: .byte 1
                                  
-00281e                           pulse2_pattern_delay: .byte 1
-00281f                           triangle_pattern_delay: .byte 1
-002820                           noise_pattern_delay: .byte 1
-002821                           dcpm_pattern_delay: .byte 1
+002829                           pulse2_pattern_delay: .byte 1
+00282a                           triangle_pattern_delay: .byte 1
+00282b                           noise_pattern_delay: .byte 1
+00282c                           dcpm_pattern_delay: .byte 1
                                  
                                  .cseg
                                  
@@ -64,155 +75,165 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): Includ
                                  .def pulse1_volume_decay = r17 //0000.dddd = Decay
                                  
                                  reset:
-000000 940c 0ccb                 	jmp init
+000000 940c 0cdc                 	jmp init
                                  
                                  .org TCA0_OVF_vect
-00000e 940c 0da5                 	jmp sound_driver
+00000e 940c 0dcd                 	jmp sound_driver
                                  
                                  .org TCA0_CMP0_vect
-000012 940c 0d8b                 	jmp sequence_0_2
+000012 940c 0db3                 	jmp sequence_0_2
                                  
                                  .org TCA0_CMP1_vect
-000014 940c 0d95                 	jmp sequence_1_3
+000014 940c 0dbd                 	jmp sequence_1_3
                                  
                                  .org TCA0_CMP2_vect
-000016 940c 0d8b                 	jmp sequence_0_2
+000016 940c 0db3                 	jmp sequence_0_2
                                  
                                  .org TCB0_INT_vect
-000018 940c 0ec4                 	jmp pulse1_sequence_routine
+000018 940c 0f46                 	jmp pulse1_sequence_routine
                                  
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(48): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(49): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(50): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(51): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(53): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(54): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(55): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(59): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(60): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(61): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(65): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(68): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(69): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(72): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(73): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(74): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(75): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(76): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(77): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(81): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(85): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(89): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(90): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(97): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(104): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(105): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(107): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(109): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(110): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(111): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(112): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(113): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(114): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(115): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(116): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(117): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(120): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(121): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(122): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(128): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(129): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(130): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(133): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(134): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(135): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(136): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(140): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(141): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(145): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(146): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(197): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(198): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(199): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(205): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(206): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(210): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(213): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(214): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(220): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(221): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(225): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(227): warning: .cseg .db misalignment - padding zero byte
-C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(195): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(196): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(200): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(201): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(202): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(203): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(204): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(207): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(208): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(209): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(211): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(215): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(216): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(218): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(219): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(222): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(223): warning: .cseg .db misalignment - padding zero byte
+C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(90): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
                                  .list
                                  
                                  init:
                                  	//MAIN CLOCK
-000ccb edb8                      	ldi r27, CPU_CCP_IOREG_gc //protected write
-000ccc 93b0 0034                 	sts CPU_CCP, r27
-000cce e0b0                      	ldi r27, 0 << CLKCTRL_PEN_bp //disable prescaler for 20 MHz on main clock
-000ccf 93b0 0061                 	sts CLKCTRL_MCLKCTRLB, r27
+000cdc edb8                      	ldi r27, CPU_CCP_IOREG_gc //protected write
+000cdd 93b0 0034                 	sts CPU_CCP, r27
+000cdf e0b0                      	ldi r27, 0 << CLKCTRL_PEN_bp //disable prescaler for 20 MHz on main clock
+000ce0 93b0 0061                 	sts CLKCTRL_MCLKCTRLB, r27
                                  
                                  /*	//TEST FOR C4, 1 SECOND, 50% DD
                                  	ldi r26, 0x97
@@ -230,94 +251,107 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Us
                                  	sts pulse1_sweep_param, r27*/
                                  
                                  	//ZERO
-000cd1 2400                      	clr zero
+000ce2 2400                      	clr zero
                                  
                                  	//MEMORY
-000cd2 e3b0                      	ldi r27, 0b00110000
-000cd3 93b0 2800                 	sts pulse1_param, r27
-000cd5 e8b0                      	ldi r27, 0b10000000
-000cd6 93b0 2801                 	sts pulse1_sweep_param, r27
-000cd8 efbf                      	ldi r27, 0xFF
-000cd9 93b0 2802                 	sts pulse1_timerL, r27
-000cdb 93b0 2803                 	sts pulse1_timerH, r27
-000cdd 93b0 2804                 	sts pulse1_length, r27
+000ce3 e3b0                      	ldi r27, 0b00110000
+000ce4 93b0 2800                 	sts pulse1_param, r27
+000ce6 e8b0                      	ldi r27, 0b10000000
+000ce7 93b0 2801                 	sts pulse1_sweep_param, r27
+000ce9 efbf                      	ldi r27, 0xFF
+000cea 93b0 2802                 	sts pulse1_timerL, r27
+000cec 93b0 2803                 	sts pulse1_timerH, r27
+000cee 93b0 2804                 	sts pulse1_length, r27
                                  
-000cdf e0b0                      	ldi r27, 0x00
-000ce0 93b0 2808                 	sts song_frame_offset, r27
-000ce2 93b0 2809                 	sts song_frame_offset+1, r27
-000ce4 eee2                      	ldi ZL, LOW(song0_frames << 1)
-000ce5 e0f0                      	ldi ZH, HIGH(song0_frames << 1)
-000ce6 93e0 2806                 	sts song_frames, ZL
-000ce8 93f0 2807                 	sts song_frames+1, ZH
+000cf0 e0b0                      	ldi r27, 0x00
+000cf1 93b0 2808                 	sts song_frame_offset, r27
+000cf3 93b0 2809                 	sts song_frame_offset+1, r27
+000cf5 eee2                      	ldi ZL, LOW(song0_frames << 1)
+000cf6 e0f0                      	ldi ZH, HIGH(song0_frames << 1)
+000cf7 93e0 2806                 	sts song_frames, ZL
+000cf9 93f0 2807                 	sts song_frames+1, ZH
                                  
                                  	//CHANNEL 0 TEST
-000cea e0b0                      	ldi r27, 0x00
-000ceb 0feb                      	add ZL, r27
-000cec 1df0                      	adc ZH, zero
-000ced 91a5                      	lpm r26, Z+
-000cee 91b4                      	lpm r27, Z
-000cef 0faa                      	lsl r26
-000cf0 1fbb                      	rol r27
-000cf1 93a0 280a                 	sts pulse1_pattern, r26
-000cf3 93b0 280b                 	sts pulse1_pattern+1, r27
-000cf5 e0b0                      	ldi r27, 0x00
-000cf6 9200 280c                 	sts pulse1_pattern_delay, zero
-000cf8 9200 280d                 	sts pulse1_pattern_offset, zero
-000cfa 9200 280e                 	sts pulse1_pattern_offset+1, zero
+000cfb e0b2                      	ldi r27, 0x02
+000cfc 0feb                      	add ZL, r27
+000cfd 1df0                      	adc ZH, zero
+000cfe 91a5                      	lpm r26, Z+
+000cff 91b4                      	lpm r27, Z
+000d00 0faa                      	lsl r26
+000d01 1fbb                      	rol r27
+000d02 93a0 280a                 	sts pulse1_pattern, r26
+000d04 93b0 280b                 	sts pulse1_pattern+1, r27
+000d06 e0b0                      	ldi r27, 0x00
+000d07 9200 280c                 	sts pulse1_pattern_delay, zero
+000d09 9200 280d                 	sts pulse1_pattern_offset, zero
+000d0b 9200 280e                 	sts pulse1_pattern_offset+1, zero
                                  
                                  	//channel 0 instrument macros
-000cfc 9200 2811                 	sts pulse1_volume_macro_offset, zero
-000cfe 9200 2814                 	sts pulse1_arpeggio_macro_offset, zero
-000d00 9200 2817                 	sts pulse1_pitch_macro_offset, zero
-000d02 9200 281a                 	sts pulse1_hi_pitch_macro_offset, zero
-000d04 9200 281d                 	sts pulse1_duty_macro_offset, zero
-000d06 9200 280f                 	sts pulse1_volume_macro, zero
-000d08 9200 2810                 	sts pulse1_volume_macro+1, zero
-000d0a 9200 2812                 	sts pulse1_arpeggio_macro, zero
-000d0c 9200 2813                 	sts pulse1_arpeggio_macro+1, zero
-000d0e 9200 2815                 	sts pulse1_pitch_macro, zero
-000d10 9200 2816                 	sts pulse1_pitch_macro+1, zero
-000d12 9200 2818                 	sts pulse1_hi_pitch_macro, zero
-000d14 9200 2819                 	sts pulse1_hi_pitch_macro+1, zero
-000d16 9200 281b                 	sts pulse1_duty_macro, zero
-000d18 9200 281c                 	sts pulse1_duty_macro+1, zero
+000d0d efbf                      	ldi r27, 0xFF
+000d0e 9200 2811                 	sts pulse1_volume_macro_offset, zero
+000d10 93b0 2812                 	sts pulse1_volume_macro_loop, r27
+000d12 93b0 2813                 	sts pulse1_volume_macro_release, r27
+000d14 9200 2816                 	sts pulse1_arpeggio_macro_offset, zero
+000d16 93b0 2817                 	sts pulse1_arpeggio_macro_loop, r27
+000d18 93b0 2818                 	sts pulse1_arpeggio_macro_release, r27
+000d1a 93b0 2819                 	sts pulse1_arpeggio_macro_mode, r27
+000d1c 9200 281c                 	sts pulse1_pitch_macro_offset, zero
+000d1e 93b0 281d                 	sts pulse1_pitch_macro_loop, r27
+000d20 93b0 281e                 	sts pulse1_pitch_macro_release, r27
+000d22 9200 2821                 	sts pulse1_hi_pitch_macro_offset, zero
+000d24 93b0 2822                 	sts pulse1_hi_pitch_macro_loop, r27
+000d26 93b0 2823                 	sts pulse1_hi_pitch_macro_release, r27
+000d28 9200 2826                 	sts pulse1_duty_macro_offset, zero
+000d2a 93b0 2827                 	sts pulse1_duty_macro_loop, r27
+000d2c 93b0 2828                 	sts pulse1_duty_macro_release, r27
                                  
-000d1a 9200 281e                 	sts pulse2_pattern_delay, zero
-000d1c 9200 281f                 	sts triangle_pattern_delay, zero
-000d1e 9200 2820                 	sts noise_pattern_delay, zero
-000d20 9200 2821                 	sts dcpm_pattern_delay, zero
+000d2e 9200 280f                 	sts pulse1_volume_macro, zero
+000d30 9200 2810                 	sts pulse1_volume_macro+1, zero
+000d32 9200 2814                 	sts pulse1_arpeggio_macro, zero
+000d34 9200 2815                 	sts pulse1_arpeggio_macro+1, zero
+000d36 9200 281a                 	sts pulse1_pitch_macro, zero
+000d38 9200 281b                 	sts pulse1_pitch_macro+1, zero
+000d3a 9200 281f                 	sts pulse1_hi_pitch_macro, zero
+000d3c 9200 2820                 	sts pulse1_hi_pitch_macro+1, zero
+000d3e 9200 2824                 	sts pulse1_duty_macro, zero
+000d40 9200 2825                 	sts pulse1_duty_macro+1, zero
+                                 
+000d42 9200 2829                 	sts pulse2_pattern_delay, zero
+000d44 9200 282a                 	sts triangle_pattern_delay, zero
+000d46 9200 282b                 	sts noise_pattern_delay, zero
+000d48 9200 282c                 	sts dcpm_pattern_delay, zero
                                  
                                  	//PINS
-000d22 efbf                      	ldi r27, 0xFF //set all pins in VPORTD to output
-000d23 b9bc                      	out VPORTD_DIR, r27
+000d4a efbf                      	ldi r27, 0xFF //set all pins in VPORTD to output
+000d4b b9bc                      	out VPORTD_DIR, r27
                                  
                                  	//ENVELOPE
-000d24 e00f                      	ldi pulse1_volume_divider, 0x0F
-000d25 9110 2800                 	lds pulse1_volume_decay, pulse1_param
-000d27 701f                      	andi pulse1_volume_decay, 0x0F //mask for VVVV bits
-000d28 9190 2800                 	lds channel_flags, pulse1_param
-000d2a 7390                      	andi channel_flags, 0b00110000
-000d2b 6490                      	sbr channel_flags, 0b01000000 //set start flag
-000d2c 9200 2805                 	sts pulse1_output_volume, zero
+000d4c e00f                      	ldi pulse1_volume_divider, 0x0F
+000d4d 9110 2800                 	lds pulse1_volume_decay, pulse1_param
+000d4f 701f                      	andi pulse1_volume_decay, 0x0F //mask for VVVV bits
+000d50 9190 2800                 	lds channel_flags, pulse1_param
+000d52 7390                      	andi channel_flags, 0b00110000
+000d53 6490                      	sbr channel_flags, 0b01000000 //set start flag
+000d54 9200 2805                 	sts pulse1_output_volume, zero
                                  	
                                  	//LENGTH
-000d2e 91d0 2804                 	lds r29, pulse1_length
-000d30 d1e0                      	rcall length_converter
-000d31 2eed                      	mov pulse1_length_counter, r29
+000d56 91d0 2804                 	lds r29, pulse1_length
+000d58 d23a                      	rcall length_converter
+000d59 2eed                      	mov pulse1_length_counter, r29
                                  
                                  	//SEQUENCE
-000d32 91d0 2800                 	lds r29, pulse1_param //load param for sequence table
-000d34 0fdd                      	lsl r29 //shift duty cycle bits to LSB
-000d35 1fdd                      	rol r29
-000d36 1fdd                      	rol r29
-000d37 70d3                      	andi r29, 0b00000011 //mask duty cycle bits
-000d38 d1ee                      	rcall duty_cycle_sequences
-000d39 2edd                      	mov pulse1_sequence, r29
+000d5a 91d0 2800                 	lds r29, pulse1_param //load param for sequence table
+000d5c 0fdd                      	lsl r29 //shift duty cycle bits to LSB
+000d5d 1fdd                      	rol r29
+000d5e 1fdd                      	rol r29
+000d5f 70d3                      	andi r29, 0b00000011 //mask duty cycle bits
+000d60 d248                      	rcall duty_cycle_sequences
+000d61 2edd                      	mov pulse1_sequence, r29
                                  
                                  	//SWEEP
-000d3a 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param
-000d3c 94f2                      	swap pulse1_sweep //swap data from high byte and low byte
-000d3d 6890                      	sbr channel_flags, 0b10000000 //set reload flag
+000d62 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param
+000d64 94f2                      	swap pulse1_sweep //swap data from high byte and low byte
+000d65 6890                      	sbr channel_flags, 0b10000000 //set reload flag
                                  
                                  	//TIMERS
                                  	//Frame Counter
@@ -329,28 +363,28 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Us
                                  	//The ATmega4809 is cofigured to run at 20000000 Hz
                                  	//0.00416666666 seconds is the period for 240 Hz
                                  	//The /64 comes from the prescaler divider used
-000d3e e7b0                      	ldi r27, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
-000d3f 93b0 0a01                 	sts TCA0_SINGLE_CTRLB, r27
-000d41 e7b1                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
-000d42 93b0 0a0a                 	sts TCA0_SINGLE_INTCTRL, r27
-000d44 e1b5                      	ldi r27, 0x15 //set the period for CMP0
-000d45 93b0 0a28                 	sts TCA0_SINGLE_CMP0, r27
-000d47 e0b5                      	ldi r27, 0x05
-000d48 93b0 0a29                 	sts TCA0_SINGLE_CMP0 + 1, r27
-000d4a e2bb                      	ldi r27, 0x2B //set the period for CMP1
-000d4b 93b0 0a2a                 	sts TCA0_SINGLE_CMP1, r27
-000d4d e0ba                      	ldi r27, 0x0A
-000d4e 93b0 0a2b                 	sts TCA0_SINGLE_CMP1 + 1, r27
-000d50 e4b1                      	ldi r27, 0x41 //set the period for CMP2
-000d51 93b0 0a2c                 	sts TCA0_SINGLE_CMP2, r27
-000d53 e0bf                      	ldi r27, 0x0F
-000d54 93b0 0a2d                 	sts TCA0_SINGLE_CMP2 + 1, r27
-000d56 e5b7                      	ldi r27, 0x57 //set the period for OVF
-000d57 93b0 0a26                 	sts TCA0_SINGLE_PER, r27
-000d59 e1b4                      	ldi r27, 0x14
-000d5a 93b0 0a27                 	sts TCA0_SINGLE_PER + 1, r27
-000d5c e0bb                      	ldi r27, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
-000d5d 93b0 0a00                 	sts TCA0_SINGLE_CTRLA, r27
+000d66 e7b0                      	ldi r27, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
+000d67 93b0 0a01                 	sts TCA0_SINGLE_CTRLB, r27
+000d69 e7b1                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
+000d6a 93b0 0a0a                 	sts TCA0_SINGLE_INTCTRL, r27
+000d6c e1b5                      	ldi r27, 0x15 //set the period for CMP0
+000d6d 93b0 0a28                 	sts TCA0_SINGLE_CMP0, r27
+000d6f e0b5                      	ldi r27, 0x05
+000d70 93b0 0a29                 	sts TCA0_SINGLE_CMP0 + 1, r27
+000d72 e2bb                      	ldi r27, 0x2B //set the period for CMP1
+000d73 93b0 0a2a                 	sts TCA0_SINGLE_CMP1, r27
+000d75 e0ba                      	ldi r27, 0x0A
+000d76 93b0 0a2b                 	sts TCA0_SINGLE_CMP1 + 1, r27
+000d78 e4b1                      	ldi r27, 0x41 //set the period for CMP2
+000d79 93b0 0a2c                 	sts TCA0_SINGLE_CMP2, r27
+000d7b e0bf                      	ldi r27, 0x0F
+000d7c 93b0 0a2d                 	sts TCA0_SINGLE_CMP2 + 1, r27
+000d7e e5b7                      	ldi r27, 0x57 //set the period for OVF
+000d7f 93b0 0a26                 	sts TCA0_SINGLE_PER, r27
+000d81 e1b4                      	ldi r27, 0x14
+000d82 93b0 0a27                 	sts TCA0_SINGLE_PER + 1, r27
+000d84 e0bb                      	ldi r27, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
+000d85 93b0 0a00                 	sts TCA0_SINGLE_CTRLA, r27
                                  
                                  	//NOTE: Channel Timers are clocked (20/2)/(0.8948865) = 11.1746014718 times faster than the NES APU
                                  	//Because of this, we multiply all the NES timer values by 11.1746014718 beforehand 
@@ -359,442 +393,519 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Us
                                  	//The /2 comes from the prescaler divider used
                                  	//0.8948865 MHz is the speed of the NTSC NES APU
                                  	//Pulse 1
-000d5f e0b0                      	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
-000d60 93b0 0a81                 	sts TCB0_CTRLB, r27
-000d62 e0b1                      	ldi r27, TCB_CAPT_bm //enable interrupts
-000d63 93b0 0a85                 	sts TCB0_INTCTRL, r27
-000d65 91b0 2802                 	lds r27, pulse1_timerL //load the LOW bits for timer
-000d67 93b0 0a8c                 	sts TCB0_CCMPL, r27
-000d69 91b0 2803                 	lds r27, pulse1_timerH //load the HIGH bits for timer
-000d6b 93b0 0a8d                 	sts TCB0_CCMPH, r27
-000d6d e0b3                      	ldi r27, TCB_CLKSEL_CLKDIV2_gc | TCB_ENABLE_bm //use prescaler divider of 2 and enable timer
-000d6e 93b0 0a80                 	sts TCB0_CTRLA, r27
-000d70 9478                      	sei //global interrupt enable
+000d87 e0b0                      	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
+000d88 93b0 0a81                 	sts TCB0_CTRLB, r27
+000d8a e0b1                      	ldi r27, TCB_CAPT_bm //enable interrupts
+000d8b 93b0 0a85                 	sts TCB0_INTCTRL, r27
+000d8d 91b0 2802                 	lds r27, pulse1_timerL //load the LOW bits for timer
+000d8f 93b0 0a8c                 	sts TCB0_CCMPL, r27
+000d91 91b0 2803                 	lds r27, pulse1_timerH //load the HIGH bits for timer
+000d93 93b0 0a8d                 	sts TCB0_CCMPH, r27
+000d95 e0b3                      	ldi r27, TCB_CLKSEL_CLKDIV2_gc | TCB_ENABLE_bm //use prescaler divider of 2 and enable timer
+000d96 93b0 0a80                 	sts TCB0_CTRLA, r27
+000d98 9478                      	sei //global interrupt enable
                                  
                                  pulse1:
-000d71 fed0                      	sbrs pulse1_sequence, 0 //if the sequence output is zero, return
-000d72 c012                      	rjmp pulse1_off
+000d99 fed0                      	sbrs pulse1_sequence, 0 //if the sequence output is zero, return
+000d9a c012                      	rjmp pulse1_off
                                  
-000d73 14e0                      	cp pulse1_length_counter, zero //if length is zero, return
-000d74 f081                      	breq pulse1_off
+000d9b 14e0                      	cp pulse1_length_counter, zero //if length is zero, return
+000d9c f081                      	breq pulse1_off
                                  
                                  	//NOTE: We will just mute the pulse when the current period is < $0008
                                  	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
                                  	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
                                  pulse1_check_timer_08:
-000d75 91c0 0a8c                 	lds r28, TCB0_CCMPL
-000d77 91d0 0a8d                 	lds r29, TCB0_CCMPH
+000d9d 91c0 0a8c                 	lds r28, TCB0_CCMPL
+000d9f 91d0 0a8d                 	lds r29, TCB0_CCMPH
                                  pulse1_check_timer_08_HIGH:
-000d79 30d1                      	cpi r29, 0x01 //check timer HIGH period
-000d7a f008                      	brlo pulse1_check_timer_08_LOW //if the timer HIGH period is $00, check the LOW period
-000d7b c002                      	rjmp pulse1_check_timer_7FF_HIGH //if the timer HIGH period is > $01, check > $07FF condition
+000da1 30d1                      	cpi r29, 0x01 //check timer HIGH period
+000da2 f008                      	brlo pulse1_check_timer_08_LOW //if the timer HIGH period is $00, check the LOW period
+000da3 c002                      	rjmp pulse1_check_timer_7FF_HIGH //if the timer HIGH period is > $01, check > $07FF condition
                                  pulse1_check_timer_08_LOW:
-000d7c 35c9                      	cpi r28, 0x59 //check timer LOW period
-000d7d f038                      	brlo pulse1_off //if the HIGH period == $00 && LOW period <= $59, pulse off
+000da4 35c9                      	cpi r28, 0x59 //check timer LOW period
+000da5 f038                      	brlo pulse1_off //if the HIGH period == $00 && LOW period <= $59, pulse off
                                  
                                  	//NOTE: Since it'd be too taxing to calculate a target period for every APU clock in the sweep unit,
                                  	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
                                  	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
                                  	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
                                  pulse1_check_timer_7FF_HIGH:
-000d7e 35d9                      	cpi r29, 0x59 //check timer HIGH period
-000d7f f038                      	brlo pulse1_on //if the HIGH period is < $59, then all conditions have passed and pulse is not muted
-000d80 f009                      	breq pulse1_check_timer_7FF_LOW //if the HIGH period is == $59, we go check if the LOW period is < $65
-000d81 c003                      	rjmp pulse1_off //pulse off if HIGH period is > $59
+000da6 35d9                      	cpi r29, 0x59 //check timer HIGH period
+000da7 f038                      	brlo pulse1_on //if the HIGH period is < $59, then all conditions have passed and pulse is not muted
+000da8 f009                      	breq pulse1_check_timer_7FF_LOW //if the HIGH period is == $59, we go check if the LOW period is < $65
+000da9 c003                      	rjmp pulse1_off //pulse off if HIGH period is > $59
                                  pulse1_check_timer_7FF_LOW:
-000d82 36c5                      	cpi r28, 0x65 //check timer LOW period
-000d83 f408                      	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
-000d84 c002                      	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
+000daa 36c5                      	cpi r28, 0x65 //check timer LOW period
+000dab f408                      	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
+000dac c002                      	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
                                  
                                  pulse1_off:
-000d85 b80d                      	out VPORTD_OUT, zero
-000d86 cfea                      	rjmp pulse1
+000dad b80d                      	out VPORTD_OUT, zero
+000dae cfea                      	rjmp pulse1
                                  
                                  pulse1_on:
-000d87 91d0 2805                 	lds r29, pulse1_output_volume
+000daf 91d0 2805                 	lds r29, pulse1_output_volume
                                  /*	cpse r29, zero
                                  	rjmp pulse1_off //if VVVV bits are 0, then there is no volume (channel off)*/
                                  
-000d89 b9dd                      	out VPORTD_OUT, r29
-000d8a cfe6                      	rjmp pulse1
+000db1 b9dd                      	out VPORTD_OUT, r29
+000db2 cfe6                      	rjmp pulse1
                                  
                                  //FRAME COUNTER/AUDIO SAMPLE ISR
                                  sequence_0_2:
-000d8b b7bf                      	in r27, CPU_SREG
-000d8c 93bf                      	push r27
-000d8d 94f8                      	cli
+000db3 b7bf                      	in r27, CPU_SREG
+000db4 93bf                      	push r27
+000db5 94f8                      	cli
                                  
                                  	//ENVELOPE
-000d8e d16a                      	rcall pulse1_envelope_routine
+000db6 d1c4                      	rcall pulse1_envelope_routine
                                  
-000d8f e5b0                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP2_bm //clear OVF flag
-000d90 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
-000d92 91bf                      	pop r27
-000d93 bfbf                      	out CPU_SREG, r27
-000d94 9518                      	reti
+000db7 e5b0                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP2_bm //clear OVF flag
+000db8 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
+000dba 91bf                      	pop r27
+000dbb bfbf                      	out CPU_SREG, r27
+000dbc 9518                      	reti
                                  
                                  sequence_1_3:
-000d95 b7bf                      	in r27, CPU_SREG
-000d96 93bf                      	push r27
-000d97 94f8                      	cli
+000dbd b7bf                      	in r27, CPU_SREG
+000dbe 93bf                      	push r27
+000dbf 94f8                      	cli
                                  
                                  	//ENVELOPE
-000d98 d160                      	rcall pulse1_envelope_routine
+000dc0 d1ba                      	rcall pulse1_envelope_routine
                                  
                                  	//SWEEP
-000d99 fcf3                      	sbrc pulse1_sweep, 3 //check if the sweep enable bit is cleared
-000d9a d134                      	rcall pulse1_sweep_routine
+000dc1 fcf3                      	sbrc pulse1_sweep, 3 //check if the sweep enable bit is cleared
+000dc2 d18e                      	rcall pulse1_sweep_routine
                                  
                                  	//LENGTH
                                  	//NOTE: The length routine is relatively simple, so we will not be using clocks to rjmp and ret to a seperate lable
-000d9b fd95                      	sbrc channel_flags, 5 //check if the length counter halt bit is cleared
-000d9c c002                      	rjmp sequence_1_3_exit
-000d9d 10e0                      	cpse pulse1_length_counter, zero //if length counter is already 0, don't decrement
-000d9e 94ea                      	dec pulse1_length_counter
+000dc3 fd95                      	sbrc channel_flags, 5 //check if the length counter halt bit is cleared
+000dc4 c002                      	rjmp sequence_1_3_exit
+000dc5 10e0                      	cpse pulse1_length_counter, zero //if length counter is already 0, don't decrement
+000dc6 94ea                      	dec pulse1_length_counter
                                  
                                  sequence_1_3_exit:
-000d9f e2b1                      	ldi r27, TCA_SINGLE_CMP1_bm | TCA_SINGLE_OVF_bm //clear OVF flag
-000da0 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
-000da2 91bf                      	pop r27
-000da3 bfbf                      	out CPU_SREG, r27
-000da4 9518                      	reti
+000dc7 e2b1                      	ldi r27, TCA_SINGLE_CMP1_bm | TCA_SINGLE_OVF_bm //clear OVF flag
+000dc8 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
+000dca 91bf                      	pop r27
+000dcb bfbf                      	out CPU_SREG, r27
+000dcc 9518                      	reti
                                  
                                  sound_driver:
-000da5 b7bf                      	in r27, CPU_SREG
-000da6 93bf                      	push r27
-000da7 94f8                      	cli
-000da8 93cf                      	push r28
-000da9 93df                      	push r29
+000dcd b7bf                      	in r27, CPU_SREG
+000dce 93bf                      	push r27
+000dcf 94f8                      	cli
+000dd0 93cf                      	push r28
+000dd1 93df                      	push r29
                                  
                                  	//SOUND DRIVER
-000daa 91b0 280c                 	lds r27, pulse1_pattern_delay
-000dac 11b0                      	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
-000dad c0cd                      	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+000dd2 91b0 280c                 	lds r27, pulse1_pattern_delay
+000dd4 11b0                      	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
+000dd5 c129                      	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
                                  
                                  sound_driver_channel0:
-000dae 91e0 280a                 	lds ZL, pulse1_pattern //current pattern for pulse 1
-000db0 91f0 280b                 	lds ZH, pulse1_pattern+1
-000db2 91a0 280d                 	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
-000db4 91b0 280e                 	lds r27, pulse1_pattern_offset+1
-000db6 0fea                      	add ZL, r26 //offset the current pattern pointer to point to new byte data
-000db7 1ffb                      	adc ZH, r27
-000db8 91b4                      	lpm r27, Z //load the byte data from the current pattern
+000dd6 91e0 280a                 	lds ZL, pulse1_pattern //current pattern for pulse 1
+000dd8 91f0 280b                 	lds ZH, pulse1_pattern+1
+000dda 91a0 280d                 	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
+000ddc 91b0 280e                 	lds r27, pulse1_pattern_offset+1
+000dde 0fea                      	add ZL, r26 //offset the current pattern pointer to point to new byte data
+000ddf 1ffb                      	adc ZH, r27
+000de0 91b4                      	lpm r27, Z //load the byte data from the current pattern
                                  
-                                 sound_driver_channel0_check_if_note:
-000db9 35b7                      	cpi r27, 0x57 //check if data is a note (0x00 - 0x56)
-000dba f408                      	brsh sound_driver_channel0_check_if_volume
-000dbb c00b                      	rjmp sound_driver_channel0_note
-                                 sound_driver_channel0_check_if_volume:
-000dbc 36b7                      	cpi r27, 0x67 //check if data is volume (0x57-0x66)
-000dbd f408                      	brsh sound_driver_channel0_check_if_delay
-000dbe c023                      	rjmp sound_driver_channel0_volume
-                                 sound_driver_channel0_check_if_delay:
-000dbf 3eb4                      	cpi r27, 0xE4 //check if data is a delay (0x67 - 0xE3)
-000dc0 f408                      	brsh sound_driver_channel0_check_if_instrument
-000dc1 c02a                      	rjmp sound_driver_channel0_delay
-                                 sound_driver_channel0_check_if_instrument:
-000dc2 f409                      	brne sound_driver_channel0_check_if_end
-000dc3 c049                      	rjmp sound_driver_channel0_instrument_change
-                                 
-                                 	//binary search for fx flags (0xE5 - 0xFE)
+                                 sound_driver_channel0_check_if_note: //check if data is a note (0x00 - 0x56)
+000de1 35b7                      	cpi r27, 0x57
+000de2 f408                      	brsh sound_driver_channel0_check_if_volume
+000de3 c00d                      	rjmp sound_driver_channel0_note
+                                 sound_driver_channel0_check_if_volume: //check if data is volume (0x57-0x66)
+000de4 36b7                      	cpi r27, 0x67
+000de5 f408                      	brsh sound_driver_channel0_check_if_delay
+000de6 c025                      	rjmp sound_driver_channel0_volume
+                                 sound_driver_channel0_check_if_delay: //check if data is a delay (0x67 - 0xE1)
+000de7 3eb2                      	cpi r27, 0xE2
+000de8 f408                      	brsh sound_driver_channel0_check_if_instrument
+000de9 c02c                      	rjmp sound_driver_channel0_delay
+                                 sound_driver_channel0_check_if_instrument: //check for instrument flag (0xE2)
+000dea f409                      	brne sound_driver_channel0_check_if_release
+000deb c02f                      	rjmp sound_driver_channel0_instrument_change 
+                                 sound_driver_channel0_check_if_release: //check for note release flag (0xE3)
+000dec 3eb3                      	cpi r27, 0xE3
+000ded f409                      	brne sound_driver_channel0_check_if_end
+000dee c0ba                      	rjmp sound_driver_channel0_release
+                                 sound_driver_channel0_check_if_fx: //binary search for fx flags (0xE4 - 0xFE)
                                  
                                  sound_driver_channel0_check_if_end:
-000dc4 3fbf                      	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
-000dc5 f159                      	breq sound_driver_channel0_next_pattern
-000dc6 c0b7                      	rjmp sound_driver_instrument_routine
+000def 3fbf                      	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
+000df0 c0dd                      	rjmp sound_driver_channel0_next_pattern
                                  
                                  sound_driver_channel0_note:
-000dc7 9200 2811                 	sts pulse1_volume_macro_offset, zero //reset all macro offsets
-000dc9 9200 2814                 	sts pulse1_arpeggio_macro_offset, zero
-000dcb 9200 2817                 	sts pulse1_pitch_macro_offset, zero
-000dcd 9200 281a                 	sts pulse1_hi_pitch_macro_offset, zero
-000dcf 9200 281d                 	sts pulse1_duty_macro_offset, zero
+000df1 9200 2811                 	sts pulse1_volume_macro_offset, zero //reset all macro offsets
+000df3 9200 2816                 	sts pulse1_arpeggio_macro_offset, zero
+000df5 9200 281c                 	sts pulse1_pitch_macro_offset, zero
+000df7 9200 2821                 	sts pulse1_hi_pitch_macro_offset, zero
+000df9 9200 2826                 	sts pulse1_duty_macro_offset, zero
                                  
-000dd1 e3e4                      	ldi ZL, LOW(note_table << 1) //load in note table
-000dd2 e0f0                      	ldi ZH, HIGH(note_table << 1)
-000dd3 0fbb                      	lsl r27 //double the offset for the note table because we are getting byte data
-000dd4 0feb                      	add ZL, r27 //add offset
-000dd5 1df0                      	adc ZH, zero
-000dd6 91a5                      	lpm r26, Z+ //load bytes
-000dd7 91b4                      	lpm r27, Z
-000dd8 93a0 0a8c                 	sts TCB0_CCMPL, r26 //load the LOW bits for timer
-000dda 93b0 0a8d                 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
-000ddc 9200 0a8a                 	sts TCB0_CNTL, zero
-000dde 9200 0a8b                 	sts TCB0_CNTH, zero
-000de0 d086                      	rcall sound_driver_channel0_increment_offset
-000de1 cfcc                      	rjmp sound_driver_channel0
+000dfb e3e4                      	ldi ZL, LOW(note_table << 1) //load in note table
+000dfc e0f0                      	ldi ZH, HIGH(note_table << 1)
+000dfd 0fbb                      	lsl r27 //double the offset for the note table because we are getting byte data
+000dfe 0feb                      	add ZL, r27 //add offset
+000dff 1df0                      	adc ZH, zero
+000e00 91a5                      	lpm r26, Z+ //load bytes
+000e01 91b4                      	lpm r27, Z
+000e02 93a0 0a8c                 	sts TCB0_CCMPL, r26 //load the LOW bits for timer
+000e04 93b0 0a8d                 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
+000e06 9200 0a8a                 	sts TCB0_CNTL, zero
+000e08 9200 0a8b                 	sts TCB0_CNTH, zero
+000e0a d0e0                      	rcall sound_driver_channel0_increment_offset
+000e0b cfca                      	rjmp sound_driver_channel0
                                  
                                  sound_driver_channel0_volume:
-000de2 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
-000de3 91a0 2800                 	lds r26, pulse1_param
-000de5 7fa0                      	andi r26, 0xF0 //clear previous VVVV volume bits
-000de6 2bab                      	or r26, r27 //move new VVVV bits into pulse1_param
-000de7 93a0 2800                 	sts pulse1_param, r26
-000de9 6096                      	sbr channel_flags, 6
-000dea d07c                      	rcall sound_driver_channel0_increment_offset
-000deb cfc2                      	rjmp sound_driver_channel0
+000e0c 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+000e0d 91a0 2800                 	lds r26, pulse1_param
+000e0f 7fa0                      	andi r26, 0xF0 //clear previous VVVV volume bits
+000e10 2bab                      	or r26, r27 //move new VVVV bits into pulse1_param
+000e11 93a0 2800                 	sts pulse1_param, r26
+000e13 6096                      	sbr channel_flags, 6
+000e14 d0d6                      	rcall sound_driver_channel0_increment_offset
+000e15 cfc0                      	rjmp sound_driver_channel0
                                  
                                  sound_driver_channel0_delay:
-000dec 56b7                      	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
-000ded 93b0 280c                 	sts pulse1_pattern_delay, r27
-000def d077                      	rcall sound_driver_channel0_increment_offset
-000df0 c08d                      	rjmp sound_driver_instrument_routine
-                                 
-                                 sound_driver_channel0_next_pattern:
-000df1 91e0 2806                 	lds ZL, song_frames
-000df3 91f0 2807                 	lds ZH, song_frames+1
-000df5 91a0 2808                 	lds r26, song_frame_offset //we must offset to the appropriate channel
-000df7 91b0 2809                 	lds r27, song_frame_offset+1
-000df9 961a                      	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
-000dfa 93a0 2808                 	sts song_frame_offset, r26
-000dfc 93b0 2809                 	sts song_frame_offset+1, r27
-                                 	//adiw r27:r26, 2 //offset for channel 1 (test)
-000dfe 0fea                      	add ZL, r26
-000dff 1ffb                      	adc ZH, r27
-                                 
-000e00 91a5                      	lpm r26, Z+ //load the address of the next pattern
-000e01 91b4                      	lpm r27, Z
-000e02 0faa                      	lsl r26
-000e03 1fbb                      	rol r27
-000e04 93a0 280a                 	sts pulse1_pattern, r26
-000e06 93b0 280b                 	sts pulse1_pattern+1, r27
-                                 
-000e08 9200 280d                 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
-000e0a 9200 280e                 	sts pulse1_pattern_offset+1, zero
-000e0c cfa1                      	rjmp sound_driver_channel0
+000e16 56b7                      	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
+000e17 93b0 280c                 	sts pulse1_pattern_delay, r27
+000e19 d0d1                      	rcall sound_driver_channel0_increment_offset
+000e1a c0e7                      	rjmp sound_driver_instrument_routine
                                  
                                  sound_driver_channel0_instrument_change:
-000e0d 9200 280f                 	sts pulse1_volume_macro, zero //reset all macros
-000e0f 9200 2810                 	sts pulse1_volume_macro+1, zero
-000e11 9200 2812                 	sts pulse1_arpeggio_macro, zero
-000e13 9200 2813                 	sts pulse1_arpeggio_macro+1, zero
-000e15 9200 2815                 	sts pulse1_pitch_macro, zero
-000e17 9200 2816                 	sts pulse1_pitch_macro+1, zero
-000e19 9200 2818                 	sts pulse1_hi_pitch_macro, zero
-000e1b 9200 2819                 	sts pulse1_hi_pitch_macro+1, zero
-000e1d 9200 281b                 	sts pulse1_duty_macro, zero
-000e1f 9200 281c                 	sts pulse1_duty_macro+1, zero
+000e1b 9200 280f                 	sts pulse1_volume_macro, zero //reset all macro addresses
+000e1d 9200 2810                 	sts pulse1_volume_macro+1, zero
+000e1f 9200 2814                 	sts pulse1_arpeggio_macro, zero
+000e21 9200 2815                 	sts pulse1_arpeggio_macro+1, zero
+000e23 9200 281a                 	sts pulse1_pitch_macro, zero
+000e25 9200 281b                 	sts pulse1_pitch_macro+1, zero
+000e27 9200 281f                 	sts pulse1_hi_pitch_macro, zero
+000e29 9200 2820                 	sts pulse1_hi_pitch_macro+1, zero
+000e2b 9200 2824                 	sts pulse1_duty_macro, zero
+000e2d 9200 2825                 	sts pulse1_duty_macro+1, zero
                                  
-000e21 9631                      	adiw Z, 1 //point to the byte next to the flag
-000e22 91b4                      	lpm r27, Z //store the instrument offset into r27
-000e23 eee4                      	ldi ZL, LOW(instruments) //point Z to instruments table
-000e24 e0fb                      	ldi ZH, HIGH(instruments)
-000e25 0feb                      	add ZL, r27 //point Z to offsetted instrument
-000e26 1df0                      	adc ZH, zero
-000e27 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the instrument's address
-000e28 1fff                      	rol ZH
-000e29 91a5                      	lpm r26, Z+ //r26:r27 now points to the instrument
-000e2a 91b4                      	lpm r27, Z
+000e2f 9631                      	adiw Z, 1 //point to the byte next to the flag
+000e30 91b4                      	lpm r27, Z //store the instrument offset into r27
+000e31 eee4                      	ldi ZL, LOW(instruments) //point Z to instruments table
+000e32 e0fb                      	ldi ZH, HIGH(instruments)
+000e33 0feb                      	add ZL, r27 //point Z to offsetted instrument
+000e34 1df0                      	adc ZH, zero
+000e35 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the instrument's address
+000e36 1fff                      	rol ZH
+000e37 91a5                      	lpm r26, Z+ //r26:r27 now points to the instrument
+000e38 91b4                      	lpm r27, Z
                                  
-000e2b 0faa                      	lsl r26 //multiply by 2 to make r26:r27 into a byte pointer for the instrument's data
-000e2c 1fbb                      	rol r27
-000e2d 2fea                      	mov ZL, r26
-000e2e 2ffb                      	mov ZH, r27
-000e2f 91b4                      	lpm r27, Z //get macro header byte. NOTE: Each macro type for each intrument is represented by a bit in this byte. 1 indicates that the instrument uses a macro of it's corresponding type.
-000e30 e0a6                      	ldi r26, 6 //(6-1) = 5 for the 5 different macro types. NOTE: bit 0 = volume, bit 1 = arpeggio, bit 2 = pitch, bit 3 = hi pitch, bit 4 = duty
+000e39 0faa                      	lsl r26 //multiply by 2 to make r26:r27 into a byte pointer for the instrument's data
+000e3a 1fbb                      	rol r27
+000e3b 2fea                      	mov ZL, r26
+000e3c 2ffb                      	mov ZH, r27
+000e3d 91b4                      	lpm r27, Z //get macro header byte. NOTE: Each macro type for each intrument is represented by a bit in this byte. 1 indicates that the instrument uses a macro of it's corresponding type.
+000e3e 9632                      	adiw Z, 2 //point Z to the address of the macro
+000e3f e0a6                      	ldi r26, 6 //(6-1) = 5 for the 5 different macro types. NOTE: bit 0 = volume, bit 1 = arpeggio, bit 2 = pitch, bit 3 = hi pitch, bit 4 = duty
                                  sound_driver_channel0_instrument_change_macro_loop:
-000e31 95aa                      	dec r26
-000e32 f141                      	breq sound_driver_channel0_instrument_change_exit
-000e33 95b6                      	lsr r27
-000e34 f008                      	brcs sound_driver_channel0_instrument_change_load_macro
-000e35 cffb                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+000e40 95aa                      	dec r26
+000e41 f1e1                      	breq sound_driver_channel0_instrument_change_exit
+000e42 95b6                      	lsr r27
+000e43 f008                      	brcs sound_driver_channel0_instrument_change_load_macro
+000e44 cffb                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_load_macro:
-000e36 9632                      	adiw Z, 2 //point Z to the address of the macro
-000e37 91c5                      	lpm r28, Z+ //r28:r29 now point to the macro
-000e38 91d4                      	lpm r29, Z
+000e45 91c5                      	lpm r28, Z+ //r28:r29 now point to the macro
+000e46 91d5                      	lpm r29, Z+
                                  
-000e39 30a5                      	cpi r26, 5
-000e3a f039                      	breq sound_driver_channel0_instrument_change_load_macro_volume
-000e3b 30a4                      	cpi r26, 4
-000e3c f051                      	breq sound_driver_channel0_instrument_change_load_macro_arpeggio
-000e3d 30a3                      	cpi r26, 3
-000e3e f069                      	breq sound_driver_channel0_instrument_change_load_macro_pitch
-000e3f 30a2                      	cpi r26, 2
-000e40 f081                      	breq sound_driver_channel0_instrument_change_load_macro_hi_pitch
-000e41 c014                      	rjmp sound_driver_channel0_instrument_change_load_macro_duty
+000e47 30a5                      	cpi r26, 5
+000e48 f039                      	breq sound_driver_channel0_instrument_change_load_macro_volume
+000e49 30a4                      	cpi r26, 4
+000e4a f079                      	breq sound_driver_channel0_instrument_change_load_macro_arpeggio
+000e4b 30a3                      	cpi r26, 3
+000e4c f099                      	breq sound_driver_channel0_instrument_change_load_macro_pitch
+000e4d 30a2                      	cpi r26, 2
+000e4e f0d9                      	breq sound_driver_channel0_instrument_change_load_macro_hi_pitch
+000e4f c024                      	rjmp sound_driver_channel0_instrument_change_load_macro_duty
                                  
                                  sound_driver_channel0_instrument_change_load_macro_volume:
-000e42 93c0 280f                 	sts pulse1_volume_macro, r28
-000e44 93d0 2810                 	sts pulse1_volume_macro+1, r29
-000e46 cfea                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+000e50 93c0 280f                 	sts pulse1_volume_macro, r28
+000e52 93d0 2810                 	sts pulse1_volume_macro+1, r29
+000e54 d037                      	rcall sound_driver_channel0_instrument_change_read_header
+000e55 93c0 2813                 	sts pulse1_volume_macro_release, r28
+000e57 93d0 2812                 	sts pulse1_volume_macro_loop, r29
+000e59 cfe6                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  	
                                  sound_driver_channel0_instrument_change_load_macro_arpeggio:
-000e47 93c0 280f                 	sts pulse1_volume_macro, r28
-000e49 93d0 2810                 	sts pulse1_volume_macro+1, r29
-000e4b cfe5                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+000e5a 93c0 280f                 	sts pulse1_volume_macro, r28
+000e5c 93d0 2810                 	sts pulse1_volume_macro+1, r29
+000e5e d038                      	rcall sound_driver_channel0_instrument_change_read_header_arpeggio
+000e5f cfe0                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_load_macro_pitch:
-000e4c 93c0 2815                 	sts pulse1_pitch_macro, r28
-000e4e 93d0 2816                 	sts pulse1_pitch_macro+1, r29
-000e50 cfe0                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+000e60 93c0 281a                 	sts pulse1_pitch_macro, r28
+000e62 93d0 281b                 	sts pulse1_pitch_macro+1, r29
+000e64 d027                      	rcall sound_driver_channel0_instrument_change_read_header
+000e65 93c0 2813                 	sts pulse1_volume_macro_release, r28
+000e67 93d0 2812                 	sts pulse1_volume_macro_loop, r29
+000e69 cfd6                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_load_macro_hi_pitch:
-000e51 93c0 2818                 	sts pulse1_hi_pitch_macro, r28
-000e53 93d0 2819                 	sts pulse1_hi_pitch_macro+1, r29
-000e55 cfdb                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+000e6a 93c0 281f                 	sts pulse1_hi_pitch_macro, r28
+000e6c 93d0 2820                 	sts pulse1_hi_pitch_macro+1, r29
+000e6e d01d                      	rcall sound_driver_channel0_instrument_change_read_header
+000e6f 93c0 2813                 	sts pulse1_volume_macro_release, r28
+000e71 93d0 2812                 	sts pulse1_volume_macro_loop, r29
+000e73 cfcc                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_load_macro_duty:
-000e56 93c0 281b                 	sts pulse1_duty_macro, r28
-000e58 93d0 281c                 	sts pulse1_duty_macro+1, r29
-000e5a cfd6                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+000e74 93c0 2824                 	sts pulse1_duty_macro, r28
+000e76 93d0 2825                 	sts pulse1_duty_macro+1, r29
+000e78 d013                      	rcall sound_driver_channel0_instrument_change_read_header
+000e79 93c0 2813                 	sts pulse1_volume_macro_release, r28
+000e7b 93d0 2812                 	sts pulse1_volume_macro_loop, r29
+000e7d cfc2                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_exit:
-000e5b 9200 2811                 	sts pulse1_volume_macro_offset, zero //reset all macro offsets
-000e5d 9200 2814                 	sts pulse1_arpeggio_macro_offset, zero
-000e5f 9200 2817                 	sts pulse1_pitch_macro_offset, zero
-000e61 9200 281a                 	sts pulse1_hi_pitch_macro_offset, zero
-000e63 9200 281d                 	sts pulse1_duty_macro_offset, zero
-000e65 d00b                      	rcall sound_driver_channel0_increment_offset_twice
-000e66 cf47                      	rjmp sound_driver_channel0
+000e7e e0a3                      	ldi r26, 0x03
+000e7f e0b2                      	ldi r27, 0x02
+000e80 93b0 2811                 	sts pulse1_volume_macro_offset, r27 //reset all macro offsets
+000e82 93a0 2816                 	sts pulse1_arpeggio_macro_offset, r26
+000e84 93b0 281c                 	sts pulse1_pitch_macro_offset, r27
+000e86 93b0 2821                 	sts pulse1_hi_pitch_macro_offset, r27
+000e88 93b0 2826                 	sts pulse1_duty_macro_offset, r27
+000e8a d06a                      	rcall sound_driver_channel0_increment_offset_twice
+000e8b cf4a                      	rjmp sound_driver_channel0
+                                 
+                                 sound_driver_channel0_instrument_change_read_header:
+000e8c 93ef                      	push ZL
+000e8d 93ff                      	push ZH
+000e8e 2fec                      	mov ZL, r28
+000e8f 2ffd                      	mov ZH, r29
+000e90 0fee                      	lsl ZL
+000e91 1fff                      	rol ZH
+000e92 91c5                      	lpm r28, Z+
+000e93 91d4                      	lpm r29, Z
+000e94 91ff                      	pop ZH
+000e95 91ef                      	pop ZL
+000e96 9508                      	ret
+                                 
+                                 sound_driver_channel0_instrument_change_read_header_arpeggio:
+000e97 93ef                      	push ZL
+000e98 93ff                      	push ZH
+000e99 2fec                      	mov ZL, r28
+000e9a 2ffd                      	mov ZH, r29
+000e9b 0fee                      	lsl ZL
+000e9c 1fff                      	rol ZH
+000e9d 91c5                      	lpm r28, Z+
+000e9e 91d5                      	lpm r29, Z+
+000e9f 93c0 2818                 	sts pulse1_arpeggio_macro_release, r28
+000ea1 93d0 2817                 	sts pulse1_arpeggio_macro_loop, r29
+000ea3 91c4                      	lpm r28, Z
+000ea4 93c0 2819                 	sts pulse1_arpeggio_macro_mode, r28
+000ea6 91ff                      	pop ZH
+000ea7 91ef                      	pop ZL
+000ea8 9508                      	ret
+                                 
+                                 sound_driver_channel0_release:
+                                 sound_driver_channel0_release_volume:
+000ea9 91b0 2813                 	lds r27, pulse1_volume_macro_release
+000eab 3fbf                      	cpi r27, 0xFF //check if volume macro has a release flag
+000eac f009                      	breq PC+2 //if the macro has no release flag, don't increment it
+000ead 95b3                      	inc r27
+000eae 93b0 2811                 	sts pulse1_volume_macro_offset, r27 //adjust offset so that it starts after the release flag index
+                                 sound_driver_channel0_release_arpeggio:
+000eb0 91b0 2818                 	lds r27, pulse1_arpeggio_macro_release
+000eb2 3fbf                      	cpi r27, 0xFF //check if arpeggio macro has a release flag
+000eb3 f009                      	breq PC+2
+000eb4 95b3                      	inc r27
+000eb5 93b0 2816                 	sts pulse1_arpeggio_macro_offset, r27
+                                 sound_driver_channel0_release_pitch:
+000eb7 91b0 281e                 	lds r27, pulse1_pitch_macro_release
+000eb9 3fbf                      	cpi r27, 0xFF //check if pitch macro has a release flag
+000eba f009                      	breq PC+2
+000ebb 95b3                      	inc r27
+000ebc 93b0 281c                 	sts pulse1_pitch_macro_offset, r27
+                                 sound_driver_channel0_release_hi_pitch:
+000ebe 91b0 2823                 	lds r27, pulse1_hi_pitch_macro_release
+000ec0 3fbf                      	cpi r27, 0xFF //check if hi_pitch macro has a release flag
+000ec1 f009                      	breq PC+2
+000ec2 95b3                      	inc r27
+000ec3 93b0 2821                 	sts pulse1_hi_pitch_macro_offset, r27
+                                 sound_driver_channel0_release_duty:
+000ec5 91b0 2828                 	lds r27, pulse1_duty_macro_release
+000ec7 3fbf                      	cpi r27, 0xFF //check if duty macro has a release flag
+000ec8 f009                      	breq PC+2
+000ec9 95b3                      	inc r27
+000eca 93b0 2826                 	sts pulse1_duty_macro_offset, r27
+                                 sound_driver_channel0_release_exit:
+000ecc d01e                      	rcall sound_driver_channel0_increment_offset
+000ecd cf08                      	rjmp sound_driver_channel0
+                                 
+                                 sound_driver_channel0_next_pattern:
+000ece 91e0 2806                 	lds ZL, song_frames
+000ed0 91f0 2807                 	lds ZH, song_frames+1
+000ed2 91a0 2808                 	lds r26, song_frame_offset //we must offset to the appropriate channel
+000ed4 91b0 2809                 	lds r27, song_frame_offset+1
+000ed6 961a                      	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
+000ed7 93a0 2808                 	sts song_frame_offset, r26
+000ed9 93b0 2809                 	sts song_frame_offset+1, r27
+000edb 9612                      	adiw r27:r26, 2 //offset for channel 1 (test)
+000edc 0fea                      	add ZL, r26
+000edd 1ffb                      	adc ZH, r27
+                                 
+000ede 91a5                      	lpm r26, Z+ //load the address of the next pattern
+000edf 91b4                      	lpm r27, Z
+000ee0 0faa                      	lsl r26
+000ee1 1fbb                      	rol r27
+000ee2 93a0 280a                 	sts pulse1_pattern, r26
+000ee4 93b0 280b                 	sts pulse1_pattern+1, r27
+                                 
+000ee6 9200 280d                 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
+000ee8 9200 280e                 	sts pulse1_pattern_offset+1, zero
+000eea ceeb                      	rjmp sound_driver_channel0
                                  
                                  sound_driver_channel0_increment_offset:
-000e67 91e0 280d                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
-000e69 91f0 280e                 	lds ZH, pulse1_pattern_offset+1
-000e6b 9631                      	adiw Z, 1
-000e6c 93e0 280d                 	sts pulse1_pattern_offset, ZL
-000e6e 93f0 280e                 	sts pulse1_pattern_offset+1, ZH
-000e70 9508                      	ret
+000eeb 91e0 280d                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
+000eed 91f0 280e                 	lds ZH, pulse1_pattern_offset+1
+000eef 9631                      	adiw Z, 1
+000ef0 93e0 280d                 	sts pulse1_pattern_offset, ZL
+000ef2 93f0 280e                 	sts pulse1_pattern_offset+1, ZH
+000ef4 9508                      	ret
                                  
                                  sound_driver_channel0_increment_offset_twice: //used for data that takes up 2 bytes worth of space
-000e71 91e0 280d                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
-000e73 91f0 280e                 	lds ZH, pulse1_pattern_offset+1
-000e75 9632                      	adiw Z, 2 //increment the pointer twice
-000e76 93e0 280d                 	sts pulse1_pattern_offset, ZL
-000e78 93f0 280e                 	sts pulse1_pattern_offset+1, ZH
-000e7a 9508                      	ret
+000ef5 91e0 280d                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
+000ef7 91f0 280e                 	lds ZH, pulse1_pattern_offset+1
+000ef9 9632                      	adiw Z, 2 //increment the pointer twice
+000efa 93e0 280d                 	sts pulse1_pattern_offset, ZL
+000efc 93f0 280e                 	sts pulse1_pattern_offset+1, ZH
+000efe 9508                      	ret
                                  
                                  sound_driver_decrement_frame_delay:
-000e7b 95ba                      	dec r27
-000e7c 93b0 280c                 	sts pulse1_pattern_delay, r27
+000eff 95ba                      	dec r27
+000f00 93b0 280c                 	sts pulse1_pattern_delay, r27
                                  
                                  sound_driver_instrument_routine:
                                  sound_driver_instrument_routine_channel0_volume:
-000e7e 91e0 280f                 	lds ZL, pulse1_volume_macro
-000e80 91f0 2810                 	lds ZH, pulse1_volume_macro+1
-000e82 9630                      	adiw Z, 0
-000e83 f0f1                      	breq sound_driver_instrument_routine_channel0_volume_default //if no volume macro is in use, use default multiplier of F
-000e84 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the macro's address
-000e85 1fff                      	rol ZH
-000e86 91a0 2811                 	lds r26, pulse1_volume_macro_offset
-000e88 0fea                      	add ZL, r26
-000e89 1df0                      	adc ZH, zero
+000f02 91e0 280f                 	lds ZL, pulse1_volume_macro
+000f04 91f0 2810                 	lds ZH, pulse1_volume_macro+1
+000f06 9630                      	adiw Z, 0
+000f07 f0e1                      	breq sound_driver_instrument_routine_channel0_volume_default //if no volume macro is in use, use default multiplier of F
+000f08 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the macro's address
+000f09 1fff                      	rol ZH
+000f0a 91a0 2811                 	lds r26, pulse1_volume_macro_offset
+000f0c 0fea                      	add ZL, r26
+000f0d 1df0                      	adc ZH, zero
                                  
-000e8a 95a3                      	inc r26 //increment the macro offset
-000e8b 93a0 2811                 	sts pulse1_volume_macro_offset, r26
+000f0e 91b0 2813                 	lds r27, pulse1_volume_macro_release
+000f10 17ba                      	cp r27, r26
+000f11 f019                      	breq sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index, keep the offset unchanged
+000f12 95a3                      	inc r26 //increment the macro offset
+000f13 93a0 2811                 	sts pulse1_volume_macro_offset, r26
+                                 	
+                                 sound_driver_instrument_routine_channel0_volume_read:
+000f15 91b4                      	lpm r27, Z //load volume data into r27
+000f16 3fbf                      	cpi r27, 0xFF //check for macro end flag
+000f17 f429                      	brne sound_driver_instrument_routine_channel0_volume_calculate //if the data was not the macro end flag, calculate the volume
                                  
-000e8d 91b4                      	lpm r27, Z //load volume data into r27
-000e8e 3fbf                      	cpi r27, 0xFF //check for macro end flag
-000e8f f459                      	brne sound_driver_instrument_routine_channel0_volume_calculate //if the data was not the macro end flag, calculate the volume
-                                 
-000e90 9631                      	adiw Z, 1 //if we are at the macro end flag, check the byte next to it for loop data
-000e91 91b4                      	lpm r27, Z //load loop byte into r27
-000e92 3fbf                      	cpi r27, 0xFF //check for no loop
-000e93 f019                      	breq sound_driver_instrument_routine_channel0_volume_no_loop
-                                 
-                                 sound_driver_instrument_routine_channel0_volume_loop:
-000e94 93b0 2811                 	sts pulse1_volume_macro_offset, r27
-000e96 cfe7                      	rjmp sound_driver_instrument_routine_channel0_volume
-                                 
-                                 sound_driver_instrument_routine_channel0_volume_no_loop:
-000e97 50a2                      	subi r26, 2 //reset offset to last valid volume byte
-000e98 93a0 2811                 	sts pulse1_volume_macro_offset, r26
-000e9a cfe3                      	rjmp sound_driver_instrument_routine_channel0_volume
+                                 sound_driver_instrument_routine_channel0_volume_macro_end_flag:
+000f18 91b0 2812                 	lds r27, pulse1_volume_macro_loop //load the loop index
+000f1a 93b0 2811                 	sts pulse1_volume_macro_offset, r27 //store the loop index into the offset
+000f1c cfe5                      	rjmp sound_driver_instrument_routine_channel0_volume //go back and re-read the volume data
                                  
                                  sound_driver_instrument_routine_channel0_volume_calculate:
-000e9b e5ee                      	ldi ZL, LOW(volumes << 1) //point Z to volume table
-000e9c e1fe                      	ldi ZH, HIGH(volumes << 1)
+000f1d e6e2                      	ldi ZL, LOW(volumes << 1) //point Z to volume table
+000f1e e1ff                      	ldi ZH, HIGH(volumes << 1)
                                  
-000e9d 95b3                      	inc r27
+000f1f 95b3                      	inc r27
                                  sound_driver_instrument_routine_channel0_volume_table_offset:
-000e9e 95ba                      	dec r27
-000e9f f041                      	breq sound_driver_instrument_routine_channel0_volume_load
-000ea0 9670                      	adiw Z, 16 //move to next row in volume table
-000ea1 cffc                      	rjmp sound_driver_instrument_routine_channel0_volume_table_offset
+000f20 95ba                      	dec r27
+000f21 f041                      	breq sound_driver_instrument_routine_channel0_volume_load
+000f22 9670                      	adiw Z, 16 //move to next row in volume table
+000f23 cffc                      	rjmp sound_driver_instrument_routine_channel0_volume_table_offset
                                  
                                  sound_driver_instrument_routine_channel0_volume_default:
-000ea2 91b0 2800                 	lds r27, pulse1_param //a multiplier of F means in no change to the main volume, so we just copy the value into the output
-000ea4 70bf                      	andi r27, 0x0F //mask for VVVV volume bits
-000ea5 93b0 2805                 	sts pulse1_output_volume, r27
-000ea7 c008                      	rjmp sound_driver_instrument_routine_channel0_arpeggio
+000f24 91b0 2800                 	lds r27, pulse1_param //a multiplier of F means in no change to the main volume, so we just copy the value into the output
+000f26 70bf                      	andi r27, 0x0F //mask for VVVV volume bits
+000f27 93b0 2805                 	sts pulse1_output_volume, r27
+000f29 c008                      	rjmp sound_driver_instrument_routine_channel0_arpeggio
                                  
                                  sound_driver_instrument_routine_channel0_volume_load:
-000ea8 91b0 2800                 	lds r27, pulse1_param //load main volume
-000eaa 70bf                      	andi r27, 0x0F //mask for VVVV volume bits
-000eab 0feb                      	add ZL, r27 //offset the volume table by the main volume
-000eac 1df0                      	adc ZH, zero
-000ead 91b4                      	lpm r27, Z
-000eae 93b0 2805                 	sts pulse1_output_volume, r27 //store the new output volume
+000f2a 91b0 2800                 	lds r27, pulse1_param //load main volume
+000f2c 70bf                      	andi r27, 0x0F //mask for VVVV volume bits
+000f2d 0feb                      	add ZL, r27 //offset the volume table by the main volume
+000f2e 1df0                      	adc ZH, zero
+000f2f 91b4                      	lpm r27, Z
+000f30 93b0 2805                 	sts pulse1_output_volume, r27 //store the new output volume
                                  	
                                  sound_driver_instrument_routine_channel0_arpeggio:
-000eb0 91e0 2812                 	lds ZL, pulse1_arpeggio_macro
-000eb2 91f0 2813                 	lds ZH, pulse1_arpeggio_macro+1
+000f32 91e0 2814                 	lds ZL, pulse1_arpeggio_macro
+000f34 91f0 2815                 	lds ZH, pulse1_arpeggio_macro+1
                                  
-000eb4 91e0 2815                 	lds ZL, pulse1_pitch_macro
-000eb6 91f0 2816                 	lds ZH, pulse1_pitch_macro+1
+000f36 91e0 281a                 	lds ZL, pulse1_pitch_macro
+000f38 91f0 281b                 	lds ZH, pulse1_pitch_macro+1
                                  
-000eb8 91e0 2818                 	lds ZL, pulse1_hi_pitch_macro
-000eba 91f0 2819                 	lds ZH, pulse1_hi_pitch_macro+1
+000f3a 91e0 281f                 	lds ZL, pulse1_hi_pitch_macro
+000f3c 91f0 2820                 	lds ZH, pulse1_hi_pitch_macro+1
                                  
-000ebc 91e0 281b                 	lds ZL, pulse1_duty_macro
-000ebe 91f0 281c                 	lds ZH, pulse1_duty_macro+1
+000f3e 91e0 2824                 	lds ZL, pulse1_duty_macro
+000f40 91f0 2825                 	lds ZH, pulse1_duty_macro+1
                                  
-000ec0 c000                      	rjmp sound_driver_exit
+000f42 c000                      	rjmp sound_driver_exit
                                  
                                  sound_driver_exit:
-000ec1 91df                      	pop r29
-000ec2 91cf                      	pop r28
-000ec3 ced4                      	rjmp sequence_1_3 + 3 //+3 is to skip the stack instructions since we already pushed them
+000f43 91df                      	pop r29
+000f44 91cf                      	pop r28
+000f45 ce7a                      	rjmp sequence_1_3 + 3 //+3 is to skip the stack instructions since we already pushed them
                                  
                                  //PULSE 1 ROUTINES
                                  pulse1_sequence_routine:
-000ec4 b7bf                      	in r27, CPU_SREG
-000ec5 93bf                      	push r27
-000ec6 94f8                      	cli
+000f46 b7bf                      	in r27, CPU_SREG
+000f47 93bf                      	push r27
+000f48 94f8                      	cli
                                  
-000ec7 0cdd                      	lsl pulse1_sequence //shifts sequence to the left
-000ec8 1cd0                      	adc pulse1_sequence, zero //if the shifted bit was a 1, it will be added to the LSB
+000f49 0cdd                      	lsl pulse1_sequence //shifts sequence to the left
+000f4a 1cd0                      	adc pulse1_sequence, zero //if the shifted bit was a 1, it will be added to the LSB
                                  
-000ec9 e0b1                      	ldi r27, TCB_CAPT_bm //clear OVF flag
-000eca 93b0 0a86                 	sts TCB0_INTFLAGS, r27
-000ecc 91bf                      	pop r27
-000ecd bfbf                      	out CPU_SREG, r27
-000ece 9518                      	reti
+000f4b e0b1                      	ldi r27, TCB_CAPT_bm //clear OVF flag
+000f4c 93b0 0a86                 	sts TCB0_INTFLAGS, r27
+000f4e 91bf                      	pop r27
+000f4f bfbf                      	out CPU_SREG, r27
+000f50 9518                      	reti
                                  
                                  pulse1_sweep_routine:
-000ecf 2dbf                      	mov r27, pulse1_sweep
-000ed0 70b7                      	andi r27, 0x07 //mask for period divider bits
-000ed1 f4f9                      	brne pulse1_sweep_routine_decrement_divider //check if divider != 0
+000f51 2dbf                      	mov r27, pulse1_sweep
+000f52 70b7                      	andi r27, 0x07 //mask for period divider bits
+000f53 f4f9                      	brne pulse1_sweep_routine_decrement_divider //check if divider != 0
                                  
                                  pulse1_sweep_routine_action: //if the divider is == 0, update the pulse timer period
-000ed2 93df                      	push r29
-000ed3 2ddf                      	mov r29, pulse1_sweep
-000ed4 95d2                      	swap r29
-000ed5 70d7                      	andi r29, 0x07 //mask for shift bits
-000ed6 f409                      	brne PC+2 //check of shift == 0
-000ed7 91df                      	pop r29
-000ed8 c019                      	rjmp pulse1_sweep_routine_check_reload //if the shift == 0, do nothing and return
+000f54 93df                      	push r29
+000f55 2ddf                      	mov r29, pulse1_sweep
+000f56 95d2                      	swap r29
+000f57 70d7                      	andi r29, 0x07 //mask for shift bits
+000f58 f409                      	brne PC+2 //check of shift == 0
+000f59 91df                      	pop r29
+000f5a c019                      	rjmp pulse1_sweep_routine_check_reload //if the shift == 0, do nothing and return
                                  
-000ed9 91a0 0a8c                 	lds r26, TCB0_CCMPL
-000edb 91b0 0a8d                 	lds r27, TCB0_CCMPH
-000edd 95b6                      	lsr r27
-000ede 95a7                      	ror r26
-000edf 95da                      	dec r29
-000ee0 f7e1                      	brne PC-3 //keep looping/shifting until shift count is 0
+000f5b 91a0 0a8c                 	lds r26, TCB0_CCMPL
+000f5d 91b0 0a8d                 	lds r27, TCB0_CCMPH
+000f5f 95b6                      	lsr r27
+000f60 95a7                      	ror r26
+000f61 95da                      	dec r29
+000f62 f7e1                      	brne PC-3 //keep looping/shifting until shift count is 0
                                  
-000ee1 fef7                      	sbrs pulse1_sweep, 7 //check the negate flag
-000ee2 c002                      	rjmp PC+3 //if negate flag was clear, go straight to addition
+000f63 fef7                      	sbrs pulse1_sweep, 7 //check the negate flag
+000f64 c002                      	rjmp PC+3 //if negate flag was clear, go straight to addition
                                  
-000ee3 95a0                      	com r26 //pulse1 uses one's complement if the negate flag is set
-000ee4 95b0                      	com r27
+000f65 95a0                      	com r26 //pulse1 uses one's complement if the negate flag is set
+000f66 95b0                      	com r27
                                  
-000ee5 91d0 0a8c                 	lds r29, TCB0_CCMPL //perform addition to get new timer period
-000ee7 0fad                      	add r26, r29
-000ee8 91d0 0a8d                 	lds r29, TCB0_CCMPH
-000eea 1fbd                      	adc r27, r29
+000f67 91d0 0a8c                 	lds r29, TCB0_CCMPL //perform addition to get new timer period
+000f69 0fad                      	add r26, r29
+000f6a 91d0 0a8d                 	lds r29, TCB0_CCMPH
+000f6c 1fbd                      	adc r27, r29
                                  
-000eeb 93a0 0a8c                 	sts TCB0_CCMPL, r26 //store the new LOW bits for timer
-000eed 93b0 0a8d                 	sts TCB0_CCMPH, r27 //store the new HIGH bits for timer
+000f6d 93a0 0a8c                 	sts TCB0_CCMPL, r26 //store the new LOW bits for timer
+000f6f 93b0 0a8d                 	sts TCB0_CCMPH, r27 //store the new HIGH bits for timer
                                  
                                  	//sts pulse1_timerL, r26
                                  	//sts pulse1_timerH, r27
@@ -812,221 +923,221 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(79): 'C:\Us
                                  	mov pulse1_sweep, r27
                                  	sbr channel_flags, 0b10000000*/
                                  	
-000eef 91df                      	pop r29
-000ef0 c001                      	rjmp pulse1_sweep_routine_check_reload
+000f71 91df                      	pop r29
+000f72 c001                      	rjmp pulse1_sweep_routine_check_reload
                                  
                                  pulse1_sweep_routine_decrement_divider:
-000ef1 94fa                      	dec pulse1_sweep //if the divider != 0, decrement the divider
+000f73 94fa                      	dec pulse1_sweep //if the divider != 0, decrement the divider
                                  
                                  pulse1_sweep_routine_check_reload:
-000ef2 ff97                      	sbrs channel_flags, 7 //if the reload flag is set, reload the sweep divider
-000ef3 9508                      	ret
+000f74 ff97                      	sbrs channel_flags, 7 //if the reload flag is set, reload the sweep divider
+000f75 9508                      	ret
                                  
                                  pulse1_sweep_reload:
-000ef4 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param //NOTE: since the reload flag is kept in bit 6, we clear the reload flag indirectly
-000ef6 94f2                      	swap pulse1_sweep //bring data from high byte to low byte
-000ef7 779f                      	cbr channel_flags, 0b10000000 //clear ready flag
-000ef8 9508                      	ret
+000f76 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param //NOTE: since the reload flag is kept in bit 6, we clear the reload flag indirectly
+000f78 94f2                      	swap pulse1_sweep //bring data from high byte to low byte
+000f79 779f                      	cbr channel_flags, 0b10000000 //clear ready flag
+000f7a 9508                      	ret
                                  
                                  pulse1_envelope_routine:
-000ef9 fd96                      	sbrc channel_flags, 6 //check if start flag is cleared
-000efa c010                      	rjmp pulse1_envelope_routine_clear_start
+000f7b fd96                      	sbrc channel_flags, 6 //check if start flag is cleared
+000f7c c010                      	rjmp pulse1_envelope_routine_clear_start
                                  
-000efb 3000                      	cpi pulse1_volume_divider, 0x00 //check if the divider is 0
-000efc f011                      	breq PC+3 //if the divider == 0, check loop flag
-000efd 950a                      	dec pulse1_volume_divider //if the divider != 0, decrement and return
-000efe 9508                      	ret
+000f7d 3000                      	cpi pulse1_volume_divider, 0x00 //check if the divider is 0
+000f7e f011                      	breq PC+3 //if the divider == 0, check loop flag
+000f7f 950a                      	dec pulse1_volume_divider //if the divider != 0, decrement and return
+000f80 9508                      	ret
                                  
-000eff 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the divider == 0, reset the divider period
-000f01 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
-000f02 ff95                      	sbrs channel_flags, 5 //check if the loop flag is set
-000f03 c002                      	rjmp pulse1_envelope_routine_decrement_decay //if the loop flag is not set, check the decay
-000f04 e01f                      	ldi pulse1_volume_decay, 0x0F //if the loop flag is set, reset decay and return
-000f05 9508                      	ret
+000f81 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the divider == 0, reset the divider period
+000f83 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
+000f84 ff95                      	sbrs channel_flags, 5 //check if the loop flag is set
+000f85 c002                      	rjmp pulse1_envelope_routine_decrement_decay //if the loop flag is not set, check the decay
+000f86 e01f                      	ldi pulse1_volume_decay, 0x0F //if the loop flag is set, reset decay and return
+000f87 9508                      	ret
                                  
                                  pulse1_envelope_routine_decrement_decay:
-000f06 3010                      	cpi pulse1_volume_decay, 0x00 //check if the decay is 0
-000f07 f409                      	brne PC+2 //if decay != 0, go decrement
-000f08 9508                      	ret //if decay == 0 && loop flag == 0, do nothing and return
-000f09 951a                      	dec pulse1_volume_decay
-000f0a 9508                      	ret
+000f88 3010                      	cpi pulse1_volume_decay, 0x00 //check if the decay is 0
+000f89 f409                      	brne PC+2 //if decay != 0, go decrement
+000f8a 9508                      	ret //if decay == 0 && loop flag == 0, do nothing and return
+000f8b 951a                      	dec pulse1_volume_decay
+000f8c 9508                      	ret
                                  
                                  pulse1_envelope_routine_clear_start:
-000f0b 7b9f                      	cbr channel_flags, 0b01000000 //if the start flag is set, clear it
-000f0c 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the start flag is set, reset the divider period
-000f0e 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
-000f0f e01f                      	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
-000f10 9508                      	ret
+000f8d 7b9f                      	cbr channel_flags, 0b01000000 //if the start flag is set, clear it
+000f8e 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the start flag is set, reset the divider period
+000f90 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
+000f91 e01f                      	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
+000f92 9508                      	ret
                                  
                                  //CONVERTERS (TABLES)
                                  //converts and loads 5 bit length to corresponding 8 bit length value into r29
                                  length_converter:
-000f11 e1fe                      	ldi ZH, HIGH(length << 1)
-000f12 e2ee                      	ldi ZL, LOW(length << 1)
-000f13 0fed                      	add ZL, r29
-000f14 1df0                      	adc ZH, zero
-000f15 91d4                      	lpm r29, Z
-000f16 9508                      	ret
+000f93 e1ff                      	ldi ZH, HIGH(length << 1)
+000f94 e3e2                      	ldi ZL, LOW(length << 1)
+000f95 0fed                      	add ZL, r29
+000f96 1df0                      	adc ZH, zero
+000f97 91d4                      	lpm r29, Z
+000f98 9508                      	ret
                                  
-000f17 7f05
-000f18 010a
-000f19 0214
-000f1a 0328
-000f1b 0450
-000f1c 051e
-000f1d 0607
-000f1e 070d
-000f1f 0806
-000f20 090c
-000f21 0a18
-000f22 0b30
-000f23 0c60
-000f24 0d24
-000f25 0e08
-000f26 0f10                      length: .db $05, $7F, $0A, $01, $14, $02, $28, $03, $50, $04, $1E, $05, $07, $06, $0D, $07, $06, $08, $0C, $09, $18, $0A, $30, $0B, $60, $0C, $24, $0D, $08, $0E, $10, $0F
+000f99 7f05
+000f9a 010a
+000f9b 0214
+000f9c 0328
+000f9d 0450
+000f9e 051e
+000f9f 0607
+000fa0 070d
+000fa1 0806
+000fa2 090c
+000fa3 0a18
+000fa4 0b30
+000fa5 0c60
+000fa6 0d24
+000fa7 0e08
+000fa8 0f10                      length: .db $05, $7F, $0A, $01, $14, $02, $28, $03, $50, $04, $1E, $05, $07, $06, $0D, $07, $06, $08, $0C, $09, $18, $0A, $30, $0B, $60, $0C, $24, $0D, $08, $0E, $10, $0F
                                  
                                  //loads pulse sequence into r29
                                  duty_cycle_sequences:
-000f27 e1fe                      	ldi ZH, HIGH(sequences << 1)
-000f28 e5ea                      	ldi ZL, LOW(sequences << 1)
-000f29 0fed                      	add ZL, r29
-000f2a 1df0                      	adc ZH, zero
-000f2b 91d4                      	lpm r29, Z
-000f2c 9508                      	ret
+000fa9 e1ff                      	ldi ZH, HIGH(sequences << 1)
+000faa e5ee                      	ldi ZL, LOW(sequences << 1)
+000fab 0fed                      	add ZL, r29
+000fac 1df0                      	adc ZH, zero
+000fad 91d4                      	lpm r29, Z
+000fae 9508                      	ret
                                  
                                  //pulse sequences: 12.5%, 25%, 50%, 75%
-000f2d 0301
-000f2e fc0f                      sequences: .db 0b00000001, 0b00000011, 0b00001111, 0b11111100
+000faf 0301
+000fb0 fc0f                      sequences: .db 0b00000001, 0b00000011, 0b00001111, 0b11111100
                                  
                                  //famitracker volumes table: http://famitracker.com/wiki/index.php?title=Volume
                                  volumes:
-000f2f 0000
-000f30 0000
-000f31 0000
-000f32 0000
-000f33 0000
-000f34 0000
-000f35 0000
-000f36 0000                      	.db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-000f37 0100
-000f38 0101
-000f39 0101
-000f3a 0101
-000f3b 0101
-000f3c 0101
-000f3d 0101
-000f3e 0101                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
-000f3f 0100
-000f40 0101
-000f41 0101
-000f42 0101
-000f43 0101
-000f44 0101
-000f45 0101
-000f46 0201                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02
-000f47 0100
-000f48 0101
-000f49 0101
-000f4a 0101
-000f4b 0101
-000f4c 0202
-000f4d 0202
-000f4e 0302                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03
-000f4f 0100
-000f50 0101
-000f51 0101
-000f52 0101
-000f53 0202
-000f54 0202
-000f55 0303
-000f56 0403                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04
-000f57 0100
-000f58 0101
-000f59 0101
-000f5a 0202
-000f5b 0302
-000f5c 0303
-000f5d 0404
-000f5e 0504                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05
-000f5f 0100
-000f60 0101
-000f61 0201
-000f62 0202
-000f63 0303
-000f64 0404
-000f65 0504
-000f66 0605                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05, 0x06
-000f67 0100
-000f68 0101
-000f69 0201
-000f6a 0302
-000f6b 0403
-000f6c 0504
-000f6d 0605
-000f6e 0706                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07
-000f6f 0100
-000f70 0101
-000f71 0202
-000f72 0303
-000f73 0404
-000f74 0505
-000f75 0606
-000f76 0807                      	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x08
-000f77 0100
-000f78 0101
-000f79 0302
-000f7a 0403
-000f7b 0504
-000f7c 0606
-000f7d 0707
-000f7e 0908                      	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08, 0x09
-000f7f 0100
-000f80 0201
-000f81 0302
-000f82 0404
-000f83 0605
-000f84 0706
-000f85 0808
-000f86 0a09                      	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A
-000f87 0100
-000f88 0201
-000f89 0302
-000f8a 0504
-000f8b 0605
-000f8c 0807
-000f8d 0908
-000f8e 0b0a                      	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x05, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B
-000f8f 0100
-000f90 0201
-000f91 0403
-000f92 0504
-000f93 0706
-000f94 0808
-000f95 0a09
-000f96 0c0b                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B, 0x0C
-000f97 0100
-000f98 0201
-000f99 0403
-000f9a 0605
-000f9b 0706
-000f9c 0908
-000f9d 0b0a
-000f9e 0d0c                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D
-000f9f 0100
-000fa0 0201
-000fa1 0403
-000fa2 0605
-000fa3 0807
-000fa4 0a09
-000fa5 0c0b
-000fa6 0e0d                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E
-000fa7 0100
-000fa8 0302
-000fa9 0504
-000faa 0706
-000fab 0908
-000fac 0b0a
-000fad 0d0c
+000fb1 0000
+000fb2 0000
+000fb3 0000
+000fb4 0000
+000fb5 0000
+000fb6 0000
+000fb7 0000
+000fb8 0000                      	.db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+000fb9 0100
+000fba 0101
+000fbb 0101
+000fbc 0101
+000fbd 0101
+000fbe 0101
+000fbf 0101
+000fc0 0101                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
+000fc1 0100
+000fc2 0101
+000fc3 0101
+000fc4 0101
+000fc5 0101
+000fc6 0101
+000fc7 0101
+000fc8 0201                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02
+000fc9 0100
+000fca 0101
+000fcb 0101
+000fcc 0101
+000fcd 0101
+000fce 0202
+000fcf 0202
+000fd0 0302                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03
+000fd1 0100
+000fd2 0101
+000fd3 0101
+000fd4 0101
+000fd5 0202
+000fd6 0202
+000fd7 0303
+000fd8 0403                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04
+000fd9 0100
+000fda 0101
+000fdb 0101
+000fdc 0202
+000fdd 0302
+000fde 0303
+000fdf 0404
+000fe0 0504                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05
+000fe1 0100
+000fe2 0101
+000fe3 0201
+000fe4 0202
+000fe5 0303
+000fe6 0404
+000fe7 0504
+000fe8 0605                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05, 0x06
+000fe9 0100
+000fea 0101
+000feb 0201
+000fec 0302
+000fed 0403
+000fee 0504
+000fef 0605
+000ff0 0706                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07
+000ff1 0100
+000ff2 0101
+000ff3 0202
+000ff4 0303
+000ff5 0404
+000ff6 0505
+000ff7 0606
+000ff8 0807                      	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x08
+000ff9 0100
+000ffa 0101
+000ffb 0302
+000ffc 0403
+000ffd 0504
+000ffe 0606
+000fff 0707
+001000 0908                      	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08, 0x09
+001001 0100
+001002 0201
+001003 0302
+001004 0404
+001005 0605
+001006 0706
+001007 0808
+001008 0a09                      	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A
+001009 0100
+00100a 0201
+00100b 0302
+00100c 0504
+00100d 0605
+00100e 0807
+00100f 0908
+001010 0b0a                      	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x05, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B
+001011 0100
+001012 0201
+001013 0403
+001014 0504
+001015 0706
+001016 0808
+001017 0a09
+001018 0c0b                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B, 0x0C
+001019 0100
+00101a 0201
+00101b 0403
+00101c 0605
+00101d 0706
+00101e 0908
+00101f 0b0a
+001020 0d0c                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D
+001021 0100
+001022 0201
+001023 0403
+001024 0605
+001025 0807
+001026 0a09
+001027 0c0b
+001028 0e0d                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E
+001029 0100
+00102a 0302
+00102b 0504
+00102c 0706
+00102d 0908
+00102e 0b0a
+00102f 0d0c
 
 
 RESOURCE USE INFORMATION
@@ -1044,41 +1155,41 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega4809" register use summary:
-x  :   0 y  :   0 z  :  25 r0 :  60 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+x  :   0 y  :   0 z  :  28 r0 :  55 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
 r13:   4 r14:   4 r15:   9 r16:   7 r17:   6 r18:   0 r19:   0 r20:   0 
-r21:   0 r22:   0 r23:   0 r24:   0 r25:  11 r26:  38 r27: 130 r28:  11 
-r29:  36 r30:  30 r31:  30 
+r21:   0 r22:   0 r23:   0 r24:   0 r25:  11 r26:  40 r27: 170 r28:  22 
+r29:  45 r30:  38 r31:  38 
 Registers used: 14 out of 35 (40.0%)
 
 "ATmega4809" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :  11 add   :  10 adiw  :   8 and   :   0 
 andi  :  10 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   1 break :   0 breq  :  12 brge  :   0 brhc  :   0 
+brcc  :   0 brcs  :   1 break :   0 breq  :  16 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   3 brlt  :   0 brmi  :   0 
-brne  :   6 brpl  :   0 brsh  :   4 brtc  :   0 brts  :   0 brvc  :   0 
+brne  :   7 brpl  :   0 brsh  :   4 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   2 
 clc   :   0 clh   :   0 cli   :   4 cln   :   0 clr   :   1 cls   :   0 
-clt   :   0 clv   :   0 clz   :   0 com   :   2 cp    :   1 cpc   :   0 
-cpi   :  16 cpse  :   2 dec   :   8 des   :   0 eor   :   0 fmul  :   0 
-fmuls :   0 fmulsu:   0 icall :   0 ijmp  :   0 in    :   4 inc   :   2 
-jmp   :   6 ld    :   0 ldd   :   0 ldi   :  42 lds   :  44 lpm   :  31 
-lsl   :   8 lsr   :   2 mov   :   6 movw  :   0 mul   :   0 muls  :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   2 cp    :   2 cpc   :   0 
+cpi   :  21 cpse  :   2 dec   :   8 des   :   0 eor   :   0 fmul  :   0 
+fmuls :   0 fmulsu:   0 icall :   0 ijmp  :   0 in    :   4 inc   :   7 
+jmp   :   6 ld    :   0 ldd   :   0 ldi   :  45 lds   :  51 lpm   :  35 
+lsl   :  10 lsr   :   2 mov   :  10 movw  :   0 mul   :   0 muls  :   0 
 mulsu :   0 neg   :   0 nop   :   0 or    :   1 ori   :   0 out   :   6 
-pop   :   7 push  :   7 rcall :   9 ret   :  11 reti  :   3 rjmp  :  36 
-rol   :   7 ror   :   1 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 
+pop   :  11 push  :  11 rcall :  15 ret   :  13 reti  :   3 rjmp  :  37 
+rol   :   9 ror   :   1 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 
 sbis  :   0 sbiw  :   0 sbr   :   3 sbrc  :   3 sbrs  :   4 sec   :   0 
 seh   :   0 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 
 sev   :   0 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 
-sts   : 109 sub   :   0 subi  :   3 swap  :   3 tst   :   0 wdr   :   0 
+sts   : 135 sub   :   0 subi  :   2 swap  :   3 tst   :   0 wdr   :   0 
 
 Instructions used: 43 out of 114 (37.7%)
 
 "ATmega4809" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x001f5e   1212   6790   8002   49152  16.3%
-[.dseg] 0x002800 0x002822      0     34     34    6144   0.6%
+[.cseg] 0x000000 0x002062   1438   6824   8262   49152  16.8%
+[.dseg] 0x002800 0x00282d      0     45     45    6144   0.7%
 [.eseg] 0x000000 0x000000      0      0      0     256   0.0%
 
-Assembly complete, 0 errors, 62 warnings
+Assembly complete, 0 errors, 67 warnings
