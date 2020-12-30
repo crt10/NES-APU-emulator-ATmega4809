@@ -17,6 +17,7 @@ pulse1_timerL: .byte 1 //$4002 LLLL.LLLL = Low 8 bits for timer
 pulse1_timerH: .byte 1 //$4002 HHHH.HHHH = High 8 bits for timer
 pulse1_length: .byte 1 //$4002 000l.llll = Length counter load
 pulse1_output_volume: .byte 1 //this is the final output volume of pulse 1
+pulse1_note: .byte 1 //the current note index in the note table
 
 song_frames: .byte 2
 song_frame_offset: .byte 2
@@ -134,7 +135,7 @@ init:
 	sts song_frames+1, ZH
 
 	//CHANNEL 0 TEST
-	ldi r27, 0x02
+	ldi r27, 0x00
 	add ZL, r27
 	adc ZH, zero
 	lpm r26, Z+
@@ -367,6 +368,8 @@ sound_driver:
 	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
 	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
 
+
+
 sound_driver_channel0:
 	lds ZL, pulse1_pattern //current pattern for pulse 1
 	lds ZH, pulse1_pattern+1
@@ -401,26 +404,19 @@ sound_driver_channel0_check_if_end:
 	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
 	rjmp sound_driver_channel0_next_pattern
 
+
+
 sound_driver_channel0_note:
+	sts pulse1_note, r27 //store the note index
 	sts pulse1_volume_macro_offset, zero //reset all macro offsets
 	sts pulse1_arpeggio_macro_offset, zero
 	sts pulse1_pitch_macro_offset, zero
 	sts pulse1_hi_pitch_macro_offset, zero
 	sts pulse1_duty_macro_offset, zero
-
-	ldi ZL, LOW(note_table << 1) //load in note table
-	ldi ZH, HIGH(note_table << 1)
-	lsl r27 //double the offset for the note table because we are getting byte data
-	add ZL, r27 //add offset
-	adc ZH, zero
-	lpm r26, Z+ //load bytes
-	lpm r27, Z
-	sts TCB0_CCMPL, r26 //load the LOW bits for timer
-	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
-	sts TCB0_CNTL, zero
-	sts TCB0_CNTH, zero
 	rcall sound_driver_channel0_increment_offset
 	rjmp sound_driver_channel0
+
+
 
 sound_driver_channel0_volume:
 	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
@@ -432,11 +428,15 @@ sound_driver_channel0_volume:
 	rcall sound_driver_channel0_increment_offset
 	rjmp sound_driver_channel0
 
+
+
 sound_driver_channel0_delay:
 	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts pulse1_pattern_delay, r27
 	rcall sound_driver_channel0_increment_offset
 	rjmp sound_driver_instrument_routine
+
+
 
 sound_driver_channel0_instrument_change:
 	sts pulse1_volume_macro, zero //reset all macro addresses
@@ -498,8 +498,8 @@ sound_driver_channel0_instrument_change_load_macro_volume:
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 	
 sound_driver_channel0_instrument_change_load_macro_arpeggio:
-	sts pulse1_volume_macro, r28
-	sts pulse1_volume_macro+1, r29
+	sts pulse1_arpeggio_macro, r28
+	sts pulse1_arpeggio_macro+1, r29
 	rcall sound_driver_channel0_instrument_change_read_header_arpeggio
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
@@ -568,6 +568,8 @@ sound_driver_channel0_instrument_change_read_header_arpeggio:
 	pop ZL
 	ret
 
+
+
 sound_driver_channel0_release:
 sound_driver_channel0_release_volume:
 	lds r27, pulse1_volume_macro_release
@@ -603,6 +605,8 @@ sound_driver_channel0_release_exit:
 	rcall sound_driver_channel0_increment_offset
 	rjmp sound_driver_channel0
 
+
+
 sound_driver_channel0_next_pattern:
 	lds ZL, song_frames
 	lds ZH, song_frames+1
@@ -611,7 +615,7 @@ sound_driver_channel0_next_pattern:
 	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
 	sts song_frame_offset, r26
 	sts song_frame_offset+1, r27
-	adiw r27:r26, 2 //offset for channel 1 (test)
+	//adiw r27:r26, 2 //offset for channel 1 (test)
 	add ZL, r26
 	adc ZH, r27
 
@@ -625,6 +629,8 @@ sound_driver_channel0_next_pattern:
 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
 	sts pulse1_pattern_offset+1, zero
 	rjmp sound_driver_channel0
+
+
 
 sound_driver_channel0_increment_offset:
 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
@@ -641,6 +647,8 @@ sound_driver_channel0_increment_offset_twice: //used for data that takes up 2 by
 	sts pulse1_pattern_offset, ZL
 	sts pulse1_pattern_offset+1, ZH
 	ret
+
+
 
 sound_driver_decrement_frame_delay:
 	dec r27
@@ -660,10 +668,13 @@ sound_driver_instrument_routine_channel0_volume:
 
 	lds r27, pulse1_volume_macro_release
 	cp r27, r26
-	breq sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index, check if there is a loop
-	lds r27, pulse1_volume_macro_loop
-	cpi r27, 0xFF //check if loop flag exists
-	brne sound_driver_instrument_routine_channel0_volume_macro_end_flag+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
+	brne sound_driver_instrument_routine_channel0_volume_increment //if the current offset is not equal to the release index, increment the offset
+	lds r26, pulse1_volume_macro_loop
+	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
+	brlo sound_driver_instrument_routine_channel0_volume_macro_end_flag+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
+	rjmp sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
+
+sound_driver_instrument_routine_channel0_volume_increment:
 	inc r26 //increment the macro offset
 	sts pulse1_volume_macro_offset, r26
 	
@@ -702,10 +713,137 @@ sound_driver_instrument_routine_channel0_volume_load:
 	lpm r27, Z
 	sts pulse1_output_volume, r27 //store the new output volume
 	
+
+
 sound_driver_instrument_routine_channel0_arpeggio:
 	lds ZL, pulse1_arpeggio_macro
 	lds ZH, pulse1_arpeggio_macro+1
+	adiw Z, 0
+	breq sound_driver_instrument_routine_channel0_arpeggio_default //if no arpeggio macro is in use, go output the note without any offsets
+	lsl ZL //multiply by 2 to make Z into a byte pointer for the macro's address
+	rol ZH
+	lds r26, pulse1_arpeggio_macro_offset
+	add ZL, r26
+	adc ZH, zero
 
+	lds r27, pulse1_arpeggio_macro_release
+	cp r27, r26
+	brne sound_driver_instrument_routine_channel0_arpeggio_increment //if the current offset is not equal to the release index, increment the offset
+	lds r26, pulse1_arpeggio_macro_loop
+	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
+	mov r27, r26
+	brlo sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
+
+sound_driver_instrument_routine_channel0_arpeggio_increment:
+	inc r26 //increment the macro offset
+	sts pulse1_arpeggio_macro_offset, r26
+	
+sound_driver_instrument_routine_channel0_arpeggio_read:
+	lpm r27, Z //load arpeggio data into r27
+	cpi r27, 0x80 //check for macro end flag
+	brne sound_driver_instrument_routine_channel0_arpeggio_process //if the data was not the macro end flag, calculate the volume
+
+
+
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag:
+	lds r27, pulse1_arpeggio_macro_loop //load the loop index
+	cpi r27, 0xFF //check if loop flag exists
+	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if a loop flag exists, then load the loop value
+
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_fixed:
+	subi r26, 1 //if a loop flag does not exist, keep the offset at the end flag
+	sts pulse1_arpeggio_macro_offset, r26
+	lds r27, pulse1_arpeggio_macro_mode //load the mode to check for fixed mode NOTE: end behavior for fixed mode is different in that once the macro ends, the true note is played
+	cpi r27, 0x01 //fixed mode
+	breq sound_driver_instrument_routine_channel0_arpeggio_default //if there is no loop and we are in fixed mode, go play the true note
+	cpi r27, 0x02 //relative mode NOTE: end behavior is similar to fixed mode
+	breq sound_driver_instrument_routine_channel0_arpeggio_default
+
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop:
+	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
+	sts pulse1_arpeggio_macro_offset, r26 //store the last valid index into the offset
+	rjmp sound_driver_instrument_routine_channel0_arpeggio
+
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload:
+	sts pulse1_arpeggio_macro_offset, r27 //store the loop index into the offset
+	rjmp sound_driver_instrument_routine_channel0_arpeggio //go back and re-read the volume data
+
+
+
+sound_driver_instrument_routine_channel0_arpeggio_process:
+	lds r26, pulse1_arpeggio_macro_mode
+	cpi r26, 0x00 //absolute mode
+	breq sound_driver_instrument_routine_channel0_arpeggio_process_absolute
+	cpi r26, 0x01 //fixed mode
+	breq sound_driver_instrument_routine_channel0_arpeggio_process_fixed
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative //relative mode
+
+sound_driver_instrument_routine_channel0_arpeggio_default:
+	lds r26, pulse1_note //load the current note index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+
+sound_driver_instrument_routine_channel0_arpeggio_process_absolute:
+	lds r26, pulse1_note //load the current note index
+	add r26, r27 //offset the note with the arpeggio data
+	brmi sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract //check if we are subtracting from the note index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_absolute_add
+
+sound_driver_instrument_routine_channel0_arpeggio_process_fixed:
+	mov r26, r27 //move the arpeggio data into r26
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+
+sound_driver_instrument_routine_channel0_arpeggio_process_relative:
+	lds r26, pulse1_note //load the current note index
+	add r26, r27 //offset the note with the arpeggio data
+	
+	brmi sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract //check if we are subtracting from the note index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative_add
+
+
+
+sound_driver_instrument_routine_channel0_arpeggio_process_absolute_add:
+	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
+	brlo sound_driver_instrument_routine_channel0_arpeggio_process_load //if the result is valid, go load the new note
+	ldi r26, 0x56 //if the result was too large, just set the result to the highest possible note index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+
+sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract:
+	sbrc r26, 7 //check if result is negative
+	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+
+sound_driver_instrument_routine_channel0_arpeggio_process_relative_add:
+	sts pulse1_note, r26 //NOTE: relative mode modifies the original note index
+	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
+	brlo sound_driver_instrument_routine_channel0_arpeggio_process_load //if the result is valid, go load the new note
+	ldi r26, 0x56 //if the result was too large, just set the result to the highest possible note index
+	sts pulse1_note, r26
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+
+sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract:
+	sbrc r26, 7 //check if result is negative
+	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
+	sts pulse1_note, r26
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+
+
+
+sound_driver_instrument_routine_channel0_arpeggio_process_load:
+	ldi ZL, LOW(note_table << 1) //load in note table
+	ldi ZH, HIGH(note_table << 1)
+	lsl r26 //double the offset for the note table because we are getting byte data
+	add ZL, r26 //add offset
+	adc ZH, zero
+	lpm r26, Z+ //load bytes
+	lpm r27, Z
+	sts TCB0_CCMPL, r26 //load the LOW bits for timer
+	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
+/*	sts TCB0_CNTL, zero
+	sts TCB0_CNTH, zero*/
+	rjmp sound_driver_instrument_routine_channel0_pitch
+
+sound_driver_instrument_routine_channel0_pitch:
 	lds ZL, pulse1_pitch_macro
 	lds ZH, pulse1_pitch_macro+1
 
