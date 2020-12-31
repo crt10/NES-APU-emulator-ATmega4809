@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Tue Dec 29 23:45:36 2020
+AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Thu Dec 31 02:01:01 2020
 
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(9): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m4809def.inc'
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(91): Including file 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm'
@@ -76,22 +76,22 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(91): Includ
                                  .def pulse1_volume_decay = r17 //0000.dddd = Decay
                                  
                                  reset:
-000000 940c 0148                 	jmp init
+000000 940c 0175                 	jmp init
                                  
                                  .org TCA0_OVF_vect
-00000e 940c 0239                 	jmp sound_driver
+00000e 940c 0266                 	jmp sound_driver
                                  
                                  .org TCA0_CMP0_vect
-000012 940c 021f                 	jmp sequence_0_2
+000012 940c 024c                 	jmp sequence_0_2
                                  
                                  .org TCA0_CMP1_vect
-000014 940c 0229                 	jmp sequence_1_3
+000014 940c 0256                 	jmp sequence_1_3
                                  
                                  .org TCA0_CMP2_vect
-000016 940c 021f                 	jmp sequence_0_2
+000016 940c 024c                 	jmp sequence_0_2
                                  
                                  .org TCB0_INT_vect
-000018 940c 040b                 	jmp pulse1_sequence_routine
+000018 940c 0442                 	jmp pulse1_sequence_routine
                                  
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm(18): warning: .cseg .db misalignment - padding zero byte
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(91): 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm' included form here
@@ -133,10 +133,10 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(91): 'C:\Us
                                  
                                  init:
                                  	//MAIN CLOCK
-000148 edb8                      	ldi r27, CPU_CCP_IOREG_gc //protected write
-000149 93b0 0034                 	sts CPU_CCP, r27
-00014b e0b0                      	ldi r27, 0 << CLKCTRL_PEN_bp //disable prescaler for 20 MHz on main clock
-00014c 93b0 0061                 	sts CLKCTRL_MCLKCTRLB, r27
+000175 edb8                      	ldi r27, CPU_CCP_IOREG_gc //protected write
+000176 93b0 0034                 	sts CPU_CCP, r27
+000178 e0b0                      	ldi r27, 0 << CLKCTRL_PEN_bp //disable prescaler for 20 MHz on main clock
+000179 93b0 0061                 	sts CLKCTRL_MCLKCTRLB, r27
                                  
                                  /*	//TEST FOR C4, 1 SECOND, 50% DD
                                  	ldi r26, 0x97
@@ -154,107 +154,107 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(91): 'C:\Us
                                  	sts pulse1_sweep_param, r27*/
                                  
                                  	//ZERO
-00014e 2400                      	clr zero
+00017b 2400                      	clr zero
                                  
                                  	//MEMORY
-00014f e3b0                      	ldi r27, 0b00110000
-000150 93b0 2800                 	sts pulse1_param, r27
-000152 e8b0                      	ldi r27, 0b10000000
-000153 93b0 2801                 	sts pulse1_sweep_param, r27
-000155 efbf                      	ldi r27, 0xFF
-000156 93b0 2802                 	sts pulse1_timerL, r27
-000158 93b0 2803                 	sts pulse1_timerH, r27
-00015a 93b0 2804                 	sts pulse1_length, r27
+00017c e3b0                      	ldi r27, 0b00110000
+00017d 93b0 2800                 	sts pulse1_param, r27
+00017f e8b0                      	ldi r27, 0b10000000
+000180 93b0 2801                 	sts pulse1_sweep_param, r27
+000182 efbf                      	ldi r27, 0xFF
+000183 93b0 2802                 	sts pulse1_timerL, r27
+000185 93b0 2803                 	sts pulse1_timerH, r27
+000187 93b0 2804                 	sts pulse1_length, r27
                                  
-00015c e0b0                      	ldi r27, 0x00
-00015d 93b0 2809                 	sts song_frame_offset, r27
-00015f 93b0 280a                 	sts song_frame_offset+1, r27
-000161 eee2                      	ldi ZL, LOW(song0_frames << 1)
-000162 e0f0                      	ldi ZH, HIGH(song0_frames << 1)
-000163 93e0 2807                 	sts song_frames, ZL
-000165 93f0 2808                 	sts song_frames+1, ZH
+000189 e0b0                      	ldi r27, 0x00
+00018a 93b0 2809                 	sts song_frame_offset, r27
+00018c 93b0 280a                 	sts song_frame_offset+1, r27
+00018e eee2                      	ldi ZL, LOW(song0_frames << 1)
+00018f e0f0                      	ldi ZH, HIGH(song0_frames << 1)
+000190 93e0 2807                 	sts song_frames, ZL
+000192 93f0 2808                 	sts song_frames+1, ZH
                                  
                                  	//CHANNEL 0 TEST
-000167 e0b0                      	ldi r27, 0x00
-000168 0feb                      	add ZL, r27
-000169 1df0                      	adc ZH, zero
-00016a 91a5                      	lpm r26, Z+
-00016b 91b4                      	lpm r27, Z
-00016c 0faa                      	lsl r26
-00016d 1fbb                      	rol r27
-00016e 93a0 280b                 	sts pulse1_pattern, r26
-000170 93b0 280c                 	sts pulse1_pattern+1, r27
-000172 e0b0                      	ldi r27, 0x00
-000173 9200 280d                 	sts pulse1_pattern_delay, zero
-000175 9200 280e                 	sts pulse1_pattern_offset, zero
-000177 9200 280f                 	sts pulse1_pattern_offset+1, zero
+000194 e0b0                      	ldi r27, 0x00
+000195 0feb                      	add ZL, r27
+000196 1df0                      	adc ZH, zero
+000197 91a5                      	lpm r26, Z+
+000198 91b4                      	lpm r27, Z
+000199 0faa                      	lsl r26
+00019a 1fbb                      	rol r27
+00019b 93a0 280b                 	sts pulse1_pattern, r26
+00019d 93b0 280c                 	sts pulse1_pattern+1, r27
+00019f e0b0                      	ldi r27, 0x00
+0001a0 9200 280d                 	sts pulse1_pattern_delay, zero
+0001a2 9200 280e                 	sts pulse1_pattern_offset, zero
+0001a4 9200 280f                 	sts pulse1_pattern_offset+1, zero
                                  
                                  	//channel 0 instrument macros
-000179 efbf                      	ldi r27, 0xFF
-00017a 9200 2812                 	sts pulse1_volume_macro_offset, zero
-00017c 93b0 2813                 	sts pulse1_volume_macro_loop, r27
-00017e 93b0 2814                 	sts pulse1_volume_macro_release, r27
-000180 9200 2817                 	sts pulse1_arpeggio_macro_offset, zero
-000182 93b0 2818                 	sts pulse1_arpeggio_macro_loop, r27
-000184 93b0 2819                 	sts pulse1_arpeggio_macro_release, r27
-000186 93b0 281a                 	sts pulse1_arpeggio_macro_mode, r27
-000188 9200 281d                 	sts pulse1_pitch_macro_offset, zero
-00018a 93b0 281e                 	sts pulse1_pitch_macro_loop, r27
-00018c 93b0 281f                 	sts pulse1_pitch_macro_release, r27
-00018e 9200 2822                 	sts pulse1_hi_pitch_macro_offset, zero
-000190 93b0 2823                 	sts pulse1_hi_pitch_macro_loop, r27
-000192 93b0 2824                 	sts pulse1_hi_pitch_macro_release, r27
-000194 9200 2827                 	sts pulse1_duty_macro_offset, zero
-000196 93b0 2828                 	sts pulse1_duty_macro_loop, r27
-000198 93b0 2829                 	sts pulse1_duty_macro_release, r27
+0001a6 efbf                      	ldi r27, 0xFF
+0001a7 9200 2812                 	sts pulse1_volume_macro_offset, zero
+0001a9 93b0 2813                 	sts pulse1_volume_macro_loop, r27
+0001ab 93b0 2814                 	sts pulse1_volume_macro_release, r27
+0001ad 9200 2817                 	sts pulse1_arpeggio_macro_offset, zero
+0001af 93b0 2818                 	sts pulse1_arpeggio_macro_loop, r27
+0001b1 93b0 2819                 	sts pulse1_arpeggio_macro_release, r27
+0001b3 93b0 281a                 	sts pulse1_arpeggio_macro_mode, r27
+0001b5 9200 281d                 	sts pulse1_pitch_macro_offset, zero
+0001b7 93b0 281e                 	sts pulse1_pitch_macro_loop, r27
+0001b9 93b0 281f                 	sts pulse1_pitch_macro_release, r27
+0001bb 9200 2822                 	sts pulse1_hi_pitch_macro_offset, zero
+0001bd 93b0 2823                 	sts pulse1_hi_pitch_macro_loop, r27
+0001bf 93b0 2824                 	sts pulse1_hi_pitch_macro_release, r27
+0001c1 9200 2827                 	sts pulse1_duty_macro_offset, zero
+0001c3 93b0 2828                 	sts pulse1_duty_macro_loop, r27
+0001c5 93b0 2829                 	sts pulse1_duty_macro_release, r27
                                  
-00019a 9200 2810                 	sts pulse1_volume_macro, zero
-00019c 9200 2811                 	sts pulse1_volume_macro+1, zero
-00019e 9200 2815                 	sts pulse1_arpeggio_macro, zero
-0001a0 9200 2816                 	sts pulse1_arpeggio_macro+1, zero
-0001a2 9200 281b                 	sts pulse1_pitch_macro, zero
-0001a4 9200 281c                 	sts pulse1_pitch_macro+1, zero
-0001a6 9200 2820                 	sts pulse1_hi_pitch_macro, zero
-0001a8 9200 2821                 	sts pulse1_hi_pitch_macro+1, zero
-0001aa 9200 2825                 	sts pulse1_duty_macro, zero
-0001ac 9200 2826                 	sts pulse1_duty_macro+1, zero
+0001c7 9200 2810                 	sts pulse1_volume_macro, zero
+0001c9 9200 2811                 	sts pulse1_volume_macro+1, zero
+0001cb 9200 2815                 	sts pulse1_arpeggio_macro, zero
+0001cd 9200 2816                 	sts pulse1_arpeggio_macro+1, zero
+0001cf 9200 281b                 	sts pulse1_pitch_macro, zero
+0001d1 9200 281c                 	sts pulse1_pitch_macro+1, zero
+0001d3 9200 2820                 	sts pulse1_hi_pitch_macro, zero
+0001d5 9200 2821                 	sts pulse1_hi_pitch_macro+1, zero
+0001d7 9200 2825                 	sts pulse1_duty_macro, zero
+0001d9 9200 2826                 	sts pulse1_duty_macro+1, zero
                                  
-0001ae 9200 282a                 	sts pulse2_pattern_delay, zero
-0001b0 9200 282b                 	sts triangle_pattern_delay, zero
-0001b2 9200 282c                 	sts noise_pattern_delay, zero
-0001b4 9200 282d                 	sts dcpm_pattern_delay, zero
+0001db 9200 282a                 	sts pulse2_pattern_delay, zero
+0001dd 9200 282b                 	sts triangle_pattern_delay, zero
+0001df 9200 282c                 	sts noise_pattern_delay, zero
+0001e1 9200 282d                 	sts dcpm_pattern_delay, zero
                                  
                                  	//PINS
-0001b6 efbf                      	ldi r27, 0xFF //set all pins in VPORTD to output
-0001b7 b9bc                      	out VPORTD_DIR, r27
+0001e3 efbf                      	ldi r27, 0xFF //set all pins in VPORTD to output
+0001e4 b9b0                      	out VPORTA_DIR, r27
                                  
                                  	//ENVELOPE
-0001b8 e00f                      	ldi pulse1_volume_divider, 0x0F
-0001b9 9110 2800                 	lds pulse1_volume_decay, pulse1_param
-0001bb 701f                      	andi pulse1_volume_decay, 0x0F //mask for VVVV bits
-0001bc 9190 2800                 	lds channel_flags, pulse1_param
-0001be 7390                      	andi channel_flags, 0b00110000
-0001bf 6490                      	sbr channel_flags, 0b01000000 //set start flag
-0001c0 9200 2805                 	sts pulse1_output_volume, zero
+0001e5 e00f                      	ldi pulse1_volume_divider, 0x0F
+0001e6 9110 2800                 	lds pulse1_volume_decay, pulse1_param
+0001e8 701f                      	andi pulse1_volume_decay, 0x0F //mask for VVVV bits
+0001e9 9190 2800                 	lds channel_flags, pulse1_param
+0001eb 7390                      	andi channel_flags, 0b00110000
+0001ec 6490                      	sbr channel_flags, 0b01000000 //set start flag
+0001ed 9200 2805                 	sts pulse1_output_volume, zero
                                  	
                                  	//LENGTH
-0001c2 91d0 2804                 	lds r29, pulse1_length
-0001c4 d293                      	rcall length_converter
-0001c5 2eed                      	mov pulse1_length_counter, r29
+0001ef 91d0 2804                 	lds r29, pulse1_length
+0001f1 d29d                      	rcall length_converter
+0001f2 2eed                      	mov pulse1_length_counter, r29
                                  
                                  	//SEQUENCE
-0001c6 91d0 2800                 	lds r29, pulse1_param //load param for sequence table
-0001c8 0fdd                      	lsl r29 //shift duty cycle bits to LSB
-0001c9 1fdd                      	rol r29
-0001ca 1fdd                      	rol r29
-0001cb 70d3                      	andi r29, 0b00000011 //mask duty cycle bits
-0001cc d2a1                      	rcall duty_cycle_sequences
-0001cd 2edd                      	mov pulse1_sequence, r29
+0001f3 91d0 2800                 	lds r29, pulse1_param //load param for sequence table
+0001f5 0fdd                      	lsl r29 //shift duty cycle bits to LSB
+0001f6 1fdd                      	rol r29
+0001f7 1fdd                      	rol r29
+0001f8 70d3                      	andi r29, 0b00000011 //mask duty cycle bits
+0001f9 d2ab                      	rcall duty_cycle_sequences
+0001fa 2edd                      	mov pulse1_sequence, r29
                                  
                                  	//SWEEP
-0001ce 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param
-0001d0 94f2                      	swap pulse1_sweep //swap data from high byte and low byte
-0001d1 6890                      	sbr channel_flags, 0b10000000 //set reload flag
+0001fb 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param
+0001fd 94f2                      	swap pulse1_sweep //swap data from high byte and low byte
+0001fe 6890                      	sbr channel_flags, 0b10000000 //set reload flag
                                  
                                  	//TIMERS
                                  	//Frame Counter
@@ -266,28 +266,28 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(91): 'C:\Us
                                  	//The ATmega4809 is cofigured to run at 20000000 Hz
                                  	//0.00416666666 seconds is the period for 240 Hz
                                  	//The /64 comes from the prescaler divider used
-0001d2 e7b0                      	ldi r27, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
-0001d3 93b0 0a01                 	sts TCA0_SINGLE_CTRLB, r27
-0001d5 e7b1                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
-0001d6 93b0 0a0a                 	sts TCA0_SINGLE_INTCTRL, r27
-0001d8 e1b5                      	ldi r27, 0x15 //set the period for CMP0
-0001d9 93b0 0a28                 	sts TCA0_SINGLE_CMP0, r27
-0001db e0b5                      	ldi r27, 0x05
-0001dc 93b0 0a29                 	sts TCA0_SINGLE_CMP0 + 1, r27
-0001de e2bb                      	ldi r27, 0x2B //set the period for CMP1
-0001df 93b0 0a2a                 	sts TCA0_SINGLE_CMP1, r27
-0001e1 e0ba                      	ldi r27, 0x0A
-0001e2 93b0 0a2b                 	sts TCA0_SINGLE_CMP1 + 1, r27
-0001e4 e4b1                      	ldi r27, 0x41 //set the period for CMP2
-0001e5 93b0 0a2c                 	sts TCA0_SINGLE_CMP2, r27
-0001e7 e0bf                      	ldi r27, 0x0F
-0001e8 93b0 0a2d                 	sts TCA0_SINGLE_CMP2 + 1, r27
-0001ea e5b7                      	ldi r27, 0x57 //set the period for OVF
-0001eb 93b0 0a26                 	sts TCA0_SINGLE_PER, r27
-0001ed e1b4                      	ldi r27, 0x14
-0001ee 93b0 0a27                 	sts TCA0_SINGLE_PER + 1, r27
-0001f0 e0bb                      	ldi r27, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
-0001f1 93b0 0a00                 	sts TCA0_SINGLE_CTRLA, r27
+0001ff e7b0                      	ldi r27, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
+000200 93b0 0a01                 	sts TCA0_SINGLE_CTRLB, r27
+000202 e7b1                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
+000203 93b0 0a0a                 	sts TCA0_SINGLE_INTCTRL, r27
+000205 e1b5                      	ldi r27, 0x15 //set the period for CMP0
+000206 93b0 0a28                 	sts TCA0_SINGLE_CMP0, r27
+000208 e0b5                      	ldi r27, 0x05
+000209 93b0 0a29                 	sts TCA0_SINGLE_CMP0 + 1, r27
+00020b e2bb                      	ldi r27, 0x2B //set the period for CMP1
+00020c 93b0 0a2a                 	sts TCA0_SINGLE_CMP1, r27
+00020e e0ba                      	ldi r27, 0x0A
+00020f 93b0 0a2b                 	sts TCA0_SINGLE_CMP1 + 1, r27
+000211 e4b1                      	ldi r27, 0x41 //set the period for CMP2
+000212 93b0 0a2c                 	sts TCA0_SINGLE_CMP2, r27
+000214 e0bf                      	ldi r27, 0x0F
+000215 93b0 0a2d                 	sts TCA0_SINGLE_CMP2 + 1, r27
+000217 e5b7                      	ldi r27, 0x57 //set the period for OVF
+000218 93b0 0a26                 	sts TCA0_SINGLE_PER, r27
+00021a e1b4                      	ldi r27, 0x14
+00021b 93b0 0a27                 	sts TCA0_SINGLE_PER + 1, r27
+00021d e0bb                      	ldi r27, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
+00021e 93b0 0a00                 	sts TCA0_SINGLE_CTRLA, r27
                                  
                                  	//NOTE: Channel Timers are clocked (20/2)/(0.8948865) = 11.1746014718 times faster than the NES APU
                                  	//Because of this, we multiply all the NES timer values by 11.1746014718 beforehand 
@@ -296,659 +296,673 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(91): 'C:\Us
                                  	//The /2 comes from the prescaler divider used
                                  	//0.8948865 MHz is the speed of the NTSC NES APU
                                  	//Pulse 1
-0001f3 e0b0                      	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
-0001f4 93b0 0a81                 	sts TCB0_CTRLB, r27
-0001f6 e0b1                      	ldi r27, TCB_CAPT_bm //enable interrupts
-0001f7 93b0 0a85                 	sts TCB0_INTCTRL, r27
-0001f9 91b0 2802                 	lds r27, pulse1_timerL //load the LOW bits for timer
-0001fb 93b0 0a8c                 	sts TCB0_CCMPL, r27
-0001fd 91b0 2803                 	lds r27, pulse1_timerH //load the HIGH bits for timer
-0001ff 93b0 0a8d                 	sts TCB0_CCMPH, r27
-000201 e0b3                      	ldi r27, TCB_CLKSEL_CLKDIV2_gc | TCB_ENABLE_bm //use prescaler divider of 2 and enable timer
-000202 93b0 0a80                 	sts TCB0_CTRLA, r27
-000204 9478                      	sei //global interrupt enable
+000220 e0b0                      	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
+000221 93b0 0a81                 	sts TCB0_CTRLB, r27
+000223 e0b1                      	ldi r27, TCB_CAPT_bm //enable interrupts
+000224 93b0 0a85                 	sts TCB0_INTCTRL, r27
+000226 91b0 2802                 	lds r27, pulse1_timerL //load the LOW bits for timer
+000228 93b0 0a8c                 	sts TCB0_CCMPL, r27
+00022a 91b0 2803                 	lds r27, pulse1_timerH //load the HIGH bits for timer
+00022c 93b0 0a8d                 	sts TCB0_CCMPH, r27
+00022e e0b3                      	ldi r27, TCB_CLKSEL_CLKDIV2_gc | TCB_ENABLE_bm //use prescaler divider of 2 and enable timer
+00022f 93b0 0a80                 	sts TCB0_CTRLA, r27
+000231 9478                      	sei //global interrupt enable
                                  
                                  pulse1:
-000205 fed0                      	sbrs pulse1_sequence, 0 //if the sequence output is zero, return
-000206 c012                      	rjmp pulse1_off
+000232 fed0                      	sbrs pulse1_sequence, 0 //if the sequence output is zero, return
+000233 c012                      	rjmp pulse1_off
                                  
-000207 14e0                      	cp pulse1_length_counter, zero //if length is zero, return
-000208 f081                      	breq pulse1_off
+000234 14e0                      	cp pulse1_length_counter, zero //if length is zero, return
+000235 f081                      	breq pulse1_off
                                  
                                  	//NOTE: We will just mute the pulse when the current period is < $0008
                                  	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
                                  	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
                                  pulse1_check_timer_08:
-000209 91c0 0a8c                 	lds r28, TCB0_CCMPL
-00020b 91d0 0a8d                 	lds r29, TCB0_CCMPH
+000236 91c0 0a8c                 	lds r28, TCB0_CCMPL
+000238 91d0 0a8d                 	lds r29, TCB0_CCMPH
                                  pulse1_check_timer_08_HIGH:
-00020d 30d1                      	cpi r29, 0x01 //check timer HIGH period
-00020e f008                      	brlo pulse1_check_timer_08_LOW //if the timer HIGH period is $00, check the LOW period
-00020f c002                      	rjmp pulse1_check_timer_7FF_HIGH //if the timer HIGH period is > $01, check > $07FF condition
+00023a 30d1                      	cpi r29, 0x01 //check timer HIGH period
+00023b f008                      	brlo pulse1_check_timer_08_LOW //if the timer HIGH period is $00, check the LOW period
+00023c c002                      	rjmp pulse1_check_timer_7FF_HIGH //if the timer HIGH period is > $01, check > $07FF condition
                                  pulse1_check_timer_08_LOW:
-000210 35c9                      	cpi r28, 0x59 //check timer LOW period
-000211 f038                      	brlo pulse1_off //if the HIGH period == $00 && LOW period <= $59, pulse off
+00023d 35c9                      	cpi r28, 0x59 //check timer LOW period
+00023e f038                      	brlo pulse1_off //if the HIGH period == $00 && LOW period <= $59, pulse off
                                  
                                  	//NOTE: Since it'd be too taxing to calculate a target period for every APU clock in the sweep unit,
                                  	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
                                  	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
                                  	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
                                  pulse1_check_timer_7FF_HIGH:
-000212 35d9                      	cpi r29, 0x59 //check timer HIGH period
-000213 f038                      	brlo pulse1_on //if the HIGH period is < $59, then all conditions have passed and pulse is not muted
-000214 f009                      	breq pulse1_check_timer_7FF_LOW //if the HIGH period is == $59, we go check if the LOW period is < $65
-000215 c003                      	rjmp pulse1_off //pulse off if HIGH period is > $59
+00023f 35d9                      	cpi r29, 0x59 //check timer HIGH period
+000240 f038                      	brlo pulse1_on //if the HIGH period is < $59, then all conditions have passed and pulse is not muted
+000241 f009                      	breq pulse1_check_timer_7FF_LOW //if the HIGH period is == $59, we go check if the LOW period is < $65
+000242 c003                      	rjmp pulse1_off //pulse off if HIGH period is > $59
                                  pulse1_check_timer_7FF_LOW:
-000216 36c5                      	cpi r28, 0x65 //check timer LOW period
-000217 f408                      	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
-000218 c002                      	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
+000243 36c5                      	cpi r28, 0x65 //check timer LOW period
+000244 f408                      	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
+000245 c002                      	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
                                  
                                  pulse1_off:
-000219 b80d                      	out VPORTD_OUT, zero
-00021a cfea                      	rjmp pulse1
+000246 b801                      	out VPORTA_OUT, zero
+000247 cfea                      	rjmp pulse1
                                  
                                  pulse1_on:
-00021b 91d0 2805                 	lds r29, pulse1_output_volume
+000248 91d0 2805                 	lds r29, pulse1_output_volume
                                  /*	cpse r29, zero
                                  	rjmp pulse1_off //if VVVV bits are 0, then there is no volume (channel off)*/
                                  
-00021d b9dd                      	out VPORTD_OUT, r29
-00021e cfe6                      	rjmp pulse1
+00024a b9d1                      	out VPORTA_OUT, r29
+00024b cfe6                      	rjmp pulse1
                                  
                                  //FRAME COUNTER/AUDIO SAMPLE ISR
                                  sequence_0_2:
-00021f b7bf                      	in r27, CPU_SREG
-000220 93bf                      	push r27
-000221 94f8                      	cli
+00024c b7bf                      	in r27, CPU_SREG
+00024d 93bf                      	push r27
+00024e 94f8                      	cli
                                  
                                  	//ENVELOPE
-000222 d21d                      	rcall pulse1_envelope_routine
+00024f d227                      	rcall pulse1_envelope_routine
                                  
-000223 e5b0                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP2_bm //clear OVF flag
-000224 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
-000226 91bf                      	pop r27
-000227 bfbf                      	out CPU_SREG, r27
-000228 9518                      	reti
+000250 e5b0                      	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP2_bm //clear OVF flag
+000251 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
+000253 91bf                      	pop r27
+000254 bfbf                      	out CPU_SREG, r27
+000255 9518                      	reti
                                  
                                  sequence_1_3:
-000229 b7bf                      	in r27, CPU_SREG
-00022a 93bf                      	push r27
-00022b 94f8                      	cli
+000256 b7bf                      	in r27, CPU_SREG
+000257 93bf                      	push r27
+000258 94f8                      	cli
                                  
                                  	//ENVELOPE
-00022c d213                      	rcall pulse1_envelope_routine
+000259 d21d                      	rcall pulse1_envelope_routine
                                  
                                  	//SWEEP
-00022d fcf3                      	sbrc pulse1_sweep, 3 //check if the sweep enable bit is cleared
-00022e d1e7                      	rcall pulse1_sweep_routine
+00025a fcf3                      	sbrc pulse1_sweep, 3 //check if the sweep enable bit is cleared
+00025b d1f1                      	rcall pulse1_sweep_routine
                                  
                                  	//LENGTH
                                  	//NOTE: The length routine is relatively simple, so we will not be using clocks to rjmp and ret to a seperate lable
-00022f fd95                      	sbrc channel_flags, 5 //check if the length counter halt bit is cleared
-000230 c002                      	rjmp sequence_1_3_exit
-000231 10e0                      	cpse pulse1_length_counter, zero //if length counter is already 0, don't decrement
-000232 94ea                      	dec pulse1_length_counter
+00025c fd95                      	sbrc channel_flags, 5 //check if the length counter halt bit is cleared
+00025d c002                      	rjmp sequence_1_3_exit
+00025e 10e0                      	cpse pulse1_length_counter, zero //if length counter is already 0, don't decrement
+00025f 94ea                      	dec pulse1_length_counter
                                  
                                  sequence_1_3_exit:
-000233 e2b1                      	ldi r27, TCA_SINGLE_CMP1_bm | TCA_SINGLE_OVF_bm //clear OVF flag
-000234 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
-000236 91bf                      	pop r27
-000237 bfbf                      	out CPU_SREG, r27
-000238 9518                      	reti
+000260 e2b1                      	ldi r27, TCA_SINGLE_CMP1_bm | TCA_SINGLE_OVF_bm //clear OVF flag
+000261 93b0 0a0b                 	sts TCA0_SINGLE_INTFLAGS, r27
+000263 91bf                      	pop r27
+000264 bfbf                      	out CPU_SREG, r27
+000265 9518                      	reti
                                  
                                  sound_driver:
-000239 b7bf                      	in r27, CPU_SREG
-00023a 93bf                      	push r27
-00023b 94f8                      	cli
-00023c 93cf                      	push r28
-00023d 93df                      	push r29
+000266 b7bf                      	in r27, CPU_SREG
+000267 93bf                      	push r27
+000268 94f8                      	cli
+000269 93cf                      	push r28
+00026a 93df                      	push r29
                                  
                                  	//SOUND DRIVER
-00023e 91b0 280d                 	lds r27, pulse1_pattern_delay
-000240 11b0                      	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
-000241 c11b                      	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+00026b 91b0 280d                 	lds r27, pulse1_pattern_delay
+00026d 11b0                      	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
+00026e c11b                      	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
                                  
                                  
                                  
                                  sound_driver_channel0:
-000242 91e0 280b                 	lds ZL, pulse1_pattern //current pattern for pulse 1
-000244 91f0 280c                 	lds ZH, pulse1_pattern+1
-000246 91a0 280e                 	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
-000248 91b0 280f                 	lds r27, pulse1_pattern_offset+1
-00024a 0fea                      	add ZL, r26 //offset the current pattern pointer to point to new byte data
-00024b 1ffb                      	adc ZH, r27
-00024c 91b4                      	lpm r27, Z //load the byte data from the current pattern
+00026f 91e0 280b                 	lds ZL, pulse1_pattern //current pattern for pulse 1
+000271 91f0 280c                 	lds ZH, pulse1_pattern+1
+000273 91a0 280e                 	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
+000275 91b0 280f                 	lds r27, pulse1_pattern_offset+1
+000277 0fea                      	add ZL, r26 //offset the current pattern pointer to point to new byte data
+000278 1ffb                      	adc ZH, r27
+000279 91b4                      	lpm r27, Z //load the byte data from the current pattern
                                  
                                  sound_driver_channel0_check_if_note: //check if data is a note (0x00 - 0x56)
-00024d 35b7                      	cpi r27, 0x57
-00024e f408                      	brsh sound_driver_channel0_check_if_volume
-00024f c00d                      	rjmp sound_driver_channel0_note
+00027a 35b7                      	cpi r27, 0x57
+00027b f408                      	brsh sound_driver_channel0_check_if_volume
+00027c c00d                      	rjmp sound_driver_channel0_note
                                  sound_driver_channel0_check_if_volume: //check if data is volume (0x57-0x66)
-000250 36b7                      	cpi r27, 0x67
-000251 f408                      	brsh sound_driver_channel0_check_if_delay
-000252 c018                      	rjmp sound_driver_channel0_volume
+00027d 36b7                      	cpi r27, 0x67
+00027e f408                      	brsh sound_driver_channel0_check_if_delay
+00027f c018                      	rjmp sound_driver_channel0_volume
                                  sound_driver_channel0_check_if_delay: //check if data is a delay (0x67 - 0xE1)
-000253 3eb2                      	cpi r27, 0xE2
-000254 f408                      	brsh sound_driver_channel0_check_if_instrument
-000255 c01f                      	rjmp sound_driver_channel0_delay
+000280 3eb2                      	cpi r27, 0xE2
+000281 f408                      	brsh sound_driver_channel0_check_if_instrument
+000282 c01f                      	rjmp sound_driver_channel0_delay
                                  sound_driver_channel0_check_if_instrument: //check for instrument flag (0xE2)
-000256 f409                      	brne sound_driver_channel0_check_if_release
-000257 c022                      	rjmp sound_driver_channel0_instrument_change 
+000283 f409                      	brne sound_driver_channel0_check_if_release
+000284 c022                      	rjmp sound_driver_channel0_instrument_change 
                                  sound_driver_channel0_check_if_release: //check for note release flag (0xE3)
-000258 3eb3                      	cpi r27, 0xE3
-000259 f409                      	brne sound_driver_channel0_check_if_end
-00025a c0ad                      	rjmp sound_driver_channel0_release
+000285 3eb3                      	cpi r27, 0xE3
+000286 f409                      	brne sound_driver_channel0_check_if_end
+000287 c0ad                      	rjmp sound_driver_channel0_release
                                  sound_driver_channel0_check_if_fx: //binary search for fx flags (0xE4 - 0xFE)
                                  
                                  sound_driver_channel0_check_if_end:
-00025b 3fbf                      	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
-00025c c0d0                      	rjmp sound_driver_channel0_next_pattern
+000288 3fbf                      	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
+000289 c0d0                      	rjmp sound_driver_channel0_next_pattern
                                  
                                  
                                  
                                  sound_driver_channel0_note:
-00025d 93b0 2806                 	sts pulse1_note, r27 //store the note index
-00025f 9200 2812                 	sts pulse1_volume_macro_offset, zero //reset all macro offsets
-000261 9200 2817                 	sts pulse1_arpeggio_macro_offset, zero
-000263 9200 281d                 	sts pulse1_pitch_macro_offset, zero
-000265 9200 2822                 	sts pulse1_hi_pitch_macro_offset, zero
-000267 9200 2827                 	sts pulse1_duty_macro_offset, zero
-000269 d0df                      	rcall sound_driver_channel0_increment_offset
-00026a cfd7                      	rjmp sound_driver_channel0
+00028a 93b0 2806                 	sts pulse1_note, r27 //store the note index
+00028c 9200 2812                 	sts pulse1_volume_macro_offset, zero //reset all macro offsets
+00028e 9200 2817                 	sts pulse1_arpeggio_macro_offset, zero
+000290 9200 281d                 	sts pulse1_pitch_macro_offset, zero
+000292 9200 2822                 	sts pulse1_hi_pitch_macro_offset, zero
+000294 9200 2827                 	sts pulse1_duty_macro_offset, zero
+000296 d0df                      	rcall sound_driver_channel0_increment_offset
+000297 cfd7                      	rjmp sound_driver_channel0
                                  
                                  
                                  
                                  sound_driver_channel0_volume:
-00026b 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
-00026c 91a0 2800                 	lds r26, pulse1_param
-00026e 7fa0                      	andi r26, 0xF0 //clear previous VVVV volume bits
-00026f 2bab                      	or r26, r27 //move new VVVV bits into pulse1_param
-000270 93a0 2800                 	sts pulse1_param, r26
-000272 6096                      	sbr channel_flags, 6
-000273 d0d5                      	rcall sound_driver_channel0_increment_offset
-000274 cfcd                      	rjmp sound_driver_channel0
+000298 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+000299 91a0 2800                 	lds r26, pulse1_param
+00029b 7fa0                      	andi r26, 0xF0 //clear previous VVVV volume bits
+00029c 2bab                      	or r26, r27 //move new VVVV bits into pulse1_param
+00029d 93a0 2800                 	sts pulse1_param, r26
+00029f 6096                      	sbr channel_flags, 6
+0002a0 d0d5                      	rcall sound_driver_channel0_increment_offset
+0002a1 cfcd                      	rjmp sound_driver_channel0
                                  
                                  
                                  
                                  sound_driver_channel0_delay:
-000275 56b7                      	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
-000276 93b0 280d                 	sts pulse1_pattern_delay, r27
-000278 d0d0                      	rcall sound_driver_channel0_increment_offset
-000279 c0e6                      	rjmp sound_driver_instrument_routine
+0002a2 56b7                      	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
+0002a3 93b0 280d                 	sts pulse1_pattern_delay, r27
+0002a5 d0d0                      	rcall sound_driver_channel0_increment_offset
+0002a6 c0e6                      	rjmp sound_driver_instrument_routine
                                  
                                  
                                  
                                  sound_driver_channel0_instrument_change:
-00027a 9200 2810                 	sts pulse1_volume_macro, zero //reset all macro addresses
-00027c 9200 2811                 	sts pulse1_volume_macro+1, zero
-00027e 9200 2815                 	sts pulse1_arpeggio_macro, zero
-000280 9200 2816                 	sts pulse1_arpeggio_macro+1, zero
-000282 9200 281b                 	sts pulse1_pitch_macro, zero
-000284 9200 281c                 	sts pulse1_pitch_macro+1, zero
-000286 9200 2820                 	sts pulse1_hi_pitch_macro, zero
-000288 9200 2821                 	sts pulse1_hi_pitch_macro+1, zero
-00028a 9200 2825                 	sts pulse1_duty_macro, zero
-00028c 9200 2826                 	sts pulse1_duty_macro+1, zero
+0002a7 9200 2810                 	sts pulse1_volume_macro, zero //reset all macro addresses
+0002a9 9200 2811                 	sts pulse1_volume_macro+1, zero
+0002ab 9200 2815                 	sts pulse1_arpeggio_macro, zero
+0002ad 9200 2816                 	sts pulse1_arpeggio_macro+1, zero
+0002af 9200 281b                 	sts pulse1_pitch_macro, zero
+0002b1 9200 281c                 	sts pulse1_pitch_macro+1, zero
+0002b3 9200 2820                 	sts pulse1_hi_pitch_macro, zero
+0002b5 9200 2821                 	sts pulse1_hi_pitch_macro+1, zero
+0002b7 9200 2825                 	sts pulse1_duty_macro, zero
+0002b9 9200 2826                 	sts pulse1_duty_macro+1, zero
                                  
-00028e 9631                      	adiw Z, 1 //point to the byte next to the flag
-00028f 91b4                      	lpm r27, Z //store the instrument offset into r27
-000290 eee4                      	ldi ZL, LOW(instruments) //point Z to instruments table
-000291 e0f0                      	ldi ZH, HIGH(instruments)
-000292 0feb                      	add ZL, r27 //point Z to offsetted instrument
-000293 1df0                      	adc ZH, zero
-000294 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the instrument's address
-000295 1fff                      	rol ZH
-000296 91a5                      	lpm r26, Z+ //r26:r27 now points to the instrument
-000297 91b4                      	lpm r27, Z
+0002bb 9631                      	adiw Z, 1 //point to the byte next to the flag
+0002bc 91b4                      	lpm r27, Z //store the instrument offset into r27
+0002bd e1e1                      	ldi ZL, LOW(instruments) //point Z to instruments table
+0002be e0f1                      	ldi ZH, HIGH(instruments)
+0002bf 0feb                      	add ZL, r27 //point Z to offsetted instrument
+0002c0 1df0                      	adc ZH, zero
+0002c1 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the instrument's address
+0002c2 1fff                      	rol ZH
+0002c3 91a5                      	lpm r26, Z+ //r26:r27 now points to the instrument
+0002c4 91b4                      	lpm r27, Z
                                  
-000298 0faa                      	lsl r26 //multiply by 2 to make r26:r27 into a byte pointer for the instrument's data
-000299 1fbb                      	rol r27
-00029a 2fea                      	mov ZL, r26
-00029b 2ffb                      	mov ZH, r27
-00029c 91b4                      	lpm r27, Z //get macro header byte. NOTE: Each macro type for each intrument is represented by a bit in this byte. 1 indicates that the instrument uses a macro of it's corresponding type.
-00029d 9632                      	adiw Z, 2 //point Z to the address of the macro
-00029e e0a6                      	ldi r26, 6 //(6-1) = 5 for the 5 different macro types. NOTE: bit 0 = volume, bit 1 = arpeggio, bit 2 = pitch, bit 3 = hi pitch, bit 4 = duty
+0002c5 0faa                      	lsl r26 //multiply by 2 to make r26:r27 into a byte pointer for the instrument's data
+0002c6 1fbb                      	rol r27
+0002c7 2fea                      	mov ZL, r26
+0002c8 2ffb                      	mov ZH, r27
+0002c9 91b4                      	lpm r27, Z //get macro header byte. NOTE: Each macro type for each intrument is represented by a bit in this byte. 1 indicates that the instrument uses a macro of it's corresponding type.
+0002ca 9632                      	adiw Z, 2 //point Z to the address of the macro
+0002cb e0a6                      	ldi r26, 6 //(6-1) = 5 for the 5 different macro types. NOTE: bit 0 = volume, bit 1 = arpeggio, bit 2 = pitch, bit 3 = hi pitch, bit 4 = duty
                                  sound_driver_channel0_instrument_change_macro_loop:
-00029f 95aa                      	dec r26
-0002a0 f1e1                      	breq sound_driver_channel0_instrument_change_exit
-0002a1 95b6                      	lsr r27
-0002a2 f008                      	brcs sound_driver_channel0_instrument_change_load_macro
-0002a3 cffb                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+0002cc 95aa                      	dec r26
+0002cd f1e1                      	breq sound_driver_channel0_instrument_change_exit
+0002ce 95b6                      	lsr r27
+0002cf f008                      	brcs sound_driver_channel0_instrument_change_load_macro
+0002d0 cffb                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_load_macro:
-0002a4 91c5                      	lpm r28, Z+ //r28:r29 now point to the macro
-0002a5 91d5                      	lpm r29, Z+
+0002d1 91c5                      	lpm r28, Z+ //r28:r29 now point to the macro
+0002d2 91d5                      	lpm r29, Z+
                                  
-0002a6 30a5                      	cpi r26, 5
-0002a7 f039                      	breq sound_driver_channel0_instrument_change_load_macro_volume
-0002a8 30a4                      	cpi r26, 4
-0002a9 f079                      	breq sound_driver_channel0_instrument_change_load_macro_arpeggio
-0002aa 30a3                      	cpi r26, 3
-0002ab f099                      	breq sound_driver_channel0_instrument_change_load_macro_pitch
-0002ac 30a2                      	cpi r26, 2
-0002ad f0d9                      	breq sound_driver_channel0_instrument_change_load_macro_hi_pitch
-0002ae c024                      	rjmp sound_driver_channel0_instrument_change_load_macro_duty
+0002d3 30a5                      	cpi r26, 5
+0002d4 f039                      	breq sound_driver_channel0_instrument_change_load_macro_volume
+0002d5 30a4                      	cpi r26, 4
+0002d6 f079                      	breq sound_driver_channel0_instrument_change_load_macro_arpeggio
+0002d7 30a3                      	cpi r26, 3
+0002d8 f099                      	breq sound_driver_channel0_instrument_change_load_macro_pitch
+0002d9 30a2                      	cpi r26, 2
+0002da f0d9                      	breq sound_driver_channel0_instrument_change_load_macro_hi_pitch
+0002db c024                      	rjmp sound_driver_channel0_instrument_change_load_macro_duty
                                  
                                  sound_driver_channel0_instrument_change_load_macro_volume:
-0002af 93c0 2810                 	sts pulse1_volume_macro, r28
-0002b1 93d0 2811                 	sts pulse1_volume_macro+1, r29
-0002b3 d037                      	rcall sound_driver_channel0_instrument_change_read_header
-0002b4 93c0 2814                 	sts pulse1_volume_macro_release, r28
-0002b6 93d0 2813                 	sts pulse1_volume_macro_loop, r29
-0002b8 cfe6                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+0002dc 93c0 2810                 	sts pulse1_volume_macro, r28
+0002de 93d0 2811                 	sts pulse1_volume_macro+1, r29
+0002e0 d037                      	rcall sound_driver_channel0_instrument_change_read_header
+0002e1 93c0 2814                 	sts pulse1_volume_macro_release, r28
+0002e3 93d0 2813                 	sts pulse1_volume_macro_loop, r29
+0002e5 cfe6                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  	
                                  sound_driver_channel0_instrument_change_load_macro_arpeggio:
-0002b9 93c0 2815                 	sts pulse1_arpeggio_macro, r28
-0002bb 93d0 2816                 	sts pulse1_arpeggio_macro+1, r29
-0002bd d038                      	rcall sound_driver_channel0_instrument_change_read_header_arpeggio
-0002be cfe0                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+0002e6 93c0 2815                 	sts pulse1_arpeggio_macro, r28
+0002e8 93d0 2816                 	sts pulse1_arpeggio_macro+1, r29
+0002ea d038                      	rcall sound_driver_channel0_instrument_change_read_header_arpeggio
+0002eb cfe0                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_load_macro_pitch:
-0002bf 93c0 281b                 	sts pulse1_pitch_macro, r28
-0002c1 93d0 281c                 	sts pulse1_pitch_macro+1, r29
-0002c3 d027                      	rcall sound_driver_channel0_instrument_change_read_header
-0002c4 93c0 2814                 	sts pulse1_volume_macro_release, r28
-0002c6 93d0 2813                 	sts pulse1_volume_macro_loop, r29
-0002c8 cfd6                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+0002ec 93c0 281b                 	sts pulse1_pitch_macro, r28
+0002ee 93d0 281c                 	sts pulse1_pitch_macro+1, r29
+0002f0 d027                      	rcall sound_driver_channel0_instrument_change_read_header
+0002f1 93c0 2814                 	sts pulse1_volume_macro_release, r28
+0002f3 93d0 2813                 	sts pulse1_volume_macro_loop, r29
+0002f5 cfd6                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_load_macro_hi_pitch:
-0002c9 93c0 2820                 	sts pulse1_hi_pitch_macro, r28
-0002cb 93d0 2821                 	sts pulse1_hi_pitch_macro+1, r29
-0002cd d01d                      	rcall sound_driver_channel0_instrument_change_read_header
-0002ce 93c0 2814                 	sts pulse1_volume_macro_release, r28
-0002d0 93d0 2813                 	sts pulse1_volume_macro_loop, r29
-0002d2 cfcc                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+0002f6 93c0 2820                 	sts pulse1_hi_pitch_macro, r28
+0002f8 93d0 2821                 	sts pulse1_hi_pitch_macro+1, r29
+0002fa d01d                      	rcall sound_driver_channel0_instrument_change_read_header
+0002fb 93c0 2814                 	sts pulse1_volume_macro_release, r28
+0002fd 93d0 2813                 	sts pulse1_volume_macro_loop, r29
+0002ff cfcc                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_load_macro_duty:
-0002d3 93c0 2825                 	sts pulse1_duty_macro, r28
-0002d5 93d0 2826                 	sts pulse1_duty_macro+1, r29
-0002d7 d013                      	rcall sound_driver_channel0_instrument_change_read_header
-0002d8 93c0 2814                 	sts pulse1_volume_macro_release, r28
-0002da 93d0 2813                 	sts pulse1_volume_macro_loop, r29
-0002dc cfc2                      	rjmp sound_driver_channel0_instrument_change_macro_loop
+000300 93c0 2825                 	sts pulse1_duty_macro, r28
+000302 93d0 2826                 	sts pulse1_duty_macro+1, r29
+000304 d013                      	rcall sound_driver_channel0_instrument_change_read_header
+000305 93c0 2814                 	sts pulse1_volume_macro_release, r28
+000307 93d0 2813                 	sts pulse1_volume_macro_loop, r29
+000309 cfc2                      	rjmp sound_driver_channel0_instrument_change_macro_loop
                                  
                                  sound_driver_channel0_instrument_change_exit:
-0002dd e0a3                      	ldi r26, 0x03
-0002de e0b2                      	ldi r27, 0x02
-0002df 93b0 2812                 	sts pulse1_volume_macro_offset, r27 //reset all macro offsets
-0002e1 93a0 2817                 	sts pulse1_arpeggio_macro_offset, r26
-0002e3 93b0 281d                 	sts pulse1_pitch_macro_offset, r27
-0002e5 93b0 2822                 	sts pulse1_hi_pitch_macro_offset, r27
-0002e7 93b0 2827                 	sts pulse1_duty_macro_offset, r27
-0002e9 d069                      	rcall sound_driver_channel0_increment_offset_twice
-0002ea cf57                      	rjmp sound_driver_channel0
+00030a e0a3                      	ldi r26, 0x03
+00030b e0b2                      	ldi r27, 0x02
+00030c 93b0 2812                 	sts pulse1_volume_macro_offset, r27 //reset all macro offsets
+00030e 93a0 2817                 	sts pulse1_arpeggio_macro_offset, r26
+000310 93b0 281d                 	sts pulse1_pitch_macro_offset, r27
+000312 93b0 2822                 	sts pulse1_hi_pitch_macro_offset, r27
+000314 93b0 2827                 	sts pulse1_duty_macro_offset, r27
+000316 d069                      	rcall sound_driver_channel0_increment_offset_twice
+000317 cf57                      	rjmp sound_driver_channel0
                                  
                                  sound_driver_channel0_instrument_change_read_header:
-0002eb 93ef                      	push ZL
-0002ec 93ff                      	push ZH
-0002ed 2fec                      	mov ZL, r28
-0002ee 2ffd                      	mov ZH, r29
-0002ef 0fee                      	lsl ZL
-0002f0 1fff                      	rol ZH
-0002f1 91c5                      	lpm r28, Z+
-0002f2 91d4                      	lpm r29, Z
-0002f3 91ff                      	pop ZH
-0002f4 91ef                      	pop ZL
-0002f5 9508                      	ret
+000318 93ef                      	push ZL
+000319 93ff                      	push ZH
+00031a 2fec                      	mov ZL, r28
+00031b 2ffd                      	mov ZH, r29
+00031c 0fee                      	lsl ZL
+00031d 1fff                      	rol ZH
+00031e 91c5                      	lpm r28, Z+
+00031f 91d4                      	lpm r29, Z
+000320 91ff                      	pop ZH
+000321 91ef                      	pop ZL
+000322 9508                      	ret
                                  
                                  sound_driver_channel0_instrument_change_read_header_arpeggio:
-0002f6 93ef                      	push ZL
-0002f7 93ff                      	push ZH
-0002f8 2fec                      	mov ZL, r28
-0002f9 2ffd                      	mov ZH, r29
-0002fa 0fee                      	lsl ZL
-0002fb 1fff                      	rol ZH
-0002fc 91c5                      	lpm r28, Z+
-0002fd 91d5                      	lpm r29, Z+
-0002fe 93c0 2819                 	sts pulse1_arpeggio_macro_release, r28
-000300 93d0 2818                 	sts pulse1_arpeggio_macro_loop, r29
-000302 91c4                      	lpm r28, Z
-000303 93c0 281a                 	sts pulse1_arpeggio_macro_mode, r28
-000305 91ff                      	pop ZH
-000306 91ef                      	pop ZL
-000307 9508                      	ret
+000323 93ef                      	push ZL
+000324 93ff                      	push ZH
+000325 2fec                      	mov ZL, r28
+000326 2ffd                      	mov ZH, r29
+000327 0fee                      	lsl ZL
+000328 1fff                      	rol ZH
+000329 91c5                      	lpm r28, Z+
+00032a 91d5                      	lpm r29, Z+
+00032b 93c0 2819                 	sts pulse1_arpeggio_macro_release, r28
+00032d 93d0 2818                 	sts pulse1_arpeggio_macro_loop, r29
+00032f 91c4                      	lpm r28, Z
+000330 93c0 281a                 	sts pulse1_arpeggio_macro_mode, r28
+000332 91ff                      	pop ZH
+000333 91ef                      	pop ZL
+000334 9508                      	ret
                                  
                                  
                                  
                                  sound_driver_channel0_release:
                                  sound_driver_channel0_release_volume:
-000308 91b0 2814                 	lds r27, pulse1_volume_macro_release
-00030a 3fbf                      	cpi r27, 0xFF //check if volume macro has a release flag
-00030b f009                      	breq PC+2 //if the macro has no release flag, don't increment it
-00030c 95b3                      	inc r27
-00030d 93b0 2812                 	sts pulse1_volume_macro_offset, r27 //adjust offset so that it starts after the release flag index
+000335 91b0 2814                 	lds r27, pulse1_volume_macro_release
+000337 3fbf                      	cpi r27, 0xFF //check if volume macro has a release flag
+000338 f019                      	breq sound_driver_channel0_release_arpeggio //if the macro has no release flag, check the next macro
+000339 95b3                      	inc r27
+00033a 93b0 2812                 	sts pulse1_volume_macro_offset, r27 //adjust offset so that it starts after the release flag index
                                  sound_driver_channel0_release_arpeggio:
-00030f 91b0 2819                 	lds r27, pulse1_arpeggio_macro_release
-000311 3fbf                      	cpi r27, 0xFF //check if arpeggio macro has a release flag
-000312 f009                      	breq PC+2
-000313 95b3                      	inc r27
-000314 93b0 2817                 	sts pulse1_arpeggio_macro_offset, r27
+00033c 91b0 2819                 	lds r27, pulse1_arpeggio_macro_release
+00033e 3fbf                      	cpi r27, 0xFF //check if arpeggio macro has a release flag
+00033f f019                      	breq sound_driver_channel0_release_pitch
+000340 95b3                      	inc r27
+000341 93b0 2817                 	sts pulse1_arpeggio_macro_offset, r27
                                  sound_driver_channel0_release_pitch:
-000316 91b0 281f                 	lds r27, pulse1_pitch_macro_release
-000318 3fbf                      	cpi r27, 0xFF //check if pitch macro has a release flag
-000319 f009                      	breq PC+2
-00031a 95b3                      	inc r27
-00031b 93b0 281d                 	sts pulse1_pitch_macro_offset, r27
+000343 91b0 281f                 	lds r27, pulse1_pitch_macro_release
+000345 3fbf                      	cpi r27, 0xFF //check if pitch macro has a release flag
+000346 f019                      	breq sound_driver_channel0_release_hi_pitch
+000347 95b3                      	inc r27
+000348 93b0 281d                 	sts pulse1_pitch_macro_offset, r27
                                  sound_driver_channel0_release_hi_pitch:
-00031d 91b0 2824                 	lds r27, pulse1_hi_pitch_macro_release
-00031f 3fbf                      	cpi r27, 0xFF //check if hi_pitch macro has a release flag
-000320 f009                      	breq PC+2
-000321 95b3                      	inc r27
-000322 93b0 2822                 	sts pulse1_hi_pitch_macro_offset, r27
+00034a 91b0 2824                 	lds r27, pulse1_hi_pitch_macro_release
+00034c 3fbf                      	cpi r27, 0xFF //check if hi_pitch macro has a release flag
+00034d f019                      	breq sound_driver_channel0_release_duty
+00034e 95b3                      	inc r27
+00034f 93b0 2822                 	sts pulse1_hi_pitch_macro_offset, r27
                                  sound_driver_channel0_release_duty:
-000324 91b0 2829                 	lds r27, pulse1_duty_macro_release
-000326 3fbf                      	cpi r27, 0xFF //check if duty macro has a release flag
-000327 f009                      	breq PC+2
-000328 95b3                      	inc r27
-000329 93b0 2827                 	sts pulse1_duty_macro_offset, r27
+000351 91b0 2829                 	lds r27, pulse1_duty_macro_release
+000353 3fbf                      	cpi r27, 0xFF //check if duty macro has a release flag
+000354 f019                      	breq sound_driver_channel0_release_exit
+000355 95b3                      	inc r27
+000356 93b0 2827                 	sts pulse1_duty_macro_offset, r27
                                  sound_driver_channel0_release_exit:
-00032b d01d                      	rcall sound_driver_channel0_increment_offset
-00032c cf15                      	rjmp sound_driver_channel0
+000358 d01d                      	rcall sound_driver_channel0_increment_offset
+000359 cf15                      	rjmp sound_driver_channel0
                                  
                                  
                                  
                                  sound_driver_channel0_next_pattern:
-00032d 91e0 2807                 	lds ZL, song_frames
-00032f 91f0 2808                 	lds ZH, song_frames+1
-000331 91a0 2809                 	lds r26, song_frame_offset //we must offset to the appropriate channel
-000333 91b0 280a                 	lds r27, song_frame_offset+1
-000335 961a                      	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
-000336 93a0 2809                 	sts song_frame_offset, r26
-000338 93b0 280a                 	sts song_frame_offset+1, r27
+00035a 91e0 2807                 	lds ZL, song_frames
+00035c 91f0 2808                 	lds ZH, song_frames+1
+00035e 91a0 2809                 	lds r26, song_frame_offset //we must offset to the appropriate channel
+000360 91b0 280a                 	lds r27, song_frame_offset+1
+000362 961a                      	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
+000363 93a0 2809                 	sts song_frame_offset, r26
+000365 93b0 280a                 	sts song_frame_offset+1, r27
                                  	//adiw r27:r26, 2 //offset for channel 1 (test)
-00033a 0fea                      	add ZL, r26
-00033b 1ffb                      	adc ZH, r27
+000367 0fea                      	add ZL, r26
+000368 1ffb                      	adc ZH, r27
                                  
-00033c 91a5                      	lpm r26, Z+ //load the address of the next pattern
-00033d 91b4                      	lpm r27, Z
-00033e 0faa                      	lsl r26
-00033f 1fbb                      	rol r27
-000340 93a0 280b                 	sts pulse1_pattern, r26
-000342 93b0 280c                 	sts pulse1_pattern+1, r27
+000369 91a5                      	lpm r26, Z+ //load the address of the next pattern
+00036a 91b4                      	lpm r27, Z
+00036b 0faa                      	lsl r26
+00036c 1fbb                      	rol r27
+00036d 93a0 280b                 	sts pulse1_pattern, r26
+00036f 93b0 280c                 	sts pulse1_pattern+1, r27
                                  
-000344 9200 280e                 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
-000346 9200 280f                 	sts pulse1_pattern_offset+1, zero
-000348 cef9                      	rjmp sound_driver_channel0
+000371 9200 280e                 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
+000373 9200 280f                 	sts pulse1_pattern_offset+1, zero
+000375 cef9                      	rjmp sound_driver_channel0
                                  
                                  
                                  
                                  sound_driver_channel0_increment_offset:
-000349 91e0 280e                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
-00034b 91f0 280f                 	lds ZH, pulse1_pattern_offset+1
-00034d 9631                      	adiw Z, 1
-00034e 93e0 280e                 	sts pulse1_pattern_offset, ZL
-000350 93f0 280f                 	sts pulse1_pattern_offset+1, ZH
-000352 9508                      	ret
+000376 91e0 280e                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
+000378 91f0 280f                 	lds ZH, pulse1_pattern_offset+1
+00037a 9631                      	adiw Z, 1
+00037b 93e0 280e                 	sts pulse1_pattern_offset, ZL
+00037d 93f0 280f                 	sts pulse1_pattern_offset+1, ZH
+00037f 9508                      	ret
                                  
                                  sound_driver_channel0_increment_offset_twice: //used for data that takes up 2 bytes worth of space
-000353 91e0 280e                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
-000355 91f0 280f                 	lds ZH, pulse1_pattern_offset+1
-000357 9632                      	adiw Z, 2 //increment the pointer twice
-000358 93e0 280e                 	sts pulse1_pattern_offset, ZL
-00035a 93f0 280f                 	sts pulse1_pattern_offset+1, ZH
-00035c 9508                      	ret
+000380 91e0 280e                 	lds ZL, pulse1_pattern_offset //current offset in the pattern for pulse 1
+000382 91f0 280f                 	lds ZH, pulse1_pattern_offset+1
+000384 9632                      	adiw Z, 2 //increment the pointer twice
+000385 93e0 280e                 	sts pulse1_pattern_offset, ZL
+000387 93f0 280f                 	sts pulse1_pattern_offset+1, ZH
+000389 9508                      	ret
                                  
                                  
                                  
                                  sound_driver_decrement_frame_delay:
-00035d 95ba                      	dec r27
-00035e 93b0 280d                 	sts pulse1_pattern_delay, r27
+00038a 95ba                      	dec r27
+00038b 93b0 280d                 	sts pulse1_pattern_delay, r27
                                  
                                  sound_driver_instrument_routine:
                                  sound_driver_instrument_routine_channel0_volume:
-000360 91e0 2810                 	lds ZL, pulse1_volume_macro
-000362 91f0 2811                 	lds ZH, pulse1_volume_macro+1
-000364 9630                      	adiw Z, 0
-000365 f109                      	breq sound_driver_instrument_routine_channel0_volume_default //if no volume macro is in use, use default multiplier of F
-000366 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the macro's address
-000367 1fff                      	rol ZH
-000368 91a0 2812                 	lds r26, pulse1_volume_macro_offset
-00036a 0fea                      	add ZL, r26
-00036b 1df0                      	adc ZH, zero
+00038d 91e0 2810                 	lds ZL, pulse1_volume_macro
+00038f 91f0 2811                 	lds ZH, pulse1_volume_macro+1
+000391 9630                      	adiw Z, 0
+000392 f109                      	breq sound_driver_instrument_routine_channel0_volume_default //if no volume macro is in use, use default multiplier of F
+000393 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the macro's address
+000394 1fff                      	rol ZH
+000395 91a0 2812                 	lds r26, pulse1_volume_macro_offset
+000397 0fea                      	add ZL, r26
+000398 1df0                      	adc ZH, zero
                                  
-00036c 91b0 2814                 	lds r27, pulse1_volume_macro_release
-00036e 17ba                      	cp r27, r26
-00036f f429                      	brne sound_driver_instrument_routine_channel0_volume_increment //if the current offset is not equal to the release index, increment the offset
-000370 91a0 2813                 	lds r26, pulse1_volume_macro_loop
-000372 17ab                      	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
-000373 f040                      	brlo sound_driver_instrument_routine_channel0_volume_macro_end_flag+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
-000374 c003                      	rjmp sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
+000399 91b0 2814                 	lds r27, pulse1_volume_macro_release
+00039b 17ba                      	cp r27, r26
+00039c f429                      	brne sound_driver_instrument_routine_channel0_volume_increment //if the current offset is not equal to the release index, increment the offset
+00039d 91a0 2813                 	lds r26, pulse1_volume_macro_loop
+00039f 17ab                      	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
+0003a0 f040                      	brlo sound_driver_instrument_routine_channel0_volume_macro_end_flag+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
+0003a1 c003                      	rjmp sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
                                  
                                  sound_driver_instrument_routine_channel0_volume_increment:
-000375 95a3                      	inc r26 //increment the macro offset
-000376 93a0 2812                 	sts pulse1_volume_macro_offset, r26
+0003a2 95a3                      	inc r26 //increment the macro offset
+0003a3 93a0 2812                 	sts pulse1_volume_macro_offset, r26
                                  	
                                  sound_driver_instrument_routine_channel0_volume_read:
-000378 91b4                      	lpm r27, Z //load volume data into r27
-000379 3fbf                      	cpi r27, 0xFF //check for macro end flag
-00037a f429                      	brne sound_driver_instrument_routine_channel0_volume_calculate //if the data was not the macro end flag, calculate the volume
+0003a5 91b4                      	lpm r27, Z //load volume data into r27
+0003a6 3fbf                      	cpi r27, 0xFF //check for macro end flag
+0003a7 f429                      	brne sound_driver_instrument_routine_channel0_volume_calculate //if the data was not the macro end flag, calculate the volume
                                  
                                  sound_driver_instrument_routine_channel0_volume_macro_end_flag:
-00037b 91b0 2813                 	lds r27, pulse1_volume_macro_loop //load the loop index
-00037d 93b0 2812                 	sts pulse1_volume_macro_offset, r27 //store the loop index into the offset
-00037f cfe0                      	rjmp sound_driver_instrument_routine_channel0_volume //go back and re-read the volume data
+0003a8 91b0 2813                 	lds r27, pulse1_volume_macro_loop //load the loop index
+0003aa 93b0 2812                 	sts pulse1_volume_macro_offset, r27 //store the loop index into the offset
+0003ac cfe0                      	rjmp sound_driver_instrument_routine_channel0_volume //go back and re-read the volume data
                                  
                                  sound_driver_instrument_routine_channel0_volume_calculate:
-000380 eeec                      	ldi ZL, LOW(volumes << 1) //point Z to volume table
-000381 e0f8                      	ldi ZH, HIGH(volumes << 1)
+0003ad e5ea                      	ldi ZL, LOW(volumes << 1) //point Z to volume table
+0003ae e0f9                      	ldi ZH, HIGH(volumes << 1)
                                  
-000382 95b3                      	inc r27
+0003af 95b3                      	inc r27
                                  sound_driver_instrument_routine_channel0_volume_table_offset:
-000383 95ba                      	dec r27
-000384 f041                      	breq sound_driver_instrument_routine_channel0_volume_load
-000385 9670                      	adiw Z, 16 //move to next row in volume table
-000386 cffc                      	rjmp sound_driver_instrument_routine_channel0_volume_table_offset
+0003b0 95ba                      	dec r27
+0003b1 f041                      	breq sound_driver_instrument_routine_channel0_volume_load
+0003b2 9670                      	adiw Z, 16 //move to next row in volume table
+0003b3 cffc                      	rjmp sound_driver_instrument_routine_channel0_volume_table_offset
                                  
                                  sound_driver_instrument_routine_channel0_volume_default:
-000387 91b0 2800                 	lds r27, pulse1_param //a multiplier of F means in no change to the main volume, so we just copy the value into the output
-000389 70bf                      	andi r27, 0x0F //mask for VVVV volume bits
-00038a 93b0 2805                 	sts pulse1_output_volume, r27
-00038c c008                      	rjmp sound_driver_instrument_routine_channel0_arpeggio
+0003b4 91b0 2800                 	lds r27, pulse1_param //a multiplier of F means in no change to the main volume, so we just copy the value into the output
+0003b6 70bf                      	andi r27, 0x0F //mask for VVVV volume bits
+0003b7 93b0 2805                 	sts pulse1_output_volume, r27
+0003b9 c008                      	rjmp sound_driver_instrument_routine_channel0_arpeggio
                                  
                                  sound_driver_instrument_routine_channel0_volume_load:
-00038d 91b0 2800                 	lds r27, pulse1_param //load main volume
-00038f 70bf                      	andi r27, 0x0F //mask for VVVV volume bits
-000390 0feb                      	add ZL, r27 //offset the volume table by the main volume
-000391 1df0                      	adc ZH, zero
-000392 91b4                      	lpm r27, Z
-000393 93b0 2805                 	sts pulse1_output_volume, r27 //store the new output volume
+0003ba 91b0 2800                 	lds r27, pulse1_param //load main volume
+0003bc 70bf                      	andi r27, 0x0F //mask for VVVV volume bits
+0003bd 0feb                      	add ZL, r27 //offset the volume table by the main volume
+0003be 1df0                      	adc ZH, zero
+0003bf 91b4                      	lpm r27, Z
+0003c0 93b0 2805                 	sts pulse1_output_volume, r27 //store the new output volume
                                  	
                                  
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio:
-000395 91e0 2815                 	lds ZL, pulse1_arpeggio_macro
-000397 91f0 2816                 	lds ZH, pulse1_arpeggio_macro+1
-000399 9630                      	adiw Z, 0
-00039a f189                      	breq sound_driver_instrument_routine_channel0_arpeggio_default //if no arpeggio macro is in use, go output the note without any offsets
-00039b 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the macro's address
-00039c 1fff                      	rol ZH
-00039d 91a0 2817                 	lds r26, pulse1_arpeggio_macro_offset
-00039f 0fea                      	add ZL, r26
-0003a0 1df0                      	adc ZH, zero
+0003c2 91e0 2815                 	lds ZL, pulse1_arpeggio_macro
+0003c4 91f0 2816                 	lds ZH, pulse1_arpeggio_macro+1
+0003c6 9630                      	adiw Z, 0
+0003c7 f1d9                      	breq sound_driver_instrument_routine_channel0_arpeggio_default //if no arpeggio macro is in use, go output the note without any offsets
+0003c8 0fee                      	lsl ZL //multiply by 2 to make Z into a byte pointer for the macro's address
+0003c9 1fff                      	rol ZH
+0003ca 91a0 2817                 	lds r26, pulse1_arpeggio_macro_offset
+0003cc 0fea                      	add ZL, r26
+0003cd 1df0                      	adc ZH, zero
                                  
-0003a1 91b0 2819                 	lds r27, pulse1_arpeggio_macro_release
-0003a3 17ba                      	cp r27, r26
-0003a4 f431                      	brne sound_driver_instrument_routine_channel0_arpeggio_increment //if the current offset is not equal to the release index, increment the offset
-0003a5 91a0 2818                 	lds r26, pulse1_arpeggio_macro_loop
-0003a7 17ab                      	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
-0003a8 2fba                      	mov r27, r26
-0003a9 f0c0                      	brlo sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
-0003aa c003                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
+0003ce 91b0 2819                 	lds r27, pulse1_arpeggio_macro_release
+0003d0 17ba                      	cp r27, r26
+0003d1 f429                      	brne sound_driver_instrument_routine_channel0_arpeggio_increment //if the current offset is not equal to the release index, increment the offset
+0003d2 91a0 2818                 	lds r26, pulse1_arpeggio_macro_loop
+0003d4 17ab                      	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
+0003d5 f010                      	brlo sound_driver_instrument_routine_channel0_arpeggio_increment+1 //if the current offset is equal to the release index and there is a loop, reload the loop index, but also read the current index data
+0003d6 c003                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_increment:
-0003ab 95a3                      	inc r26 //increment the macro offset
-0003ac 93a0 2817                 	sts pulse1_arpeggio_macro_offset, r26
+0003d7 95a3                      	inc r26 //increment the macro offset
+0003d8 93a0 2817                 	sts pulse1_arpeggio_macro_offset, r26
                                  	
                                  sound_driver_instrument_routine_channel0_arpeggio_read:
-0003ae 91b4                      	lpm r27, Z //load arpeggio data into r27
-0003af 38b0                      	cpi r27, 0x80 //check for macro end flag
-0003b0 f4a1                      	brne sound_driver_instrument_routine_channel0_arpeggio_process //if the data was not the macro end flag, calculate the volume
-                                 
+0003da 91b4                      	lpm r27, Z //load arpeggio data into r27
+0003db 38b0                      	cpi r27, 0x80 //check for macro end flag
+0003dc f4f9                      	brne sound_driver_instrument_routine_channel0_arpeggio_process //if the data was not the macro end flag, calculate the volume
                                  
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag:
-0003b1 91b0 2818                 	lds r27, pulse1_arpeggio_macro_loop //load the loop index
-0003b3 3fbf                      	cpi r27, 0xFF //check if loop flag exists
-0003b4 f469                      	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if a loop flag exists, then load the loop value
+                                 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_mode:
+0003dd 50a1                      	subi r26, 1 //keep the offset at the end flag
+0003de 93a0 2817                 	sts pulse1_arpeggio_macro_offset, r26
+0003e0 91b0 281a                 	lds r27, pulse1_arpeggio_macro_mode //load the mode to check for fixed/relative mode NOTE: end behavior for fixed/relative mode is different in that once the macro ends, the true note is played
+0003e2 30b1                      	cpi r27, 0x01
+0003e3 f048                      	brlo sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute
                                  
-                                 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_fixed:
-0003b5 50a1                      	subi r26, 1 //if a loop flag does not exist, keep the offset at the end flag
-0003b6 93a0 2817                 	sts pulse1_arpeggio_macro_offset, r26
-0003b8 91b0 281a                 	lds r27, pulse1_arpeggio_macro_mode //load the mode to check for fixed mode NOTE: end behavior for fixed mode is different in that once the macro ends, the true note is played
-0003ba 30b1                      	cpi r27, 0x01 //fixed mode
-0003bb f081                      	breq sound_driver_instrument_routine_channel0_arpeggio_default //if there is no loop and we are in fixed mode, go play the true note
-0003bc 30b2                      	cpi r27, 0x02 //relative mode NOTE: end behavior is similar to fixed mode
-0003bd f071                      	breq sound_driver_instrument_routine_channel0_arpeggio_default
+                                 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_check_release:
+0003e4 91b0 2819                 	lds r27, pulse1_arpeggio_macro_release
+0003e6 3fbf                      	cpi r27, 0xFF
+0003e7 f4d9                      	brne sound_driver_instrument_routine_channel0_arpeggio_default //if there is a release flag, we don't need to loop. just play the true note
+                                 
+                                 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_check_loop:
+0003e8 91b0 2818                 	lds r27, pulse1_arpeggio_macro_loop
+0003ea 3fbf                      	cpi r27, 0xFF
+0003eb f469                      	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if there is no release flag, but there is a loop, load the offset with the loop index
+0003ec c016                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_default //if there is no release flag and no loop, then play the true note
+                                 
+                                 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute:
+0003ed 91b0 2819                 	lds r27, pulse1_arpeggio_macro_release
+0003ef 3fbf                      	cpi r27, 0xFF
+0003f0 f421                      	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop //if there is a release flag, react as if there was no loop.
+                                 
+                                 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_check_loop:
+0003f1 91b0 2818                 	lds r27, pulse1_arpeggio_macro_loop //load the loop index
+0003f3 3fbf                      	cpi r27, 0xFF //check if loop flag exists
+0003f4 f421                      	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if a loop flag exists, then load the loop value
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop:
-0003be 50a1                      	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
-0003bf 93a0 2817                 	sts pulse1_arpeggio_macro_offset, r26 //store the last valid index into the offset
-0003c1 cfd3                      	rjmp sound_driver_instrument_routine_channel0_arpeggio
+0003f5 50a1                      	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
+0003f6 93a0 2817                 	sts pulse1_arpeggio_macro_offset, r26 //store the last valid index into the offset
+0003f8 cfc9                      	rjmp sound_driver_instrument_routine_channel0_arpeggio
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload:
-0003c2 93b0 2817                 	sts pulse1_arpeggio_macro_offset, r27 //store the loop index into the offset
-0003c4 cfd0                      	rjmp sound_driver_instrument_routine_channel0_arpeggio //go back and re-read the volume data
+0003f9 93b0 2817                 	sts pulse1_arpeggio_macro_offset, r27 //store the loop index into the offset
+0003fb cfc6                      	rjmp sound_driver_instrument_routine_channel0_arpeggio //go back and re-read the volume data
                                  
                                  
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_process:
-0003c5 91a0 281a                 	lds r26, pulse1_arpeggio_macro_mode
-0003c7 30a0                      	cpi r26, 0x00 //absolute mode
-0003c8 f031                      	breq sound_driver_instrument_routine_channel0_arpeggio_process_absolute
-0003c9 30a1                      	cpi r26, 0x01 //fixed mode
-0003ca f049                      	breq sound_driver_instrument_routine_channel0_arpeggio_process_fixed
-0003cb c00a                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative //relative mode
+0003fc 91a0 281a                 	lds r26, pulse1_arpeggio_macro_mode
+0003fe 30a0                      	cpi r26, 0x00 //absolute mode
+0003ff f031                      	breq sound_driver_instrument_routine_channel0_arpeggio_process_absolute
+000400 30a1                      	cpi r26, 0x01 //fixed mode
+000401 f081                      	breq sound_driver_instrument_routine_channel0_arpeggio_process_fixed
+000402 c011                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative //relative mode
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_default:
-0003cc 91a0 2806                 	lds r26, pulse1_note //load the current note index
-0003ce c020                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+000403 91a0 2806                 	lds r26, pulse1_note //load the current note index
+000405 c020                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_process_absolute:
-0003cf 91a0 2806                 	lds r26, pulse1_note //load the current note index
-0003d1 0fab                      	add r26, r27 //offset the note with the arpeggio data
-0003d2 f062                      	brmi sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract //check if we are subtracting from the note index
-0003d3 c007                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_absolute_add
-                                 
-                                 sound_driver_instrument_routine_channel0_arpeggio_process_fixed:
-0003d4 2fab                      	mov r26, r27 //move the arpeggio data into r26
-0003d5 c019                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
-                                 
-                                 sound_driver_instrument_routine_channel0_arpeggio_process_relative:
-0003d6 91a0 2806                 	lds r26, pulse1_note //load the current note index
-0003d8 0fab                      	add r26, r27 //offset the note with the arpeggio data
-                                 	
-0003d9 f082                      	brmi sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract //check if we are subtracting from the note index
-0003da c007                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative_add
-                                 
-                                 
+000406 91a0 2806                 	lds r26, pulse1_note //load the current note index
+000408 0fab                      	add r26, r27 //offset the note with the arpeggio data
+000409 fdb7                      	sbrc r27, 7 //check sign bit to check if we are subtracting from the note index
+00040a c004                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_process_absolute_add:
-0003db 35a7                      	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
-0003dc f090                      	brlo sound_driver_instrument_routine_channel0_arpeggio_process_load //if the result is valid, go load the new note
-0003dd e5a6                      	ldi r26, 0x56 //if the result was too large, just set the result to the highest possible note index
-0003de c010                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+00040b 35a7                      	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
+00040c f0c8                      	brlo sound_driver_instrument_routine_channel0_arpeggio_process_load //if the result is valid, go load the new note
+00040d e5a6                      	ldi r26, 0x56 //if the result was too large, just set the result to the highest possible note index
+00040e c017                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract:
-0003df fda7                      	sbrc r26, 7 //check if result is negative
-0003e0 e0a0                      	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
-0003e1 c00d                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+00040f fda7                      	sbrc r26, 7 //check if result is negative
+000410 e0a0                      	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
+000411 c014                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+                                 
+                                 
+                                 
+                                 sound_driver_instrument_routine_channel0_arpeggio_process_fixed:
+000412 2fab                      	mov r26, r27 //move the arpeggio data into r26
+000413 c012                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+                                 
+                                 
+                                 
+                                 sound_driver_instrument_routine_channel0_arpeggio_process_relative:
+000414 91a0 2806                 	lds r26, pulse1_note //load the current note index
+000416 0fab                      	add r26, r27 //offset the note with the arpeggio data
+000417 fdb7                      	sbrc r27, 7 //check sign bit to check if we are subtracting from the note index
+000418 c008                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_process_relative_add:
-0003e2 93a0 2806                 	sts pulse1_note, r26 //NOTE: relative mode modifies the original note index
-0003e4 35a7                      	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
-0003e5 f048                      	brlo sound_driver_instrument_routine_channel0_arpeggio_process_load //if the result is valid, go load the new note
-0003e6 e5a6                      	ldi r26, 0x56 //if the result was too large, just set the result to the highest possible note index
-0003e7 93a0 2806                 	sts pulse1_note, r26
-0003e9 c005                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+000419 93a0 2806                 	sts pulse1_note, r26 //NOTE: relative mode modifies the original note index
+00041b 35a7                      	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
+00041c f048                      	brlo sound_driver_instrument_routine_channel0_arpeggio_process_load //if the result is valid, go load the new note
+00041d e5a6                      	ldi r26, 0x56 //if the result was too large, just set the result to the highest possible note index
+00041e 93a0 2806                 	sts pulse1_note, r26
+000420 c005                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract:
-0003ea fda7                      	sbrc r26, 7 //check if result is negative
-0003eb e0a0                      	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
-0003ec 93a0 2806                 	sts pulse1_note, r26
-0003ee c000                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+000421 fda7                      	sbrc r26, 7 //check if result is negative
+000422 e0a0                      	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
+000423 93a0 2806                 	sts pulse1_note, r26
+000425 c000                      	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
                                  
                                  
                                  
                                  sound_driver_instrument_routine_channel0_arpeggio_process_load:
-0003ef e3e4                      	ldi ZL, LOW(note_table << 1) //load in note table
-0003f0 e0f0                      	ldi ZH, HIGH(note_table << 1)
-0003f1 0faa                      	lsl r26 //double the offset for the note table because we are getting byte data
-0003f2 0fea                      	add ZL, r26 //add offset
-0003f3 1df0                      	adc ZH, zero
-0003f4 91a5                      	lpm r26, Z+ //load bytes
-0003f5 91b4                      	lpm r27, Z
-0003f6 93a0 0a8c                 	sts TCB0_CCMPL, r26 //load the LOW bits for timer
-0003f8 93b0 0a8d                 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
+000426 e3e4                      	ldi ZL, LOW(note_table << 1) //load in note table
+000427 e0f0                      	ldi ZH, HIGH(note_table << 1)
+000428 0faa                      	lsl r26 //double the offset for the note table because we are getting byte data
+000429 0fea                      	add ZL, r26 //add offset
+00042a 1df0                      	adc ZH, zero
+00042b 91a5                      	lpm r26, Z+ //load bytes
+00042c 91b4                      	lpm r27, Z
+00042d 93a0 0a8c                 	sts TCB0_CCMPL, r26 //load the LOW bits for timer
+00042f 93b0 0a8d                 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
                                  /*	sts TCB0_CNTL, zero
                                  	sts TCB0_CNTH, zero*/
-0003fa c000                      	rjmp sound_driver_instrument_routine_channel0_pitch
+000431 c000                      	rjmp sound_driver_instrument_routine_channel0_pitch
                                  
                                  sound_driver_instrument_routine_channel0_pitch:
-0003fb 91e0 281b                 	lds ZL, pulse1_pitch_macro
-0003fd 91f0 281c                 	lds ZH, pulse1_pitch_macro+1
+000432 91e0 281b                 	lds ZL, pulse1_pitch_macro
+000434 91f0 281c                 	lds ZH, pulse1_pitch_macro+1
                                  
-0003ff 91e0 2820                 	lds ZL, pulse1_hi_pitch_macro
-000401 91f0 2821                 	lds ZH, pulse1_hi_pitch_macro+1
+000436 91e0 2820                 	lds ZL, pulse1_hi_pitch_macro
+000438 91f0 2821                 	lds ZH, pulse1_hi_pitch_macro+1
                                  
-000403 91e0 2825                 	lds ZL, pulse1_duty_macro
-000405 91f0 2826                 	lds ZH, pulse1_duty_macro+1
+00043a 91e0 2825                 	lds ZL, pulse1_duty_macro
+00043c 91f0 2826                 	lds ZH, pulse1_duty_macro+1
                                  
-000407 c000                      	rjmp sound_driver_exit
+00043e c000                      	rjmp sound_driver_exit
                                  
                                  sound_driver_exit:
-000408 91df                      	pop r29
-000409 91cf                      	pop r28
-00040a ce21                      	rjmp sequence_1_3 + 3 //+3 is to skip the stack instructions since we already pushed them
+00043f 91df                      	pop r29
+000440 91cf                      	pop r28
+000441 ce17                      	rjmp sequence_1_3 + 3 //+3 is to skip the stack instructions since we already pushed them
                                  
                                  //PULSE 1 ROUTINES
                                  pulse1_sequence_routine:
-00040b b7bf                      	in r27, CPU_SREG
-00040c 93bf                      	push r27
-00040d 94f8                      	cli
+000442 b7bf                      	in r27, CPU_SREG
+000443 93bf                      	push r27
+000444 94f8                      	cli
                                  
-00040e 0cdd                      	lsl pulse1_sequence //shifts sequence to the left
-00040f 1cd0                      	adc pulse1_sequence, zero //if the shifted bit was a 1, it will be added to the LSB
+000445 0cdd                      	lsl pulse1_sequence //shifts sequence to the left
+000446 1cd0                      	adc pulse1_sequence, zero //if the shifted bit was a 1, it will be added to the LSB
                                  
-000410 e0b1                      	ldi r27, TCB_CAPT_bm //clear OVF flag
-000411 93b0 0a86                 	sts TCB0_INTFLAGS, r27
-000413 91bf                      	pop r27
-000414 bfbf                      	out CPU_SREG, r27
-000415 9518                      	reti
+000447 e0b1                      	ldi r27, TCB_CAPT_bm //clear OVF flag
+000448 93b0 0a86                 	sts TCB0_INTFLAGS, r27
+00044a 91bf                      	pop r27
+00044b bfbf                      	out CPU_SREG, r27
+00044c 9518                      	reti
                                  
                                  pulse1_sweep_routine:
-000416 2dbf                      	mov r27, pulse1_sweep
-000417 70b7                      	andi r27, 0x07 //mask for period divider bits
-000418 f4f9                      	brne pulse1_sweep_routine_decrement_divider //check if divider != 0
+00044d 2dbf                      	mov r27, pulse1_sweep
+00044e 70b7                      	andi r27, 0x07 //mask for period divider bits
+00044f f4f9                      	brne pulse1_sweep_routine_decrement_divider //check if divider != 0
                                  
                                  pulse1_sweep_routine_action: //if the divider is == 0, update the pulse timer period
-000419 93df                      	push r29
-00041a 2ddf                      	mov r29, pulse1_sweep
-00041b 95d2                      	swap r29
-00041c 70d7                      	andi r29, 0x07 //mask for shift bits
-00041d f409                      	brne PC+2 //check of shift == 0
-00041e 91df                      	pop r29
-00041f c019                      	rjmp pulse1_sweep_routine_check_reload //if the shift == 0, do nothing and return
+000450 93df                      	push r29
+000451 2ddf                      	mov r29, pulse1_sweep
+000452 95d2                      	swap r29
+000453 70d7                      	andi r29, 0x07 //mask for shift bits
+000454 f409                      	brne PC+2 //check of shift == 0
+000455 91df                      	pop r29
+000456 c019                      	rjmp pulse1_sweep_routine_check_reload //if the shift == 0, do nothing and return
                                  
-000420 91a0 0a8c                 	lds r26, TCB0_CCMPL
-000422 91b0 0a8d                 	lds r27, TCB0_CCMPH
-000424 95b6                      	lsr r27
-000425 95a7                      	ror r26
-000426 95da                      	dec r29
-000427 f7e1                      	brne PC-3 //keep looping/shifting until shift count is 0
+000457 91a0 0a8c                 	lds r26, TCB0_CCMPL
+000459 91b0 0a8d                 	lds r27, TCB0_CCMPH
+00045b 95b6                      	lsr r27
+00045c 95a7                      	ror r26
+00045d 95da                      	dec r29
+00045e f7e1                      	brne PC-3 //keep looping/shifting until shift count is 0
                                  
-000428 fef7                      	sbrs pulse1_sweep, 7 //check the negate flag
-000429 c002                      	rjmp PC+3 //if negate flag was clear, go straight to addition
+00045f fef7                      	sbrs pulse1_sweep, 7 //check the negate flag
+000460 c002                      	rjmp PC+3 //if negate flag was clear, go straight to addition
                                  
-00042a 95a0                      	com r26 //pulse1 uses one's complement if the negate flag is set
-00042b 95b0                      	com r27
+000461 95a0                      	com r26 //pulse1 uses one's complement if the negate flag is set
+000462 95b0                      	com r27
                                  
-00042c 91d0 0a8c                 	lds r29, TCB0_CCMPL //perform addition to get new timer period
-00042e 0fad                      	add r26, r29
-00042f 91d0 0a8d                 	lds r29, TCB0_CCMPH
-000431 1fbd                      	adc r27, r29
+000463 91d0 0a8c                 	lds r29, TCB0_CCMPL //perform addition to get new timer period
+000465 0fad                      	add r26, r29
+000466 91d0 0a8d                 	lds r29, TCB0_CCMPH
+000468 1fbd                      	adc r27, r29
                                  
-000432 93a0 0a8c                 	sts TCB0_CCMPL, r26 //store the new LOW bits for timer
-000434 93b0 0a8d                 	sts TCB0_CCMPH, r27 //store the new HIGH bits for timer
+000469 93a0 0a8c                 	sts TCB0_CCMPL, r26 //store the new LOW bits for timer
+00046b 93b0 0a8d                 	sts TCB0_CCMPH, r27 //store the new HIGH bits for timer
                                  
                                  	//sts pulse1_timerL, r26
                                  	//sts pulse1_timerH, r27
@@ -966,221 +980,221 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(91): 'C:\Us
                                  	mov pulse1_sweep, r27
                                  	sbr channel_flags, 0b10000000*/
                                  	
-000436 91df                      	pop r29
-000437 c001                      	rjmp pulse1_sweep_routine_check_reload
+00046d 91df                      	pop r29
+00046e c001                      	rjmp pulse1_sweep_routine_check_reload
                                  
                                  pulse1_sweep_routine_decrement_divider:
-000438 94fa                      	dec pulse1_sweep //if the divider != 0, decrement the divider
+00046f 94fa                      	dec pulse1_sweep //if the divider != 0, decrement the divider
                                  
                                  pulse1_sweep_routine_check_reload:
-000439 ff97                      	sbrs channel_flags, 7 //if the reload flag is set, reload the sweep divider
-00043a 9508                      	ret
+000470 ff97                      	sbrs channel_flags, 7 //if the reload flag is set, reload the sweep divider
+000471 9508                      	ret
                                  
                                  pulse1_sweep_reload:
-00043b 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param //NOTE: since the reload flag is kept in bit 6, we clear the reload flag indirectly
-00043d 94f2                      	swap pulse1_sweep //bring data from high byte to low byte
-00043e 779f                      	cbr channel_flags, 0b10000000 //clear ready flag
-00043f 9508                      	ret
+000472 90f0 2801                 	lds pulse1_sweep, pulse1_sweep_param //NOTE: since the reload flag is kept in bit 6, we clear the reload flag indirectly
+000474 94f2                      	swap pulse1_sweep //bring data from high byte to low byte
+000475 779f                      	cbr channel_flags, 0b10000000 //clear ready flag
+000476 9508                      	ret
                                  
                                  pulse1_envelope_routine:
-000440 fd96                      	sbrc channel_flags, 6 //check if start flag is cleared
-000441 c010                      	rjmp pulse1_envelope_routine_clear_start
+000477 fd96                      	sbrc channel_flags, 6 //check if start flag is cleared
+000478 c010                      	rjmp pulse1_envelope_routine_clear_start
                                  
-000442 3000                      	cpi pulse1_volume_divider, 0x00 //check if the divider is 0
-000443 f011                      	breq PC+3 //if the divider == 0, check loop flag
-000444 950a                      	dec pulse1_volume_divider //if the divider != 0, decrement and return
-000445 9508                      	ret
+000479 3000                      	cpi pulse1_volume_divider, 0x00 //check if the divider is 0
+00047a f011                      	breq PC+3 //if the divider == 0, check loop flag
+00047b 950a                      	dec pulse1_volume_divider //if the divider != 0, decrement and return
+00047c 9508                      	ret
                                  
-000446 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the divider == 0, reset the divider period
-000448 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
-000449 ff95                      	sbrs channel_flags, 5 //check if the loop flag is set
-00044a c002                      	rjmp pulse1_envelope_routine_decrement_decay //if the loop flag is not set, check the decay
-00044b e01f                      	ldi pulse1_volume_decay, 0x0F //if the loop flag is set, reset decay and return
-00044c 9508                      	ret
+00047d 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the divider == 0, reset the divider period
+00047f 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
+000480 ff95                      	sbrs channel_flags, 5 //check if the loop flag is set
+000481 c002                      	rjmp pulse1_envelope_routine_decrement_decay //if the loop flag is not set, check the decay
+000482 e01f                      	ldi pulse1_volume_decay, 0x0F //if the loop flag is set, reset decay and return
+000483 9508                      	ret
                                  
                                  pulse1_envelope_routine_decrement_decay:
-00044d 3010                      	cpi pulse1_volume_decay, 0x00 //check if the decay is 0
-00044e f409                      	brne PC+2 //if decay != 0, go decrement
-00044f 9508                      	ret //if decay == 0 && loop flag == 0, do nothing and return
-000450 951a                      	dec pulse1_volume_decay
-000451 9508                      	ret
+000484 3010                      	cpi pulse1_volume_decay, 0x00 //check if the decay is 0
+000485 f409                      	brne PC+2 //if decay != 0, go decrement
+000486 9508                      	ret //if decay == 0 && loop flag == 0, do nothing and return
+000487 951a                      	dec pulse1_volume_decay
+000488 9508                      	ret
                                  
                                  pulse1_envelope_routine_clear_start:
-000452 7b9f                      	cbr channel_flags, 0b01000000 //if the start flag is set, clear it
-000453 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the start flag is set, reset the divider period
-000455 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
-000456 e01f                      	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
-000457 9508                      	ret
+000489 7b9f                      	cbr channel_flags, 0b01000000 //if the start flag is set, clear it
+00048a 9100 2800                 	lds pulse1_volume_divider, pulse1_param //if the start flag is set, reset the divider period
+00048c 700f                      	andi pulse1_volume_divider, 0x0F //mask for VVVV bits
+00048d e01f                      	ldi pulse1_volume_decay, 0x0F //if the start flag is set, reset decay
+00048e 9508                      	ret
                                  
                                  //CONVERTERS (TABLES)
                                  //converts and loads 5 bit length to corresponding 8 bit length value into r29
                                  length_converter:
-000458 e0f8                      	ldi ZH, HIGH(length << 1)
-000459 ebec                      	ldi ZL, LOW(length << 1)
-00045a 0fed                      	add ZL, r29
-00045b 1df0                      	adc ZH, zero
-00045c 91d4                      	lpm r29, Z
-00045d 9508                      	ret
+00048f e0f9                      	ldi ZH, HIGH(length << 1)
+000490 e2ea                      	ldi ZL, LOW(length << 1)
+000491 0fed                      	add ZL, r29
+000492 1df0                      	adc ZH, zero
+000493 91d4                      	lpm r29, Z
+000494 9508                      	ret
                                  
-00045e 7f05
-00045f 010a
-000460 0214
-000461 0328
-000462 0450
-000463 051e
-000464 0607
-000465 070d
-000466 0806
-000467 090c
-000468 0a18
-000469 0b30
-00046a 0c60
-00046b 0d24
-00046c 0e08
-00046d 0f10                      length: .db $05, $7F, $0A, $01, $14, $02, $28, $03, $50, $04, $1E, $05, $07, $06, $0D, $07, $06, $08, $0C, $09, $18, $0A, $30, $0B, $60, $0C, $24, $0D, $08, $0E, $10, $0F
+000495 7f05
+000496 010a
+000497 0214
+000498 0328
+000499 0450
+00049a 051e
+00049b 0607
+00049c 070d
+00049d 0806
+00049e 090c
+00049f 0a18
+0004a0 0b30
+0004a1 0c60
+0004a2 0d24
+0004a3 0e08
+0004a4 0f10                      length: .db $05, $7F, $0A, $01, $14, $02, $28, $03, $50, $04, $1E, $05, $07, $06, $0D, $07, $06, $08, $0C, $09, $18, $0A, $30, $0B, $60, $0C, $24, $0D, $08, $0E, $10, $0F
                                  
                                  //loads pulse sequence into r29
                                  duty_cycle_sequences:
-00046e e0f8                      	ldi ZH, HIGH(sequences << 1)
-00046f eee8                      	ldi ZL, LOW(sequences << 1)
-000470 0fed                      	add ZL, r29
-000471 1df0                      	adc ZH, zero
-000472 91d4                      	lpm r29, Z
-000473 9508                      	ret
+0004a5 e0f9                      	ldi ZH, HIGH(sequences << 1)
+0004a6 e5e6                      	ldi ZL, LOW(sequences << 1)
+0004a7 0fed                      	add ZL, r29
+0004a8 1df0                      	adc ZH, zero
+0004a9 91d4                      	lpm r29, Z
+0004aa 9508                      	ret
                                  
                                  //pulse sequences: 12.5%, 25%, 50%, 75%
-000474 0301
-000475 fc0f                      sequences: .db 0b00000001, 0b00000011, 0b00001111, 0b11111100
+0004ab 0301
+0004ac fc0f                      sequences: .db 0b00000001, 0b00000011, 0b00001111, 0b11111100
                                  
                                  //famitracker volumes table: http://famitracker.com/wiki/index.php?title=Volume
                                  volumes:
-000476 0000
-000477 0000
-000478 0000
-000479 0000
-00047a 0000
-00047b 0000
-00047c 0000
-00047d 0000                      	.db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-00047e 0100
-00047f 0101
-000480 0101
-000481 0101
-000482 0101
-000483 0101
-000484 0101
-000485 0101                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
-000486 0100
-000487 0101
-000488 0101
-000489 0101
-00048a 0101
-00048b 0101
-00048c 0101
-00048d 0201                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02
-00048e 0100
-00048f 0101
-000490 0101
-000491 0101
-000492 0101
-000493 0202
-000494 0202
-000495 0302                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03
-000496 0100
-000497 0101
-000498 0101
-000499 0101
-00049a 0202
-00049b 0202
-00049c 0303
-00049d 0403                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04
-00049e 0100
-00049f 0101
-0004a0 0101
-0004a1 0202
-0004a2 0302
-0004a3 0303
-0004a4 0404
-0004a5 0504                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05
-0004a6 0100
-0004a7 0101
-0004a8 0201
-0004a9 0202
-0004aa 0303
-0004ab 0404
-0004ac 0504
-0004ad 0605                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05, 0x06
-0004ae 0100
-0004af 0101
-0004b0 0201
-0004b1 0302
-0004b2 0403
-0004b3 0504
-0004b4 0605
-0004b5 0706                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07
-0004b6 0100
+0004ad 0000
+0004ae 0000
+0004af 0000
+0004b0 0000
+0004b1 0000
+0004b2 0000
+0004b3 0000
+0004b4 0000                      	.db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+0004b5 0100
+0004b6 0101
 0004b7 0101
-0004b8 0202
-0004b9 0303
-0004ba 0404
-0004bb 0505
-0004bc 0606
-0004bd 0807                      	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x08
-0004be 0100
+0004b8 0101
+0004b9 0101
+0004ba 0101
+0004bb 0101
+0004bc 0101                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
+0004bd 0100
+0004be 0101
 0004bf 0101
-0004c0 0302
-0004c1 0403
-0004c2 0504
-0004c3 0606
-0004c4 0707
-0004c5 0908                      	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08, 0x09
-0004c6 0100
-0004c7 0201
-0004c8 0302
-0004c9 0404
-0004ca 0605
-0004cb 0706
-0004cc 0808
-0004cd 0a09                      	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A
-0004ce 0100
-0004cf 0201
-0004d0 0302
-0004d1 0504
-0004d2 0605
-0004d3 0807
-0004d4 0908
-0004d5 0b0a                      	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x05, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B
-0004d6 0100
-0004d7 0201
-0004d8 0403
-0004d9 0504
-0004da 0706
-0004db 0808
-0004dc 0a09
-0004dd 0c0b                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B, 0x0C
-0004de 0100
+0004c0 0101
+0004c1 0101
+0004c2 0101
+0004c3 0101
+0004c4 0201                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02
+0004c5 0100
+0004c6 0101
+0004c7 0101
+0004c8 0101
+0004c9 0101
+0004ca 0202
+0004cb 0202
+0004cc 0302                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03
+0004cd 0100
+0004ce 0101
+0004cf 0101
+0004d0 0101
+0004d1 0202
+0004d2 0202
+0004d3 0303
+0004d4 0403                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04
+0004d5 0100
+0004d6 0101
+0004d7 0101
+0004d8 0202
+0004d9 0302
+0004da 0303
+0004db 0404
+0004dc 0504                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05
+0004dd 0100
+0004de 0101
 0004df 0201
-0004e0 0403
-0004e1 0605
-0004e2 0706
-0004e3 0908
-0004e4 0b0a
-0004e5 0d0c                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D
-0004e6 0100
+0004e0 0202
+0004e1 0303
+0004e2 0404
+0004e3 0504
+0004e4 0605                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05, 0x06
+0004e5 0100
+0004e6 0101
 0004e7 0201
-0004e8 0403
-0004e9 0605
-0004ea 0807
-0004eb 0a09
-0004ec 0c0b
-0004ed 0e0d                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E
-0004ee 0100
-0004ef 0302
-0004f0 0504
-0004f1 0706
-0004f2 0908
-0004f3 0b0a
-0004f4 0d0c
+0004e8 0302
+0004e9 0403
+0004ea 0504
+0004eb 0605
+0004ec 0706                      	.db 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07
+0004ed 0100
+0004ee 0101
+0004ef 0202
+0004f0 0303
+0004f1 0404
+0004f2 0505
+0004f3 0606
+0004f4 0807                      	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x08
+0004f5 0100
+0004f6 0101
+0004f7 0302
+0004f8 0403
+0004f9 0504
+0004fa 0606
+0004fb 0707
+0004fc 0908                      	.db 0x00, 0x01, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08, 0x09
+0004fd 0100
+0004fe 0201
+0004ff 0302
+000500 0404
+000501 0605
+000502 0706
+000503 0808
+000504 0a09                      	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A
+000505 0100
+000506 0201
+000507 0302
+000508 0504
+000509 0605
+00050a 0807
+00050b 0908
+00050c 0b0a                      	.db 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x05, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B
+00050d 0100
+00050e 0201
+00050f 0403
+000510 0504
+000511 0706
+000512 0808
+000513 0a09
+000514 0c0b                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B, 0x0C
+000515 0100
+000516 0201
+000517 0403
+000518 0605
+000519 0706
+00051a 0908
+00051b 0b0a
+00051c 0d0c                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D
+00051d 0100
+00051e 0201
+00051f 0403
+000520 0605
+000521 0807
+000522 0a09
+000523 0c0b
+000524 0e0d                      	.db 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E
+000525 0100
+000526 0302
+000527 0504
+000528 0706
+000529 0908
+00052a 0b0a
+00052b 0d0c
 
 
 RESOURCE USE INFORMATION
@@ -1201,37 +1215,37 @@ counted separately from r26..r31 here.
 x  :   0 y  :   0 z  :  30 r0 :  54 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
 r13:   4 r14:   4 r15:   9 r16:   7 r17:   6 r18:   0 r19:   0 r20:   0 
-r21:   0 r22:   0 r23:   0 r24:   0 r25:  11 r26:  75 r27: 184 r28:  22 
+r21:   0 r22:   0 r23:   0 r24:   0 r25:  11 r26:  74 r27: 190 r28:  22 
 r29:  45 r30:  40 r31:  40 
 Registers used: 14 out of 35 (40.0%)
 
 "ATmega4809" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :  12 add   :  13 adiw  :   8 and   :   0 
 andi  :  10 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   1 break :   0 breq  :  20 brge  :   0 brhc  :   0 
-brhs  :   0 brid  :   0 brie  :   0 brlo  :   7 brlt  :   0 brmi  :   2 
-brne  :  11 brpl  :   0 brsh  :   4 brtc  :   0 brts  :   0 brvc  :   0 
+brcc  :   0 brcs  :   1 break :   0 breq  :  18 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   8 brlt  :   0 brmi  :   0 
+brne  :  14 brpl  :   0 brsh  :   4 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   2 
 clc   :   0 clh   :   0 cli   :   4 cln   :   0 clr   :   1 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   2 cp    :   5 cpc   :   0 
-cpi   :  29 cpse  :   2 dec   :   8 des   :   0 eor   :   0 fmul  :   0 
+cpi   :  31 cpse  :   2 dec   :   8 des   :   0 eor   :   0 fmul  :   0 
 fmuls :   0 fmulsu:   0 icall :   0 ijmp  :   0 in    :   4 inc   :   8 
-jmp   :   6 ld    :   0 ldd   :   0 ldi   :  49 lds   :  61 lpm   :  37 
-lsl   :  11 lsr   :   2 mov   :  12 movw  :   0 mul   :   0 muls  :   0 
+jmp   :   6 ld    :   0 ldd   :   0 ldi   :  49 lds   :  64 lpm   :  37 
+lsl   :  11 lsr   :   2 mov   :  11 movw  :   0 mul   :   0 muls  :   0 
 mulsu :   0 neg   :   0 nop   :   0 or    :   1 ori   :   0 out   :   6 
-pop   :  11 push  :  11 rcall :  15 ret   :  13 reti  :   3 rjmp  :  51 
+pop   :  11 push  :  11 rcall :  15 ret   :  13 reti  :   3 rjmp  :  52 
 rol   :  10 ror   :   1 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 
-sbis  :   0 sbiw  :   0 sbr   :   3 sbrc  :   5 sbrs  :   4 sec   :   0 
+sbis  :   0 sbiw  :   0 sbr   :   3 sbrc  :   7 sbrs  :   4 sec   :   0 
 seh   :   0 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 
 sev   :   0 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 
 sts   : 141 sub   :   0 subi  :   4 swap  :   3 tst   :   0 wdr   :   0 
 
-Instructions used: 44 out of 114 (38.6%)
+Instructions used: 43 out of 114 (37.7%)
 
 "ATmega4809" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0009ec   1616    896   2512   49152   5.1%
+[.cseg] 0x000000 0x000a5a   1636    986   2622   49152   5.3%
 [.dseg] 0x002800 0x00282e      0     46     46    6144   0.7%
 [.eseg] 0x000000 0x000000      0      0      0     256   0.0%
 

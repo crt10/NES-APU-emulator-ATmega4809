@@ -186,7 +186,7 @@ init:
 
 	//PINS
 	ldi r27, 0xFF //set all pins in VPORTD to output
-	out VPORTD_DIR, r27
+	out VPORTA_DIR, r27
 
 	//ENVELOPE
 	ldi pulse1_volume_divider, 0x0F
@@ -304,7 +304,7 @@ pulse1_check_timer_7FF_LOW:
 	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
 
 pulse1_off:
-	out VPORTD_OUT, zero
+	out VPORTA_OUT, zero
 	rjmp pulse1
 
 pulse1_on:
@@ -312,7 +312,7 @@ pulse1_on:
 /*	cpse r29, zero
 	rjmp pulse1_off //if VVVV bits are 0, then there is no volume (channel off)*/
 
-	out VPORTD_OUT, r29
+	out VPORTA_OUT, r29
 	rjmp pulse1
 
 //FRAME COUNTER/AUDIO SAMPLE ISR
@@ -574,31 +574,31 @@ sound_driver_channel0_release:
 sound_driver_channel0_release_volume:
 	lds r27, pulse1_volume_macro_release
 	cpi r27, 0xFF //check if volume macro has a release flag
-	breq PC+2 //if the macro has no release flag, don't increment it
+	breq sound_driver_channel0_release_arpeggio //if the macro has no release flag, check the next macro
 	inc r27
 	sts pulse1_volume_macro_offset, r27 //adjust offset so that it starts after the release flag index
 sound_driver_channel0_release_arpeggio:
 	lds r27, pulse1_arpeggio_macro_release
 	cpi r27, 0xFF //check if arpeggio macro has a release flag
-	breq PC+2
+	breq sound_driver_channel0_release_pitch
 	inc r27
 	sts pulse1_arpeggio_macro_offset, r27
 sound_driver_channel0_release_pitch:
 	lds r27, pulse1_pitch_macro_release
 	cpi r27, 0xFF //check if pitch macro has a release flag
-	breq PC+2
+	breq sound_driver_channel0_release_hi_pitch
 	inc r27
 	sts pulse1_pitch_macro_offset, r27
 sound_driver_channel0_release_hi_pitch:
 	lds r27, pulse1_hi_pitch_macro_release
 	cpi r27, 0xFF //check if hi_pitch macro has a release flag
-	breq PC+2
+	breq sound_driver_channel0_release_duty
 	inc r27
 	sts pulse1_hi_pitch_macro_offset, r27
 sound_driver_channel0_release_duty:
 	lds r27, pulse1_duty_macro_release
 	cpi r27, 0xFF //check if duty macro has a release flag
-	breq PC+2
+	breq sound_driver_channel0_release_exit
 	inc r27
 	sts pulse1_duty_macro_offset, r27
 sound_driver_channel0_release_exit:
@@ -731,8 +731,7 @@ sound_driver_instrument_routine_channel0_arpeggio:
 	brne sound_driver_instrument_routine_channel0_arpeggio_increment //if the current offset is not equal to the release index, increment the offset
 	lds r26, pulse1_arpeggio_macro_loop
 	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
-	mov r27, r26
-	brlo sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
+	brlo sound_driver_instrument_routine_channel0_arpeggio_increment+1 //if the current offset is equal to the release index and there is a loop, reload the loop index, but also read the current index data
 	rjmp sound_driver_instrument_routine_channel0_arpeggio_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
 
 sound_driver_instrument_routine_channel0_arpeggio_increment:
@@ -745,20 +744,34 @@ sound_driver_instrument_routine_channel0_arpeggio_read:
 	brne sound_driver_instrument_routine_channel0_arpeggio_process //if the data was not the macro end flag, calculate the volume
 
 
-
 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag:
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_mode:
+	subi r26, 1 //keep the offset at the end flag
+	sts pulse1_arpeggio_macro_offset, r26
+	lds r27, pulse1_arpeggio_macro_mode //load the mode to check for fixed/relative mode NOTE: end behavior for fixed/relative mode is different in that once the macro ends, the true note is played
+	cpi r27, 0x01
+	brlo sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute
+
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_check_release:
+	lds r27, pulse1_arpeggio_macro_release
+	cpi r27, 0xFF
+	brne sound_driver_instrument_routine_channel0_arpeggio_default //if there is a release flag, we don't need to loop. just play the true note
+
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_check_loop:
+	lds r27, pulse1_arpeggio_macro_loop
+	cpi r27, 0xFF
+	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if there is no release flag, but there is a loop, load the offset with the loop index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_default //if there is no release flag and no loop, then play the true note
+
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute:
+	lds r27, pulse1_arpeggio_macro_release
+	cpi r27, 0xFF
+	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop //if there is a release flag, react as if there was no loop.
+
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_check_loop:
 	lds r27, pulse1_arpeggio_macro_loop //load the loop index
 	cpi r27, 0xFF //check if loop flag exists
 	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if a loop flag exists, then load the loop value
-
-sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_fixed:
-	subi r26, 1 //if a loop flag does not exist, keep the offset at the end flag
-	sts pulse1_arpeggio_macro_offset, r26
-	lds r27, pulse1_arpeggio_macro_mode //load the mode to check for fixed mode NOTE: end behavior for fixed mode is different in that once the macro ends, the true note is played
-	cpi r27, 0x01 //fixed mode
-	breq sound_driver_instrument_routine_channel0_arpeggio_default //if there is no loop and we are in fixed mode, go play the true note
-	cpi r27, 0x02 //relative mode NOTE: end behavior is similar to fixed mode
-	breq sound_driver_instrument_routine_channel0_arpeggio_default
 
 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop:
 	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
@@ -786,21 +799,8 @@ sound_driver_instrument_routine_channel0_arpeggio_default:
 sound_driver_instrument_routine_channel0_arpeggio_process_absolute:
 	lds r26, pulse1_note //load the current note index
 	add r26, r27 //offset the note with the arpeggio data
-	brmi sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract //check if we are subtracting from the note index
-	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_absolute_add
-
-sound_driver_instrument_routine_channel0_arpeggio_process_fixed:
-	mov r26, r27 //move the arpeggio data into r26
-	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
-
-sound_driver_instrument_routine_channel0_arpeggio_process_relative:
-	lds r26, pulse1_note //load the current note index
-	add r26, r27 //offset the note with the arpeggio data
-	
-	brmi sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract //check if we are subtracting from the note index
-	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative_add
-
-
+	sbrc r27, 7 //check sign bit to check if we are subtracting from the note index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract
 
 sound_driver_instrument_routine_channel0_arpeggio_process_absolute_add:
 	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
@@ -812,6 +812,20 @@ sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract:
 	sbrc r26, 7 //check if result is negative
 	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
 	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+
+
+
+sound_driver_instrument_routine_channel0_arpeggio_process_fixed:
+	mov r26, r27 //move the arpeggio data into r26
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+
+
+
+sound_driver_instrument_routine_channel0_arpeggio_process_relative:
+	lds r26, pulse1_note //load the current note index
+	add r26, r27 //offset the note with the arpeggio data
+	sbrc r27, 7 //check sign bit to check if we are subtracting from the note index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract
 
 sound_driver_instrument_routine_channel0_arpeggio_process_relative_add:
 	sts pulse1_note, r26 //NOTE: relative mode modifies the original note index

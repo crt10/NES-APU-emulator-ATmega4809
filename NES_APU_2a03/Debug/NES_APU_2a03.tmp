@@ -65,7 +65,7 @@
   <sound_driver><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>359</LINE></sound_driver>
   <sequence_0_2><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>319</LINE></sequence_0_2>
   <sequence_1_3><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>333</LINE></sequence_1_3>
-  <pulse1_sequence_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>864</LINE></pulse1_sequence_routine>
+  <pulse1_sequence_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>878</LINE></pulse1_sequence_routine>
   <note_table><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>1</LINE></note_table>
   <song0_frames><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>11</LINE></song0_frames>
   <song0_channel0_pattern0><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>17</LINE></song0_channel0_pattern0>
@@ -114,8 +114,8 @@
   <arpeggio_macro10><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>80</LINE></arpeggio_macro10>
   <arpeggio_macro11><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>81</LINE></arpeggio_macro11>
   <volume_macro0><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm</FILE><LINE>68</LINE></volume_macro0>
-  <length_converter><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>977</LINE></length_converter>
-  <duty_cycle_sequences><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>988</LINE></duty_cycle_sequences>
+  <length_converter><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>991</LINE></length_converter>
+  <duty_cycle_sequences><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>1002</LINE></duty_cycle_sequences>
   <pulse1><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>271</LINE></pulse1>
   <pulse1_off><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>306</LINE></pulse1_off>
   <pulse1_check_timer_08><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>281</LINE></pulse1_check_timer_08>
@@ -124,8 +124,8 @@
   <pulse1_check_timer_7FF_HIGH><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>296</LINE></pulse1_check_timer_7FF_HIGH>
   <pulse1_on><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>310</LINE></pulse1_on>
   <pulse1_check_timer_7FF_LOW><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>301</LINE></pulse1_check_timer_7FF_LOW>
-  <pulse1_envelope_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>945</LINE></pulse1_envelope_routine>
-  <pulse1_sweep_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>878</LINE></pulse1_sweep_routine>
+  <pulse1_envelope_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>959</LINE></pulse1_envelope_routine>
+  <pulse1_sweep_routine><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>892</LINE></pulse1_sweep_routine>
   <sequence_1_3_exit><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>352</LINE></sequence_1_3_exit>
   <sound_driver_decrement_frame_delay><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>653</LINE></sound_driver_decrement_frame_delay>
   <sound_driver_channel0><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>373</LINE></sound_driver_channel0>
@@ -167,35 +167,39 @@
   <sound_driver_instrument_routine_channel0_volume_macro_end_flag><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>686</LINE></sound_driver_instrument_routine_channel0_volume_macro_end_flag>
   <sound_driver_instrument_routine_channel0_volume_read><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>681</LINE></sound_driver_instrument_routine_channel0_volume_read>
   <sound_driver_instrument_routine_channel0_volume_calculate><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>691</LINE></sound_driver_instrument_routine_channel0_volume_calculate>
-  <volumes><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>1000</LINE></volumes>
+  <volumes><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>1014</LINE></volumes>
   <sound_driver_instrument_routine_channel0_volume_table_offset><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>696</LINE></sound_driver_instrument_routine_channel0_volume_table_offset>
   <sound_driver_instrument_routine_channel0_volume_load><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>708</LINE></sound_driver_instrument_routine_channel0_volume_load>
   <sound_driver_instrument_routine_channel0_arpeggio><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>718</LINE></sound_driver_instrument_routine_channel0_arpeggio>
-  <sound_driver_instrument_routine_channel0_arpeggio_default><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>782</LINE></sound_driver_instrument_routine_channel0_arpeggio_default>
-  <sound_driver_instrument_routine_channel0_arpeggio_increment><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>738</LINE></sound_driver_instrument_routine_channel0_arpeggio_increment>
-  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>768</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload>
-  <sound_driver_instrument_routine_channel0_arpeggio_read><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>742</LINE></sound_driver_instrument_routine_channel0_arpeggio_read>
-  <sound_driver_instrument_routine_channel0_arpeggio_process><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>774</LINE></sound_driver_instrument_routine_channel0_arpeggio_process>
-  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>749</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag>
-  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_fixed><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>754</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_fixed>
-  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>763</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop>
-  <sound_driver_instrument_routine_channel0_arpeggio_process_absolute><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>786</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_absolute>
-  <sound_driver_instrument_routine_channel0_arpeggio_process_fixed><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>792</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_fixed>
-  <sound_driver_instrument_routine_channel0_arpeggio_process_relative><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>796</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_relative>
-  <sound_driver_instrument_routine_channel0_arpeggio_process_load><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>832</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_load>
+  <sound_driver_instrument_routine_channel0_arpeggio_default><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>795</LINE></sound_driver_instrument_routine_channel0_arpeggio_default>
+  <sound_driver_instrument_routine_channel0_arpeggio_increment><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>737</LINE></sound_driver_instrument_routine_channel0_arpeggio_increment>
+  <sound_driver_instrument_routine_channel0_arpeggio_read><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>741</LINE></sound_driver_instrument_routine_channel0_arpeggio_read>
+  <sound_driver_instrument_routine_channel0_arpeggio_process><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>787</LINE></sound_driver_instrument_routine_channel0_arpeggio_process>
+  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>747</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag>
+  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_mode><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>748</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_check_mode>
+  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>766</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute>
+  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_check_release><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>755</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_check_release>
+  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_check_loop><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>760</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_check_loop>
+  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>781</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload>
+  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>776</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop>
+  <sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_check_loop><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>771</LINE></sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_check_loop>
+  <sound_driver_instrument_routine_channel0_arpeggio_process_absolute><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>799</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_absolute>
+  <sound_driver_instrument_routine_channel0_arpeggio_process_fixed><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>818</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_fixed>
+  <sound_driver_instrument_routine_channel0_arpeggio_process_relative><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>824</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_relative>
+  <sound_driver_instrument_routine_channel0_arpeggio_process_load><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>846</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_load>
   <sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>811</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_absolute_subtract>
   <sound_driver_instrument_routine_channel0_arpeggio_process_absolute_add><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>805</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_absolute_add>
-  <sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>824</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract>
-  <sound_driver_instrument_routine_channel0_arpeggio_process_relative_add><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>816</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_relative_add>
-  <sound_driver_instrument_routine_channel0_pitch><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>846</LINE></sound_driver_instrument_routine_channel0_pitch>
-  <sound_driver_exit><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>858</LINE></sound_driver_exit>
-  <pulse1_sweep_routine_decrement_divider><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>932</LINE></pulse1_sweep_routine_decrement_divider>
-  <pulse1_sweep_routine_action><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>883</LINE></pulse1_sweep_routine_action>
-  <pulse1_sweep_routine_check_reload><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>935</LINE></pulse1_sweep_routine_check_reload>
-  <pulse1_sweep_reload><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>939</LINE></pulse1_sweep_reload>
-  <pulse1_envelope_routine_clear_start><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>968</LINE></pulse1_envelope_routine_clear_start>
-  <pulse1_envelope_routine_decrement_decay><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>961</LINE></pulse1_envelope_routine_decrement_decay>
-  <length><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>985</LINE></length>
-  <sequences><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>997</LINE></sequences>
+  <sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>838</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract>
+  <sound_driver_instrument_routine_channel0_arpeggio_process_relative_add><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>830</LINE></sound_driver_instrument_routine_channel0_arpeggio_process_relative_add>
+  <sound_driver_instrument_routine_channel0_pitch><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>860</LINE></sound_driver_instrument_routine_channel0_pitch>
+  <sound_driver_exit><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>872</LINE></sound_driver_exit>
+  <pulse1_sweep_routine_decrement_divider><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>946</LINE></pulse1_sweep_routine_decrement_divider>
+  <pulse1_sweep_routine_action><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>897</LINE></pulse1_sweep_routine_action>
+  <pulse1_sweep_routine_check_reload><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>949</LINE></pulse1_sweep_routine_check_reload>
+  <pulse1_sweep_reload><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>953</LINE></pulse1_sweep_reload>
+  <pulse1_envelope_routine_clear_start><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>982</LINE></pulse1_envelope_routine_clear_start>
+  <pulse1_envelope_routine_decrement_decay><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>975</LINE></pulse1_envelope_routine_decrement_decay>
+  <length><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>999</LINE></length>
+  <sequences><FILE>C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm</FILE><LINE>1011</LINE></sequences>
  </LABELS>
 </ASSEMBLER_INFO>
