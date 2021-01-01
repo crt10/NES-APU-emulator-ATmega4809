@@ -654,6 +654,8 @@ sound_driver_decrement_frame_delay:
 	dec r27
 	sts pulse1_pattern_delay, r27
 
+
+
 sound_driver_instrument_routine:
 sound_driver_instrument_routine_channel0_volume:
 	lds ZL, pulse1_volume_macro
@@ -671,7 +673,7 @@ sound_driver_instrument_routine_channel0_volume:
 	brne sound_driver_instrument_routine_channel0_volume_increment //if the current offset is not equal to the release index, increment the offset
 	lds r26, pulse1_volume_macro_loop
 	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
-	brlo sound_driver_instrument_routine_channel0_volume_macro_end_flag+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index
+	brlo sound_driver_instrument_routine_channel0_volume_increment+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index, but also read the current index data
 	rjmp sound_driver_instrument_routine_channel0_volume_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
 
 sound_driver_instrument_routine_channel0_volume_increment:
@@ -683,27 +685,32 @@ sound_driver_instrument_routine_channel0_volume_read:
 	cpi r27, 0xFF //check for macro end flag
 	brne sound_driver_instrument_routine_channel0_volume_calculate //if the data was not the macro end flag, calculate the volume
 
+
+
 sound_driver_instrument_routine_channel0_volume_macro_end_flag:
+sound_driver_instrument_routine_channel0_volume_macro_end_flag_check_release:
+	lds r27, pulse1_volume_macro_release
+	cpi r27, 0xFF
+	brne sound_driver_instrument_routine_channel0_volume_macro_end_flag_last_index //if there is a release flag, we don't need to loop. stay at the last valid index
+
+sound_driver_instrument_routine_channel0_volume_macro_end_flag_check_loop:
 	lds r27, pulse1_volume_macro_loop //load the loop index
 	sts pulse1_volume_macro_offset, r27 //store the loop index into the offset
 	rjmp sound_driver_instrument_routine_channel0_volume //go back and re-read the volume data
 
+sound_driver_instrument_routine_channel0_volume_macro_end_flag_last_index:
+	subi r26, 2 //go back to last valid index NOTE: Since we increment the offset everytime we read data, we have to decrement twice. 1 to account for the increment and 1 for the end flag.
+	sts pulse1_volume_macro_offset, r26
+	rjmp sound_driver_instrument_routine_channel0_volume //go back and re-read the volume data
+
+
+
 sound_driver_instrument_routine_channel0_volume_calculate:
 	ldi ZL, LOW(volumes << 1) //point Z to volume table
 	ldi ZH, HIGH(volumes << 1)
-
-	inc r27
-sound_driver_instrument_routine_channel0_volume_table_offset:
-	dec r27
-	breq sound_driver_instrument_routine_channel0_volume_load
-	adiw Z, 16 //move to next row in volume table
-	rjmp sound_driver_instrument_routine_channel0_volume_table_offset
-
-sound_driver_instrument_routine_channel0_volume_default:
-	lds r27, pulse1_param //a multiplier of F means in no change to the main volume, so we just copy the value into the output
-	andi r27, 0x0F //mask for VVVV volume bits
-	sts pulse1_output_volume, r27
-	rjmp sound_driver_instrument_routine_channel0_arpeggio
+	swap r27 //multiply the offset by 16 to move to the correct row in the volume table
+	add ZL, r27 //add offset to the table
+	adc ZH, zero
 
 sound_driver_instrument_routine_channel0_volume_load:
 	lds r27, pulse1_param //load main volume
@@ -712,6 +719,12 @@ sound_driver_instrument_routine_channel0_volume_load:
 	adc ZH, zero
 	lpm r27, Z
 	sts pulse1_output_volume, r27 //store the new output volume
+	rjmp sound_driver_instrument_routine_channel0_arpeggio
+
+sound_driver_instrument_routine_channel0_volume_default:
+	lds r27, pulse1_param //a multiplier of F means in no change to the main volume, so we just copy the value into the output
+	andi r27, 0x0F //mask for VVVV volume bits
+	sts pulse1_output_volume, r27
 	
 
 
