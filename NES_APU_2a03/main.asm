@@ -22,6 +22,8 @@ pulse1_note: .byte 1 //the current note index in the note table
 song_frames: .byte 2
 song_frame_offset: .byte 2
 
+
+
 pulse1_pattern: .byte 2
 pulse1_pattern_delay: .byte 1
 pulse1_pattern_offset: .byte 2
@@ -30,23 +32,31 @@ pulse1_volume_macro: .byte 2
 pulse1_volume_macro_offset: .byte 1
 pulse1_volume_macro_loop: .byte 1
 pulse1_volume_macro_release: .byte 1
+
 pulse1_arpeggio_macro: .byte 2
 pulse1_arpeggio_macro_offset: .byte 1
 pulse1_arpeggio_macro_loop: .byte 1
 pulse1_arpeggio_macro_release: .byte 1
 pulse1_arpeggio_macro_mode: .byte 1
+
+pulse1_total_pitch_offset: .byte 1 //used to reference the overall change in pitch for the pitch macro
 pulse1_pitch_macro: .byte 2
 pulse1_pitch_macro_offset: .byte 1
 pulse1_pitch_macro_loop: .byte 1
 pulse1_pitch_macro_release: .byte 1
+
+pulse1_total_hi_pitch_offset: .byte 1 //used to reference the overall change in pitch for the hi pitch macro
 pulse1_hi_pitch_macro: .byte 2
 pulse1_hi_pitch_macro_offset: .byte 1
 pulse1_hi_pitch_macro_loop: .byte 1
 pulse1_hi_pitch_macro_release: .byte 1
+
 pulse1_duty_macro: .byte 2
 pulse1_duty_macro_offset: .byte 1
 pulse1_duty_macro_loop: .byte 1
 pulse1_duty_macro_release: .byte 1
+
+
 
 pulse2_pattern_delay: .byte 1
 triangle_pattern_delay: .byte 1
@@ -55,13 +65,8 @@ dcpm_pattern_delay: .byte 1
 
 .cseg
 
-//NOTE: r30 and r31 are reserved for conversion routines, since lpm can only be used with the Z register
-//r28 and r29 are reserved for non-interrupt routines
-//r26 and r27 are reserved for interrupt routines, but interrupt routines may use r28 and r29
-//If an interrupt uses r28 and r29, then they must be pushed and popped (this should be limited as much as possible)
-//This was done in order to save clock cycles due to constantly pushing/popping registers
 //NOTE: zero is defined in order to use the cp instruction without the need to load 0x00 into a register beforehand
-.def zero = r0
+.def zero = r2
 .def channel_flags = r25 //[pulse1.pulse2] RSlc.0000 = Reload, Start, Length halt/Loop, Constant volume
 .def pulse1_sequence = r13
 .def pulse1_length_counter = r14
@@ -172,8 +177,10 @@ init:
 	sts pulse1_volume_macro+1, zero
 	sts pulse1_arpeggio_macro, zero
 	sts pulse1_arpeggio_macro+1, zero
+	sts pulse1_total_pitch_offset, zero
 	sts pulse1_pitch_macro, zero
 	sts pulse1_pitch_macro+1, zero
+	sts pulse1_total_hi_pitch_offset, zero
 	sts pulse1_hi_pitch_macro, zero
 	sts pulse1_hi_pitch_macro+1, zero
 	sts pulse1_duty_macro, zero
@@ -250,11 +257,12 @@ init:
 	sts TCA0_SINGLE_CTRLA, r27
 
 	//NOTE: Channel Timers are clocked (20/2)/(0.8948865) = 11.1746014718 times faster than the NES APU
-	//Because of this, we multiply all the NES timer values by 11.1746014718 beforehand 
+	//Because of this, we multiply all the NES timer values by 11.1746014718 beforehand
 	//Since we rotate the sequence when the timer goes from t-(t-1) to 0, instead of 0 to t like the NES, we add 1 to the NES timers before multiplying
 	//The ATmega4809 is configured to run at 20 MHz
 	//The /2 comes from the prescaler divider used
 	//0.8948865 MHz is the speed of the NTSC NES APU
+	//NOTE: This means that any offset to the pitch for the NES timers would be multiplied by 11.1746014718 aswell.
 	//Pulse 1
 	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
 	sts TCB0_CTRLB, r27
@@ -408,11 +416,15 @@ sound_driver_channel0_check_if_end:
 
 sound_driver_channel0_note:
 	sts pulse1_note, r27 //store the note index
-	sts pulse1_volume_macro_offset, zero //reset all macro offsets
-	sts pulse1_arpeggio_macro_offset, zero
-	sts pulse1_pitch_macro_offset, zero
-	sts pulse1_hi_pitch_macro_offset, zero
-	sts pulse1_duty_macro_offset, zero
+	ldi r26, 0x03
+	ldi r27, 0x02
+	sts pulse1_volume_macro_offset, r27 //reset all macro offsets
+	sts pulse1_arpeggio_macro_offset, r26
+	sts pulse1_pitch_macro_offset, r27
+	sts pulse1_hi_pitch_macro_offset, r27
+	sts pulse1_duty_macro_offset, r27
+	sts pulse1_total_pitch_offset, zero //reset the pitch and hi pitch offset
+	sts pulse1_total_hi_pitch_offset, zero
 	rcall sound_driver_channel0_increment_offset
 	rjmp sound_driver_channel0
 
@@ -475,6 +487,21 @@ sound_driver_channel0_instrument_change_macro_loop:
 	brcs sound_driver_channel0_instrument_change_load_macro
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
+
+
+sound_driver_channel0_instrument_change_exit:
+	ldi r26, 0x03
+	ldi r27, 0x02
+	sts pulse1_volume_macro_offset, r27 //reset all macro offsets
+	sts pulse1_arpeggio_macro_offset, r26
+	sts pulse1_pitch_macro_offset, r27
+	sts pulse1_hi_pitch_macro_offset, r27
+	sts pulse1_duty_macro_offset, r27
+	rcall sound_driver_channel0_increment_offset_twice
+	rjmp sound_driver_channel0
+
+
+
 sound_driver_channel0_instrument_change_load_macro:
 	lpm r28, Z+ //r28:r29 now point to the macro
 	lpm r29, Z+
@@ -506,37 +533,30 @@ sound_driver_channel0_instrument_change_load_macro_arpeggio:
 sound_driver_channel0_instrument_change_load_macro_pitch:
 	sts pulse1_pitch_macro, r28
 	sts pulse1_pitch_macro+1, r29
+	sts pulse1_total_pitch_offset, zero //reset the pitch offset
 	rcall sound_driver_channel0_instrument_change_read_header
-	sts pulse1_volume_macro_release, r28
-	sts pulse1_volume_macro_loop, r29
+	sts pulse1_pitch_macro_release, r28
+	sts pulse1_pitch_macro_loop, r29
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
 sound_driver_channel0_instrument_change_load_macro_hi_pitch:
 	sts pulse1_hi_pitch_macro, r28
 	sts pulse1_hi_pitch_macro+1, r29
+	sts pulse1_total_hi_pitch_offset, zero //reset the hi pitch offset
 	rcall sound_driver_channel0_instrument_change_read_header
-	sts pulse1_volume_macro_release, r28
-	sts pulse1_volume_macro_loop, r29
+	sts pulse1_hi_pitch_macro_release, r28
+	sts pulse1_hi_pitch_macro_loop, r29
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
 sound_driver_channel0_instrument_change_load_macro_duty:
 	sts pulse1_duty_macro, r28
 	sts pulse1_duty_macro+1, r29
 	rcall sound_driver_channel0_instrument_change_read_header
-	sts pulse1_volume_macro_release, r28
-	sts pulse1_volume_macro_loop, r29
+	sts pulse1_duty_macro_release, r28
+	sts pulse1_duty_macro_loop, r29
 	rjmp sound_driver_channel0_instrument_change_macro_loop
 
-sound_driver_channel0_instrument_change_exit:
-	ldi r26, 0x03
-	ldi r27, 0x02
-	sts pulse1_volume_macro_offset, r27 //reset all macro offsets
-	sts pulse1_arpeggio_macro_offset, r26
-	sts pulse1_pitch_macro_offset, r27
-	sts pulse1_hi_pitch_macro_offset, r27
-	sts pulse1_duty_macro_offset, r27
-	rcall sound_driver_channel0_increment_offset_twice
-	rjmp sound_driver_channel0
+
 
 sound_driver_channel0_instrument_change_read_header:
 	push ZL
@@ -729,6 +749,7 @@ sound_driver_instrument_routine_channel0_volume_default:
 
 
 sound_driver_instrument_routine_channel0_arpeggio:
+	//NOTE: The arpeggio macro routine is also in charge of actually setting the timers using the note stored in SRAM. The default routine is responsible for that in the case no arpeggio macro is used.
 	lds ZL, pulse1_arpeggio_macro
 	lds ZH, pulse1_arpeggio_macro+1
 	adiw Z, 0
@@ -779,14 +800,14 @@ sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_fixed_relative_
 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute:
 	lds r27, pulse1_arpeggio_macro_release
 	cpi r27, 0xFF
-	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop //if there is a release flag, react as if there was no loop.
+	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_no_loop //if there is a release flag, react as if there was no loop.
 
 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_check_loop:
 	lds r27, pulse1_arpeggio_macro_loop //load the loop index
 	cpi r27, 0xFF //check if loop flag exists
 	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if a loop flag exists, then load the loop value
 
-sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_no_loop:
+sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_no_loop:
 	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
 	sts pulse1_arpeggio_macro_offset, r26 //store the last valid index into the offset
 	rjmp sound_driver_instrument_routine_channel0_arpeggio
@@ -798,6 +819,8 @@ sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload:
 
 
 sound_driver_instrument_routine_channel0_arpeggio_process:
+	sts pulse1_total_pitch_offset, zero //the pitch offsets must be reset when a new note is to be calculated from an arpeggio macro
+	sts pulse1_total_hi_pitch_offset, zero
 	lds r26, pulse1_arpeggio_macro_mode
 	cpi r26, 0x00 //absolute mode
 	breq sound_driver_instrument_routine_channel0_arpeggio_process_absolute
@@ -806,6 +829,7 @@ sound_driver_instrument_routine_channel0_arpeggio_process:
 	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative //relative mode
 
 sound_driver_instrument_routine_channel0_arpeggio_default:
+	//NOTE: the pitch offset does not need to be reset here because there is no new note being calculated
 	lds r26, pulse1_note //load the current note index
 	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
 
@@ -866,14 +890,103 @@ sound_driver_instrument_routine_channel0_arpeggio_process_load:
 	lpm r27, Z
 	sts TCB0_CCMPL, r26 //load the LOW bits for timer
 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
-/*	sts TCB0_CNTL, zero
-	sts TCB0_CNTH, zero*/
 	rjmp sound_driver_instrument_routine_channel0_pitch
+
+
 
 sound_driver_instrument_routine_channel0_pitch:
 	lds ZL, pulse1_pitch_macro
 	lds ZH, pulse1_pitch_macro+1
+	adiw Z, 0
+	brne sound_driver_instrument_routine_channel0_pitch_continue
+	rjmp sound_driver_instrument_routine_channel0_hi_pitch //if no pitch macro is in use, go to the next macro routine
+sound_driver_instrument_routine_channel0_pitch_continue:
+	lsl ZL //multiply by 2 to make z into a byte pointer for the macro's address
+	rol ZH
+	lds r26, pulse1_pitch_macro_offset
+	add ZL, r26
+	adc ZH, zero
 
+	lds r27, pulse1_pitch_macro_release
+	cp r27, r26
+	brne sound_driver_instrument_routine_channel0_pitch_increment //if the current offset is not equal to the release index, increment the offset
+	lds r26, pulse1_pitch_macro_loop
+	cp r26, r27 //check if loop flag exists note: a loop flag and a release flag can only co-exist if the loop is less than the release
+	brlo sound_driver_instrument_routine_channel0_pitch_increment+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index, but also read the current index data
+	rjmp sound_driver_instrument_routine_channel0_pitch_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
+
+sound_driver_instrument_routine_channel0_pitch_increment:
+	inc r26 //increment the macro offset
+	sts pulse1_pitch_macro_offset, r26
+	
+sound_driver_instrument_routine_channel0_pitch_read:
+	lpm r27, Z //load pitch data into r27
+	cpi r27, 0x80 //check for macro end flag
+	brne sound_driver_instrument_routine_channel0_pitch_calculate //if the data was not the macro end flag, calculate the pitch offset
+
+
+
+sound_driver_instrument_routine_channel0_pitch_macro_end_flag:
+sound_driver_instrument_routine_channel0_pitch_macro_end_flag_check_release:
+	subi r26, 1 //keep the macro offset at the end flag
+	sts pulse1_pitch_macro_offset, r26
+	lds r27, pulse1_pitch_macro_release
+	cpi r27, 0xff
+	brne sound_driver_instrument_routine_channel0_pitch_default //if there is a release flag, we don't need to loop. offset the pitch by the final total pitch
+
+sound_driver_instrument_routine_channel0_pitch_macro_end_flag_check_loop:
+	lds r27, pulse1_pitch_macro_loop //load the loop index
+	cpi r27, 0xff //check if there is a loop index
+	breq sound_driver_instrument_routine_channel0_pitch_default //if there is no loop flag, we don't need to loop. offset the pitch by the final total pitch
+	sts pulse1_pitch_macro_offset, r27 //store the loop index into the offset
+	rjmp sound_driver_instrument_routine_channel0_pitch_continue+2 //go back and re-read the pitch data
+
+
+
+sound_driver_instrument_routine_channel0_pitch_default:
+	lds r27, pulse1_total_pitch_offset
+	rjmp sound_driver_instrument_routine_channel0_pitch_calculate_multiply
+
+sound_driver_instrument_routine_channel0_pitch_calculate:
+	lds r26, pulse1_total_pitch_offset //load the total pitch offset to change
+	add r27, r26
+	sts pulse1_total_pitch_offset, r27
+
+sound_driver_instrument_routine_channel0_pitch_calculate_multiply:
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r27 //store the signed pitch offset data into r22
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mulsu r22, r23
+	pop r23
+	pop r22
+
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	sbrs r1, 3 //check if result was a negative number
+	rjmp sound_driver_instrument_routine_channel0_pitch_calculate_offset //if the result was positive, don't fill with 1s
+
+sound_driver_instrument_routine_channel0_pitch_calculate_negative:
+	ldi r27, 0xF0
+	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_instrument_routine_channel0_pitch_calculate_offset:
+	lds r26, TCB0_CCMPL //load the low bits for timer
+	lds r27, TCB0_CCMPH //load the high bits for timer
+	add r26, r0 //offset the timer values
+	adc r27, r1
+	sts TCB0_CCMPL, r26 //store the new low bits for timer
+	sts TCB0_CCMPH, r27 //store the new high bits for timer
+	
+
+
+sound_driver_instrument_routine_channel0_hi_pitch:
 	lds ZL, pulse1_hi_pitch_macro
 	lds ZH, pulse1_hi_pitch_macro+1
 
