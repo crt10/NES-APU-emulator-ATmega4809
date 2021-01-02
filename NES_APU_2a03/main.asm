@@ -939,7 +939,7 @@ sound_driver_instrument_routine_channel0_pitch_macro_end_flag_check_loop:
 	cpi r27, 0xff //check if there is a loop index
 	breq sound_driver_instrument_routine_channel0_pitch_default //if there is no loop flag, we don't need to loop. offset the pitch by the final total pitch
 	sts pulse1_pitch_macro_offset, r27 //store the loop index into the offset
-	rjmp sound_driver_instrument_routine_channel0_pitch_continue+2 //go back and re-read the pitch data
+	rjmp sound_driver_instrument_routine_channel0_pitch //go back and re-read the pitch data
 
 
 
