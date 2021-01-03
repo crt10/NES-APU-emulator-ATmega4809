@@ -395,18 +395,20 @@ sound_driver_channel0_check_if_volume: //check if data is volume (0x57-0x66)
 	cpi r27, 0x67
 	brsh sound_driver_channel0_check_if_delay
 	rjmp sound_driver_channel0_volume
-sound_driver_channel0_check_if_delay: //check if data is a delay (0x67 - 0xE1)
-	cpi r27, 0xE2
+sound_driver_channel0_check_if_delay: //check if data is a delay (0x67 - 0xE2)
+	cpi r27, 0xE3
 	brsh sound_driver_channel0_check_if_instrument
 	rjmp sound_driver_channel0_delay
-sound_driver_channel0_check_if_instrument: //check for instrument flag (0xE2)
+sound_driver_channel0_check_if_instrument: //check for instrument flag (0xE3)
 	brne sound_driver_channel0_check_if_release
 	rjmp sound_driver_channel0_instrument_change 
-sound_driver_channel0_check_if_release: //check for note release flag (0xE3)
-	cpi r27, 0xE3
-	brne sound_driver_channel0_check_if_end
+sound_driver_channel0_check_if_release: //check for note release flag (0xE4)
+	cpi r27, 0xE4
+	brne sound_driver_channel0_check_if_fx
 	rjmp sound_driver_channel0_release
-sound_driver_channel0_check_if_fx: //binary search for fx flags (0xE4 - 0xFE)
+sound_driver_channel0_check_if_fx: //binary search for fx flags (0xE5 - 0xFE)
+	cpi r27, 0xF1
+	//breq //(Hxy)
 
 sound_driver_channel0_check_if_end:
 	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
