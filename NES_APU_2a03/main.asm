@@ -894,6 +894,11 @@ sound_driver_instrument_routine_channel0_arpeggio_process_load:
 
 
 
+//NOTE: There is a limitation with the pitch routines in that the total pitch can not be offset by 127 in both,
+//the positive and negative direction, from the original note pitch. This shouldn't be too much of a problem as
+//most songs that use instruments with the pitch macro, do not stray that far from the original note pitch.
+//In the case of hi pitch, the total pitch can not be offset by 127*16 from the original pitch. This is also
+//not a big deal as you can easily reach the entire note range with an offset of up to 127*16.
 sound_driver_instrument_routine_channel0_pitch:
 	lds ZL, pulse1_pitch_macro
 	lds ZH, pulse1_pitch_macro+1
@@ -911,7 +916,7 @@ sound_driver_instrument_routine_channel0_pitch_continue:
 	cp r27, r26
 	brne sound_driver_instrument_routine_channel0_pitch_increment //if the current offset is not equal to the release index, increment the offset
 	lds r26, pulse1_pitch_macro_loop
-	cp r26, r27 //check if loop flag exists note: a loop flag and a release flag can only co-exist if the loop is less than the release
+	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
 	brlo sound_driver_instrument_routine_channel0_pitch_increment+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index, but also read the current index data
 	rjmp sound_driver_instrument_routine_channel0_pitch_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
 
@@ -931,12 +936,12 @@ sound_driver_instrument_routine_channel0_pitch_macro_end_flag_check_release:
 	subi r26, 1 //keep the macro offset at the end flag
 	sts pulse1_pitch_macro_offset, r26
 	lds r27, pulse1_pitch_macro_release
-	cpi r27, 0xff
+	cpi r27, 0xFF
 	brne sound_driver_instrument_routine_channel0_pitch_default //if there is a release flag, we don't need to loop. offset the pitch by the final total pitch
 
 sound_driver_instrument_routine_channel0_pitch_macro_end_flag_check_loop:
 	lds r27, pulse1_pitch_macro_loop //load the loop index
-	cpi r27, 0xff //check if there is a loop index
+	cpi r27, 0xFF //check if there is a loop index
 	breq sound_driver_instrument_routine_channel0_pitch_default //if there is no loop flag, we don't need to loop. offset the pitch by the final total pitch
 	sts pulse1_pitch_macro_offset, r27 //store the loop index into the offset
 	rjmp sound_driver_instrument_routine_channel0_pitch //go back and re-read the pitch data
@@ -986,14 +991,159 @@ sound_driver_instrument_routine_channel0_pitch_calculate_offset:
 	
 
 
+//NOTE: The hi pitch macro routine does not account for overflowing from the offset. In famitracker, if the offset
+//goes beyond the note range, there will be no more offset calculations. In this routine, it is possible that
+//the pitch goes from B-7 and back around to C-0. I don't believe there will ever be a song in which this will be a problem.
 sound_driver_instrument_routine_channel0_hi_pitch:
 	lds ZL, pulse1_hi_pitch_macro
 	lds ZH, pulse1_hi_pitch_macro+1
+	adiw Z, 0
+	brne sound_driver_instrument_routine_channel0_hi_pitch_continue
+	rjmp sound_driver_instrument_routine_channel0_duty //if no hi pitch macro is in use, go to the next macro routine
+sound_driver_instrument_routine_channel0_hi_pitch_continue:
+	lsl ZL //multiply by 2 to make z into a byte pointer for the macro's address
+	rol ZH
+	lds r26, pulse1_hi_pitch_macro_offset
+	add ZL, r26
+	adc ZH, zero
 
+	lds r27, pulse1_hi_pitch_macro_release
+	cp r27, r26
+	brne sound_driver_instrument_routine_channel0_hi_pitch_increment //if the current offset is not equal to the release index, increment the offset
+	lds r26, pulse1_hi_pitch_macro_loop
+	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
+	brlo sound_driver_instrument_routine_channel0_hi_pitch_increment+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index, but also read the current index data
+	rjmp sound_driver_instrument_routine_channel0_hi_pitch_read //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged
+
+sound_driver_instrument_routine_channel0_hi_pitch_increment:
+	inc r26 //increment the macro offset
+	sts pulse1_hi_pitch_macro_offset, r26
+	
+sound_driver_instrument_routine_channel0_hi_pitch_read:
+	lpm r27, Z //load hi pitch data into r27
+	cpi r27, 0x80 //check for macro end flag
+	brne sound_driver_instrument_routine_channel0_hi_pitch_calculate //if the data was not the macro end flag, calculate the hi pitch offset
+
+
+
+sound_driver_instrument_routine_channel0_hi_pitch_macro_end_flag:
+sound_driver_instrument_routine_channel0_hi_pitch_macro_end_flag_check_release:
+	subi r26, 1 //keep the macro offset at the end flag
+	sts pulse1_hi_pitch_macro_offset, r26
+	lds r27, pulse1_hi_pitch_macro_release
+	cpi r27, 0xFF
+	brne sound_driver_instrument_routine_channel0_hi_pitch_default //if there is a release flag, we don't need to loop. offset the hi pitch by the final total hi pitch
+
+sound_driver_instrument_routine_channel0_hi_pitch_macro_end_flag_check_loop:
+	lds r27, pulse1_hi_pitch_macro_loop //load the loop index
+	cpi r27, 0xFF //check if there is a loop index
+	breq sound_driver_instrument_routine_channel0_hi_pitch_default //if there is no loop flag, we don't need to loop. offset the pitch by the final total hi pitch
+	sts pulse1_hi_pitch_macro_offset, r27 //store the loop index into the offset
+	rjmp sound_driver_instrument_routine_channel0_hi_pitch //go back and re-read the hi pitch data
+
+
+
+sound_driver_instrument_routine_channel0_hi_pitch_default:
+	lds r27, pulse1_total_hi_pitch_offset
+	rjmp sound_driver_instrument_routine_channel0_hi_pitch_calculate_multiply
+
+sound_driver_instrument_routine_channel0_hi_pitch_calculate:
+	lds r26, pulse1_total_hi_pitch_offset //load the total hi pitch offset to change
+	add r27, r26
+	sts pulse1_total_hi_pitch_offset, r27
+
+sound_driver_instrument_routine_channel0_hi_pitch_calculate_multiply:
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r27 //store the signed hi pitch offset data into r22
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mulsu r22, r23
+	pop r23
+	pop r22
+
+	//NOTE: fractional bits do not need to be shifted out because hi pitch offsets are multiplied by 16. shifting right 4 times for the fraction and left 4 times for the 16x is the same as no shift.
+sound_driver_instrument_routine_channel0_hi_pitch_calculate_offset:
+	lds r26, TCB0_CCMPL //load the low bits for timer
+	lds r27, TCB0_CCMPH //load the high bits for timer
+	add r26, r0 //offset the timer values
+	adc r27, r1
+	sts TCB0_CCMPL, r26 //store the new low bits for timer
+	sts TCB0_CCMPH, r27 //store the new high bits for timer
+
+
+
+//NOTE: Unlike the original NES, changing the duty cycle will reset the sequencer position entirely.
+sound_driver_instrument_routine_channel0_duty:
 	lds ZL, pulse1_duty_macro
 	lds ZH, pulse1_duty_macro+1
+	adiw Z, 0
+	breq sound_driver_exit //if no duty macro is in use, go to the next macro routine
+	lsl ZL //multiply by 2 to make z into a byte pointer for the macro's address
+	rol ZH
+	lds r26, pulse1_duty_macro_offset
+	add ZL, r26
+	adc ZH, zero
 
-	rjmp sound_driver_exit
+	lds r27, pulse1_duty_macro_release
+	cp r27, r26
+	brne sound_driver_instrument_routine_channel0_duty_increment //if the current offset is not equal to the release index, increment the offset
+	lds r26, pulse1_duty_macro_loop
+	cp r26, r27 //check if loop flag exists NOTE: a loop flag and a release flag can only co-exist if the loop is less than the release
+	brlo sound_driver_instrument_routine_channel0_duty_increment+1 //if the current offset is equal to the release index and there is a loop, load the offset with the loop index, but also read the current index data
+	rjmp sound_driver_exit //if the current offset is equal to the release index and there is no loop, then keep the offset unchanged and skip the rest of the routine
+
+sound_driver_instrument_routine_channel0_duty_increment:
+	inc r26 //increment the macro offset
+	sts pulse1_duty_macro_offset, r26
+	
+sound_driver_instrument_routine_channel0_duty_read:
+	lpm r27, Z //load pitch data into r27
+	cpi r27, 0xFF //check for macro end flag
+	brne sound_driver_instrument_routine_channel0_duty_load //if the data was not the macro end flag, load the new duty cycle
+
+
+
+sound_driver_instrument_routine_channel0_duty_macro_end_flag:
+sound_driver_instrument_routine_channel0_duty_macro_end_flag_check_release:
+	subi r26, 1 //keep the macro offset at the end flag
+	sts pulse1_duty_macro_offset, r26
+	lds r27, pulse1_duty_macro_release
+	cpi r27, 0xFF
+	brne sound_driver_exit //if there is a release flag, we don't need to loop. skip the rest of the routine.
+
+sound_driver_instrument_routine_channel0_duty_macro_end_flag_check_loop:
+	lds r27, pulse1_duty_macro_loop //load the loop index
+	cpi r27, 0xFF //check if there is a loop index
+	breq sound_driver_exit //if there is no loop flag, we don't need to loop. skip the rest of the routine.
+	sts pulse1_duty_macro_offset, r27 //store the loop index into the offset
+	rjmp sound_driver_instrument_routine_channel0_duty //go back and re-read the duty data
+
+
+
+sound_driver_instrument_routine_channel0_duty_load:
+	ldi ZH, HIGH(sequences << 1) //point Z to sequence table
+	ldi ZL, LOW(sequences << 1)
+	add ZL, r27 //offset the pointer by the duty macro data
+	adc ZH, zero
+
+	lsr r27 //move the duty cycle bits to the 2 MSB for pulse1_param (register $4000)
+	ror r27
+	ror r27
+	lds r26, pulse1_param //load r26 with pulse1_param (register $4000)
+	mov r28, r26 //store a copy of pulse1_param into r28
+	andi r26, 0b11000000 //mask the duty cycle bits
+	cpse r27, r26 //check if the previous duty cycle and the new duty cycle are equal
+	rjmp sound_driver_instrument_routine_channel0_duty_load_store
+	rjmp sound_driver_exit //if the previous and new duty cycle are the same, don't reload the sequence
+
+sound_driver_instrument_routine_channel0_duty_load_store:
+	lpm pulse1_sequence, Z //store the sequence
+
+	andi r28, 0b00111111 //mask out the duty cycle bits
+	or r28, r27 //store the new duty cycle bits into r27
+	sts pulse1_param, r28
+
+
 
 sound_driver_exit:
 	pop r29
