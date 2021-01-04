@@ -408,126 +408,105 @@ sound_driver_channel0_check_if_release: //check for note release flag (0xE4)
 	rjmp sound_driver_channel0_release
 sound_driver_channel0_check_if_end:
 	cpi r27, 0xFF
-	breq sound_driver_channel0_next_pattern
+	brne sound_driver_channel0_check_if_fx
+	rjmp sound_driver_channel0_next_pattern
 
 
-sound_driver_channel0_check_if_fx: //binary search for fx flags (0xE5 - 0xFE)
+
+sound_driver_channel0_check_if_fx: //fx flags (0xE5 - 0xFE)
 	adiw Z, 1 //point Z to the byte next to the flag
 	lpm r26, Z //load the fx data into r26
 	rcall sound_driver_channel0_increment_offset_twice
 
-	cpi r27, 0xF1
-	breq sound_driver_channel0_fx_Gxx //note delay
-	brlo sound_driver_channel0_check_if_fx_0xE5_to_0xF0
-	brsh sound_driver_channel0_check_if_fx_0xF2_to_0xFE
+	subi r27, 0xE5 //prepare offset to perform table lookup
+	ldi ZL, LOW(fx << 1) //load in note table
+	ldi ZH, HIGH(fx << 1)
+	lsl r27 //double the offset for the table because we are getting byte data
+	add ZL, r27 //add offset
+	adc ZH, zero
+	lpm r28, Z+ //load address bytes
+	lpm r29, Z
+	mov ZL, r28 //move address bytes back into Z for an indirect jump
+	mov ZH, r29
+	ijmp
 
-sound_driver_channel0_check_if_fx_0xE5_to_0xF0:
-	cpi r27, 0xEA
-	breq sound_driver_channel0_fx_7xy //tremelo
-	brlo sound_driver_channel0_check_if_fx_0xE5_to_0xE9
-	brsh sound_driver_channel0_check_if_fx_0xEB_to_0xF0
 
-sound_driver_channel0_check_if_fx_0xF2_to_0xFE:
-	cpi r27, 0xF8
-	breq sound_driver_channel0_fx_Rxy //note slide down
-	brlo sound_driver_channel0_check_if_fx_0xF2_to_0xF7
-	brsh sound_driver_channel0_check_if_fx_0xF9_to_0xFE
 
-sound_driver_channel0_check_if_fx_0xE5_to_0xE9:
-	cpi r27, 0xE7
-	breq sound_driver_channel0_fx_2xx //pitch slide down
-	brlo sound_driver_channel0_check_if_fx_0xE5_to_0xE6
-	brsh sound_driver_channel0_check_if_fx_0xE8_to_0xE9
-
-sound_driver_channel0_check_if_fx_0xEB_to_0xF0:
-	cpi r27, 0xED
-	breq sound_driver_channel0_fx_Cxx //halt
-	brlo sound_driver_channel0_check_if_fx_0xEB_to_0xEC
-	brsh sound_driver_channel0_check_if_fx_0xEE_to_0xF0
-
-sound_driver_channel0_check_if_fx_0xF2_to_0xF7:
-	cpi r27, 0xF4
-	breq sound_driver_channel0_fx_Hxx //FDS modulation depth
-	brlo sound_driver_channel0_check_if_fx_0xF2_to_0xF3
-	brsh sound_driver_channel0_check_if_fx_0xF5_to_0xF7
-
-sound_driver_channel0_check_if_fx_0xF9_to_0xFE:
-	cpi r27, 0xFB
-	breq sound_driver_channel0_fx_Wxx //DPCM sample speed
-	brlo sound_driver_channel0_check_if_fx_0xF9_to_0xFA
-	brsh sound_driver_channel0_check_if_fx_0xFC_to_0xFE
-
-sound_driver_channel0_check_if_fx_0xE5_to_0xE6:
-	cpi r27, 0xE5
-	breq sound_driver_channel0_fx_0xy //arpeggio
-	brsh sound_driver_channel0_fx_1xx //pitch slide up
-
-sound_driver_channel0_check_if_fx_0xE8_to_0xE9:
-	cpi r27, 0xE8
-	breq sound_driver_channel0_fx_3xx //automatic portamento
-	brsh sound_driver_channel0_fx_4xy //vibrato
-
-sound_driver_channel0_check_if_fx_0xEB_to_0xEC:
-	cpi r27, 0xEB
-	breq sound_driver_channel0_fx_Axy //volume slide
-	brsh sound_driver_channel0_fx_Bxx //pattern jump
-
-sound_driver_channel0_check_if_fx_0xEE_to_0xF0:
-	cpi r27, 0xEF
-	breq sound_driver_channel0_fx_Exx //volume set
-	brsh sound_driver_channel0_fx_Fxx //speed and tempo
-	brlo sound_driver_channel0_fx_Dxx //frame skip
-
-sound_driver_channel0_check_if_fx_0xF2_to_0xF3:
-	cpi r27, 0xF2
-	breq sound_driver_channel0_fx_Hxy //hardware sweep up
-	brsh sound_driver_channel0_fx_lxy //hardware sweep down
-
-sound_driver_channel0_check_if_fx_0xF5_to_0xF7:
-	cpi r27, 0xF6
-	breq sound_driver_channel0_fx_Pxx //fine pitch
-	brsh sound_driver_channel0_fx_Qxy //note slide up
-	brlo sound_driver_channel0_fx_Ixx //FDS modulation speed
-
-sound_driver_channel0_check_if_fx_0xF9_to_0xFA:
-	cpi r27, 0xF9
-	breq sound_driver_channel0_fx_Sxx //mute delay
-	brsh sound_driver_channel0_fx_Vxx //duty
-
-sound_driver_channel0_check_if_fx_0xFC_to_0xFE:
-	cpi r27, 0xFD
-	breq sound_driver_channel0_fx_Yxx //DPCM sample offset
-	brsh sound_driver_channel0_fx_Zxx //DPCM delta counter
-	brlo sound_driver_channel0_fx_Xxx //DPCM sample retrigger
-
-sound_driver_channel0_fx_0xy:
+sound_driver_channel0_fx_0xy: //arpeggio
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_1xx:
-sound_driver_channel0_fx_2xx:
-sound_driver_channel0_fx_3xx:
-sound_driver_channel0_fx_4xy:
-sound_driver_channel0_fx_7xy:
-sound_driver_channel0_fx_Axy:
-sound_driver_channel0_fx_Bxx:
-sound_driver_channel0_fx_Cxx:
-sound_driver_channel0_fx_Dxx:
-sound_driver_channel0_fx_Exx:
-sound_driver_channel0_fx_Fxx:
-sound_driver_channel0_fx_Gxx:
-sound_driver_channel0_fx_Hxy:
-sound_driver_channel0_fx_lxy:
-sound_driver_channel0_fx_Hxx:
-sound_driver_channel0_fx_Ixx:
-sound_driver_channel0_fx_Pxx:
-sound_driver_channel0_fx_Qxy:
-sound_driver_channel0_fx_Rxy:
-sound_driver_channel0_fx_Sxx:
-sound_driver_channel0_fx_Vxx:
-sound_driver_channel0_fx_Wxx:
-sound_driver_channel0_fx_Xxx:
-sound_driver_channel0_fx_Yxx:
-sound_driver_channel0_fx_Zxx:
+sound_driver_channel0_fx_1xx: //pitch slide up
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_2xx: //pitch slide down
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_3xx: //automatic portamento
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_4xy: //vibrato
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_7xy: //tremelo effect
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Axy: //volume slide
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Bxx: //pattern jump
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Cxx: //halt
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Dxx: //frame skip
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Exx: //volume
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Fxx: //speed and tempo
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Gxx: //note delay
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Hxy: //hardware sweep up
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_lxy: //hardware sweep down
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Hxx: //FDS modulation depth
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Ixx: //FDS modulation speed
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Pxx: //fine pitch
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Qxy: //note slide up
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Rxy: //note slide down
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Sxx: //mute delay
+	rjmp sound_driver_channel0
 
+sound_driver_channel0_fx_Vxx: //duty
+	ldi ZH, HIGH(sequences << 1) //point Z to sequence table
+	ldi ZL, LOW(sequences << 1)
+	add ZL, r26 //offset the pointer
+	adc ZH, zero
+
+	lsr r26 //move the duty cycle bits to the 2 MSB for pulse1_param (register $4000)
+	ror r26
+	ror r26
+	lds r27, pulse1_param //load r27 with pulse1_param (register $4000)
+	mov r28, r27 //store a copy of pulse1_param into r28
+	andi r27, 0b11000000 //mask the duty cycle bits
+	cpse r26, r27 //check if the previous duty cycle and the new duty cycle are equal
+	rjmp sound_driver_channel0_fx_Vxx_store
+	rjmp sound_driver_channel0 //if the previous and new duty cycle are the same, don't reload the sequence
+
+sound_driver_channel0_fx_Vxx_store:
+	lpm pulse1_sequence, Z //store the sequence
+
+	andi r28, 0b00111111 //mask out the duty cycle bits
+	or r28, r27 //store the new duty cycle bits into r27
+	sts pulse1_param, r28
+	rjmp sound_driver_channel0
+
+sound_driver_channel0_fx_Wxx: //DPCM sample speed
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Xxx: //DPCM sample retrigger
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Yxx: //DPCM sample offset
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_Zxx: //DPCM sample delta counter
+	rjmp sound_driver_channel0
 
 
 sound_driver_channel0_note:
@@ -992,7 +971,6 @@ sound_driver_instrument_routine_channel0_arpeggio_process_relative_subtract:
 	sbrc r26, 7 //check if result is negative
 	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
 	sts pulse1_note, r26
-	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
 
 
 
@@ -1401,6 +1379,15 @@ duty_cycle_sequences:
 
 //pulse sequences: 12.5%, 25%, 50%, 75%
 sequences: .db 0b00000001, 0b00000011, 0b00001111, 0b11111100
+
+//list of famitracker fx: http://famitracker.com/wiki/index.php?title=Effect_list
+fx:
+	.dw sound_driver_channel0_fx_0xy, sound_driver_channel0_fx_1xx, sound_driver_channel0_fx_2xx, sound_driver_channel0_fx_3xx, sound_driver_channel0_fx_4xy
+	.dw sound_driver_channel0_fx_7xy, sound_driver_channel0_fx_Axy, sound_driver_channel0_fx_Bxx, sound_driver_channel0_fx_Cxx, sound_driver_channel0_fx_Dxx
+	.dw sound_driver_channel0_fx_Exx, sound_driver_channel0_fx_Fxx, sound_driver_channel0_fx_Gxx, sound_driver_channel0_fx_Hxy, sound_driver_channel0_fx_lxy
+	.dw sound_driver_channel0_fx_Hxx, sound_driver_channel0_fx_Ixx, sound_driver_channel0_fx_Pxx, sound_driver_channel0_fx_Qxy, sound_driver_channel0_fx_Rxy
+	.dw sound_driver_channel0_fx_Sxx, sound_driver_channel0_fx_Vxx, sound_driver_channel0_fx_Wxx, sound_driver_channel0_fx_Xxx, sound_driver_channel0_fx_Yxx
+	.dw sound_driver_channel0_fx_Zxx
 
 //famitracker volumes table: http://famitracker.com/wiki/index.php?title=Volume
 volumes:
