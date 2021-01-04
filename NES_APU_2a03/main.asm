@@ -404,15 +404,129 @@ sound_driver_channel0_check_if_instrument: //check for instrument flag (0xE3)
 	rjmp sound_driver_channel0_instrument_change 
 sound_driver_channel0_check_if_release: //check for note release flag (0xE4)
 	cpi r27, 0xE4
-	brne sound_driver_channel0_check_if_fx
+	brne sound_driver_channel0_check_if_end
 	rjmp sound_driver_channel0_release
-sound_driver_channel0_check_if_fx: //binary search for fx flags (0xE5 - 0xFE)
-	cpi r27, 0xF1
-	//breq //(Hxy)
-
 sound_driver_channel0_check_if_end:
-	cpi r27, 0xFF //check if data is the last byte of data (0xFF)
-	rjmp sound_driver_channel0_next_pattern
+	cpi r27, 0xFF
+	breq sound_driver_channel0_next_pattern
+
+
+sound_driver_channel0_check_if_fx: //binary search for fx flags (0xE5 - 0xFE)
+	adiw Z, 1 //point Z to the byte next to the flag
+	lpm r26, Z //load the fx data into r26
+	rcall sound_driver_channel0_increment_offset_twice
+
+	cpi r27, 0xF1
+	breq sound_driver_channel0_fx_Gxx //note delay
+	brlo sound_driver_channel0_check_if_fx_0xE5_to_0xF0
+	brsh sound_driver_channel0_check_if_fx_0xF2_to_0xFE
+
+sound_driver_channel0_check_if_fx_0xE5_to_0xF0:
+	cpi r27, 0xEA
+	breq sound_driver_channel0_fx_7xy //tremelo
+	brlo sound_driver_channel0_check_if_fx_0xE5_to_0xE9
+	brsh sound_driver_channel0_check_if_fx_0xEB_to_0xF0
+
+sound_driver_channel0_check_if_fx_0xF2_to_0xFE:
+	cpi r27, 0xF8
+	breq sound_driver_channel0_fx_Rxy //note slide down
+	brlo sound_driver_channel0_check_if_fx_0xF2_to_0xF7
+	brsh sound_driver_channel0_check_if_fx_0xF9_to_0xFE
+
+sound_driver_channel0_check_if_fx_0xE5_to_0xE9:
+	cpi r27, 0xE7
+	breq sound_driver_channel0_fx_2xx //pitch slide down
+	brlo sound_driver_channel0_check_if_fx_0xE5_to_0xE6
+	brsh sound_driver_channel0_check_if_fx_0xE8_to_0xE9
+
+sound_driver_channel0_check_if_fx_0xEB_to_0xF0:
+	cpi r27, 0xED
+	breq sound_driver_channel0_fx_Cxx //halt
+	brlo sound_driver_channel0_check_if_fx_0xEB_to_0xEC
+	brsh sound_driver_channel0_check_if_fx_0xEE_to_0xF0
+
+sound_driver_channel0_check_if_fx_0xF2_to_0xF7:
+	cpi r27, 0xF4
+	breq sound_driver_channel0_fx_Hxx //FDS modulation depth
+	brlo sound_driver_channel0_check_if_fx_0xF2_to_0xF3
+	brsh sound_driver_channel0_check_if_fx_0xF5_to_0xF7
+
+sound_driver_channel0_check_if_fx_0xF9_to_0xFE:
+	cpi r27, 0xFB
+	breq sound_driver_channel0_fx_Wxx //DPCM sample speed
+	brlo sound_driver_channel0_check_if_fx_0xF9_to_0xFA
+	brsh sound_driver_channel0_check_if_fx_0xFC_to_0xFE
+
+sound_driver_channel0_check_if_fx_0xE5_to_0xE6:
+	cpi r27, 0xE5
+	breq sound_driver_channel0_fx_0xy //arpeggio
+	brsh sound_driver_channel0_fx_1xx //pitch slide up
+
+sound_driver_channel0_check_if_fx_0xE8_to_0xE9:
+	cpi r27, 0xE8
+	breq sound_driver_channel0_fx_3xx //automatic portamento
+	brsh sound_driver_channel0_fx_4xy //vibrato
+
+sound_driver_channel0_check_if_fx_0xEB_to_0xEC:
+	cpi r27, 0xEB
+	breq sound_driver_channel0_fx_Axy //volume slide
+	brsh sound_driver_channel0_fx_Bxx //pattern jump
+
+sound_driver_channel0_check_if_fx_0xEE_to_0xF0:
+	cpi r27, 0xEF
+	breq sound_driver_channel0_fx_Exx //volume set
+	brsh sound_driver_channel0_fx_Fxx //speed and tempo
+	brlo sound_driver_channel0_fx_Dxx //frame skip
+
+sound_driver_channel0_check_if_fx_0xF2_to_0xF3:
+	cpi r27, 0xF2
+	breq sound_driver_channel0_fx_Hxy //hardware sweep up
+	brsh sound_driver_channel0_fx_lxy //hardware sweep down
+
+sound_driver_channel0_check_if_fx_0xF5_to_0xF7:
+	cpi r27, 0xF6
+	breq sound_driver_channel0_fx_Pxx //fine pitch
+	brsh sound_driver_channel0_fx_Qxy //note slide up
+	brlo sound_driver_channel0_fx_Ixx //FDS modulation speed
+
+sound_driver_channel0_check_if_fx_0xF9_to_0xFA:
+	cpi r27, 0xF9
+	breq sound_driver_channel0_fx_Sxx //mute delay
+	brsh sound_driver_channel0_fx_Vxx //duty
+
+sound_driver_channel0_check_if_fx_0xFC_to_0xFE:
+	cpi r27, 0xFD
+	breq sound_driver_channel0_fx_Yxx //DPCM sample offset
+	brsh sound_driver_channel0_fx_Zxx //DPCM delta counter
+	brlo sound_driver_channel0_fx_Xxx //DPCM sample retrigger
+
+sound_driver_channel0_fx_0xy:
+	rjmp sound_driver_channel0
+sound_driver_channel0_fx_1xx:
+sound_driver_channel0_fx_2xx:
+sound_driver_channel0_fx_3xx:
+sound_driver_channel0_fx_4xy:
+sound_driver_channel0_fx_7xy:
+sound_driver_channel0_fx_Axy:
+sound_driver_channel0_fx_Bxx:
+sound_driver_channel0_fx_Cxx:
+sound_driver_channel0_fx_Dxx:
+sound_driver_channel0_fx_Exx:
+sound_driver_channel0_fx_Fxx:
+sound_driver_channel0_fx_Gxx:
+sound_driver_channel0_fx_Hxy:
+sound_driver_channel0_fx_lxy:
+sound_driver_channel0_fx_Hxx:
+sound_driver_channel0_fx_Ixx:
+sound_driver_channel0_fx_Pxx:
+sound_driver_channel0_fx_Qxy:
+sound_driver_channel0_fx_Rxy:
+sound_driver_channel0_fx_Sxx:
+sound_driver_channel0_fx_Vxx:
+sound_driver_channel0_fx_Wxx:
+sound_driver_channel0_fx_Xxx:
+sound_driver_channel0_fx_Yxx:
+sound_driver_channel0_fx_Zxx:
 
 
 
