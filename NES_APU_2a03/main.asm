@@ -61,8 +61,10 @@ pulse1_fx_Pxx: .byte 1 //refers to the fine pitch offset set by the Pxx effect
 pulse1_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy effect NOTE: this value is a signed fractional byte, with the decimal between bits 3 and 4.
 pulse1_fx_Qxy_target: .byte 2 //target note period
 pulse1_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
+pulse1_fx_Qxy_total_offset: .byte 2 //number of times to compute NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
 pulse1_fx_Rxy_target: .byte 2 //target note period
 pulse1_fx_Rxy_speed: .byte 2 //the amount to offset by to get to the target
+pulse1_fx_Rxy_total_offset: .byte 2 //number of times to compute
 
 pulse2_pattern_delay: .byte 1
 triangle_pattern_delay: .byte 1
@@ -237,10 +239,14 @@ init:
 	sts pulse1_fx_Qxy_target+1, zero
 	sts pulse1_fx_Qxy_speed, zero
 	sts pulse1_fx_Qxy_speed+1, zero
+	sts pulse1_fx_Qxy_total_offset, zero
+	sts pulse1_fx_Qxy_total_offset+1, zero
 	sts pulse1_fx_Rxy_target, zero
 	sts pulse1_fx_Rxy_target+1, zero
 	sts pulse1_fx_Rxy_speed, zero
 	sts pulse1_fx_Rxy_speed+1, zero
+	sts pulse1_fx_Rxy_total_offset, zero
+	sts pulse1_fx_Rxy_total_offset+1, zero
 
 	//TIMERS
 	//Frame Counter
@@ -562,6 +568,8 @@ sound_driver_channel0_fx_Qxy_process_continue:
 
 	sts pulse1_fx_Qxy_speed, r0 //store the effect speed
 	sts pulse1_fx_Qxy_speed+1, r1
+	sts pulse1_fx_Qxy_total_offset, zero
+	sts pulse1_fx_Qxy_total_offset+1, zero
 	rjmp sound_driver_channel0
 
 //NOTE SLIDE DOWN
@@ -630,6 +638,8 @@ sound_driver_channel0_fx_Rxy_process_continue:
 
 	sts pulse1_fx_Rxy_speed, r0 //store the effect speed
 	sts pulse1_fx_Rxy_speed+1, r1
+	sts pulse1_fx_Rxy_total_offset, zero
+	sts pulse1_fx_Rxy_total_offset+1, zero
 	rjmp sound_driver_channel0
 
 sound_driver_channel0_fx_Sxx: //mute delay
@@ -683,8 +693,12 @@ sound_driver_channel0_note:
 	sts pulse1_total_hi_pitch_offset, zero
 	sts pulse1_fx_Qxy_target, zero //reset the Qxy, Rxy effects
 	sts pulse1_fx_Qxy_target+1, zero
+	sts pulse1_fx_Qxy_total_offset, zero
+	sts pulse1_fx_Qxy_total_offset+1, zero
 	sts pulse1_fx_Rxy_target, zero
 	sts pulse1_fx_Rxy_target+1, zero
+	sts pulse1_fx_Rxy_total_offset, zero
+	sts pulse1_fx_Rxy_total_offset+1, zero
 	rcall sound_driver_channel0_increment_offset
 	rjmp sound_driver_channel0
 
@@ -1261,6 +1275,16 @@ sound_driver_instrument_routine_channel0_pitch_calculate_offset:
 	lds r27, TCB0_CCMPH //load the high bits for timer
 	add r26, r0 //offset the timer values
 	adc r27, r1
+
+	lds r28, pulse1_fx_Qxy_total_offset //NOTE: Qxy and Rxy offsets are applied here
+	lds r29, pulse1_fx_Qxy_total_offset+1
+	sub r26, r28
+	sbc r27, r29
+	lds r28, pulse1_fx_Rxy_total_offset
+	lds r29, pulse1_fx_Rxy_total_offset+1
+	add r26, r28
+	adc r27, r29
+
 	sts TCB0_CCMPL, r26 //store the new low bits for timer
 	sts TCB0_CCMPH, r27 //store the new high bits for timer
 	
@@ -1465,35 +1489,44 @@ sound_driver_channel0_fx_Axy_routine_calculate_store:
 
 
 
+//NOTE: The Qxy and Rxy routines ONLY calculate the total offset. The offset is applied in the pitch macro routine
 sound_driver_channel0_fx_Qxy_routine:
 	lds ZL, pulse1_fx_Qxy_target
 	lds ZH, pulse1_fx_Qxy_target+1
 	adiw Z, 0
 	breq sound_driver_channel0_fx_Rxy_routine //if the effect is not enabled, skip the routine
 
-	lds r26, pulse1_fx_Qxy_speed
-	lds r27, pulse1_fx_Qxy_speed+1
+	lds r26, pulse1_fx_Qxy_total_offset
+	lds r27, pulse1_fx_Qxy_total_offset+1
 	lds r28, TCB0_CCMPL
 	lds r29, TCB0_CCMPH
-
-	sub r28, r26 //subtract the timer period by the speed
+	sub r28, r26 //subtract the timer period by the total offset
 	sbc r29, r27
 
 	cp r28, ZL //compare the new timer period with the target
 	cpc r29, ZH
-	brlo sound_driver_channel0_fx_Qxy_routine_disable //if the target has been reached (or passed)
-	breq sound_driver_channel0_fx_Qxy_routine_disable
-	brsh sound_driver_channel0_fx_Qxy_routine_store
+	brlo sound_driver_channel0_fx_Qxy_routine_end //if the target has been reached (or passed)
+	breq sound_driver_channel0_fx_Qxy_routine_end
+	brsh sound_driver_channel0_fx_Qxy_routine_add
 
-sound_driver_channel0_fx_Qxy_routine_disable:
-	mov r28, ZL //in case the target was exceeded, reset the timer to the target
-	mov r29, ZH
-	sts pulse1_fx_Qxy_target, zero //loading the target with 0 effectively disables this effect
+sound_driver_channel0_fx_Qxy_routine_end:
+	sub ZL, r28 //calculate the difference to the target
+	sbc ZH, r29
+	add r26, ZL //increase the total offset to the exact amount needed to reach the target
+	adc r27, ZH
+	sts pulse1_fx_Qxy_total_offset, r26 //store the total offset
+	sts pulse1_fx_Qxy_total_offset+1, r27
+	sts pulse1_fx_Qxy_target, zero //loading the target with 0 stops any further calculations
 	sts pulse1_fx_Qxy_target+1, zero
+	rjmp sound_driver_channel0_fx_Rxy_routine
 
-sound_driver_channel0_fx_Qxy_routine_store:
-	sts TCB0_CCMPL, r28 //store the new timer periods
-	sts TCB0_CCMPH, r29
+sound_driver_channel0_fx_Qxy_routine_add:
+	lds r28, pulse1_fx_Qxy_speed
+	lds r29, pulse1_fx_Qxy_speed+1
+	add r26, r28 //increase the total offset by the speed
+	adc r27, r29
+	sts pulse1_fx_Qxy_total_offset, r26 //store the total offset
+	sts pulse1_fx_Qxy_total_offset+1, r27
 
 
 
@@ -1503,28 +1536,37 @@ sound_driver_channel0_fx_Rxy_routine:
 	adiw Z, 0
 	breq sound_driver_channel0_fx_xy_routine //if the effect is not enabled, skip the routine
 
-	lds r26, pulse1_fx_Rxy_speed
-	lds r27, pulse1_fx_Rxy_speed+1
+	lds r26, pulse1_fx_Rxy_total_offset
+	lds r27, pulse1_fx_Rxy_total_offset+1
 	lds r28, TCB0_CCMPL
 	lds r29, TCB0_CCMPH
-
-	add r28, r26 //add the timer period with the speed
-	adc r29, r27
+	add r28, r26 //add the total offset to the timer period
+	add r29, r27
 
 	cp r28, ZL //compare the new timer period with the target
 	cpc r29, ZH
-	brsh sound_driver_channel0_fx_Rxy_routine_disable //if the target has been reached (or passed)
-	brlo sound_driver_channel0_fx_Rxy_routine_store
+	brlo sound_driver_channel0_fx_Rxy_routine_end //if the target has been reached (or passed)
+	breq sound_driver_channel0_fx_Rxy_routine_end
+	brsh sound_driver_channel0_fx_Rxy_routine_add
 
-sound_driver_channel0_fx_Rxy_routine_disable:
-	mov r28, ZL //in case the target was exceeded, reset the timer to the target
-	mov r29, ZH
-	sts pulse1_fx_Rxy_target, zero //loading the target with 0 effectively disables this effect
+sound_driver_channel0_fx_Rxy_routine_end:
+	sub ZL, r28 //calculate the difference to the target
+	sbc ZH, r29
+	add r26, ZL //increase the total offset to the exact amount needed to reach the target
+	adc r27, ZH
+	sts pulse1_fx_Rxy_total_offset, r26 //store the total offset
+	sts pulse1_fx_Rxy_total_offset+1, r27
+	sts pulse1_fx_Rxy_target, zero //loading the target with 0 stops any further calculations
 	sts pulse1_fx_Rxy_target+1, zero
+	rjmp sound_driver_channel0_fx_xy_routine
 
-sound_driver_channel0_fx_Rxy_routine_store:
-	sts TCB0_CCMPL, r28 //store the new timer periods
-	sts TCB0_CCMPH, r29
+sound_driver_channel0_fx_Rxy_routine_add:
+	lds r28, pulse1_fx_Rxy_speed
+	lds r29, pulse1_fx_Rxy_speed+1
+	add r26, r28 //increase the total offset by the speed
+	adc r27, r29
+	sts pulse1_fx_Rxy_total_offset, r26 //store the total offset
+	sts pulse1_fx_Rxy_total_offset+1, r27
 
 
 sound_driver_channel0_fx_xy_routine:
