@@ -57,14 +57,22 @@ pulse1_duty_macro_offset: .byte 1
 pulse1_duty_macro_loop: .byte 1
 pulse1_duty_macro_release: .byte 1
 
+pulse1_fx_1xx: .byte 2 //refers to the rate in which to subtract the pitch from by the 1xx
+pulse1_fx_1xx_total: .byte 2 //the total pitch offset for 1xx
+pulse1_fx_2xx: .byte 2 //refers to the rate in which to add to the pitch by the 2xx
+pulse1_fx_2xx_total: .byte 2 //the total pitch offset for 2xx
+pulse1_fx_3xx_start: .byte 2 //the starting note period
+pulse1_fx_3xx_target: .byte 2 //target note period
+pulse1_fx_3xx_speed: .byte 2 //the amount to offset by to get to the target
+pulse1_fx_3xx_total_offset: .byte 2
 pulse1_fx_Pxx: .byte 1 //refers to the fine pitch offset set by the Pxx effect
 pulse1_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy effect NOTE: this value is a signed fractional byte, with the decimal between bits 3 and 4.
 pulse1_fx_Qxy_target: .byte 2 //target note period
 pulse1_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
-pulse1_fx_Qxy_total_offset: .byte 2 //number of times to compute NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
+pulse1_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
 pulse1_fx_Rxy_target: .byte 2 //target note period
 pulse1_fx_Rxy_speed: .byte 2 //the amount to offset by to get to the target
-pulse1_fx_Rxy_total_offset: .byte 2 //number of times to compute
+pulse1_fx_Rxy_total_offset: .byte 2
 
 pulse2_pattern_delay: .byte 1
 triangle_pattern_delay: .byte 1
@@ -233,6 +241,22 @@ init:
 	sbr channel_flags, 0b10000000 //set reload flag
 
 	//FX
+	sts pulse1_fx_1xx, zero
+	sts pulse1_fx_1xx+1, zero
+	sts pulse1_fx_1xx_total, zero
+	sts pulse1_fx_1xx_total+1, zero
+	sts pulse1_fx_2xx, zero
+	sts pulse1_fx_2xx+1, zero
+	sts pulse1_fx_2xx_total, zero
+	sts pulse1_fx_2xx_total+1, zero
+	sts pulse1_fx_3xx_start, zero
+	sts pulse1_fx_3xx_start+1, zero
+	sts pulse1_fx_3xx_target, zero
+	sts pulse1_fx_3xx_target+1, zero
+	sts pulse1_fx_3xx_speed, zero
+	sts pulse1_fx_3xx_speed+1, zero
+	sts pulse1_fx_3xx_total_offset, zero
+	sts pulse1_fx_3xx_total_offset+1, zero
 	sts pulse1_fx_Pxx, zero
 	sts pulse1_fx_Axy, zero
 	sts pulse1_fx_Qxy_target, zero
@@ -459,13 +483,92 @@ sound_driver_channel0_check_if_fx: //fx flags (0xE5 - 0xFE)
 
 sound_driver_channel0_fx_0xy: //arpeggio
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_1xx: //pitch slide up
+
+//PITCH SLIDE UP
+sound_driver_channel0_fx_1xx:
+	sts pulse1_fx_2xx, zero //turn off any 2xx pitch slide down
+	sts pulse1_fx_2xx+1, zero
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r26 //store the rate into r22
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	sts pulse1_fx_1xx, r0
+	sts pulse1_fx_1xx+1, r1
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_2xx: //pitch slide down
+
+//PITCH SLIDE DOWN
+sound_driver_channel0_fx_2xx:
+	sts pulse1_fx_1xx, zero //turn off any 1xx pitch slide down
+	sts pulse1_fx_1xx+1, zero
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r26 //store the rate into r22
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	sts pulse1_fx_2xx, r0
+	sts pulse1_fx_2xx+1, r1
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_3xx: //automatic portamento
+
+//AUTOMATIC PORTAMENTO
+sound_driver_channel0_fx_3xx:
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r26 //store the rate into r22
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	sts pulse1_fx_3xx_speed, r0
+	sts pulse1_fx_3xx_speed+1, r1
+
+	cpse r26, zero //check if the effect was enabled or disabled
+	rjmp sound_driver_channel0_fx_3xx_enabled
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_4xy: //vibrato
+
+sound_driver_channel0_fx_3xx_enabled:
+	lds r26, TCB0_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
+	lds r27, TCB0_CCMPH
+	sts pulse1_fx_3xx_start, r26
+	sts pulse1_fx_3xx_start+1, r27
+
+	sts pulse1_fx_3xx_total_offset, zero
+	sts pulse1_fx_3xx_total_offset+1, zero
+	rjmp sound_driver_channel0
+
+//VIBRATO
+sound_driver_channel0_fx_4xy:
 	rjmp sound_driver_channel0
 sound_driver_channel0_fx_7xy: //tremelo effect
 	rjmp sound_driver_channel0
@@ -691,6 +794,16 @@ sound_driver_channel0_note:
 	sts pulse1_duty_macro_offset, r27
 	sts pulse1_total_pitch_offset, zero //reset the pitch and hi pitch offset
 	sts pulse1_total_hi_pitch_offset, zero
+	sts pulse1_fx_1xx_total, zero //reset the total for 1xx and 2xx effects
+	sts pulse1_fx_1xx_total+1, zero
+	sts pulse1_fx_2xx_total, zero
+	sts pulse1_fx_2xx_total+1, zero
+	sts pulse1_fx_3xx_total_offset, zero //reset 3xx offset
+	sts pulse1_fx_3xx_total_offset+1, zero
+	lds r26, TCB0_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
+	lds r27, TCB0_CCMPH
+	sts pulse1_fx_3xx_start, r26
+	sts pulse1_fx_3xx_start+1, r27
 	sts pulse1_fx_Qxy_target, zero //reset the Qxy, Rxy effects
 	sts pulse1_fx_Qxy_target+1, zero
 	sts pulse1_fx_Qxy_total_offset, zero
@@ -1175,6 +1288,8 @@ sound_driver_instrument_routine_channel0_arpeggio_process_load:
 	lpm r27, Z
 	sts TCB0_CCMPL, r26 //load the LOW bits for timer
 	sts TCB0_CCMPH, r27 //load the HIGH bits for timer
+	sts pulse1_fx_3xx_target, r26 //NOTE: 3xx target note is stored here because the true note is always read in this arpeggio macro routine
+	sts pulse1_fx_3xx_target+1, r27
 	rjmp sound_driver_instrument_routine_channel0_pitch
 
 
@@ -1275,7 +1390,15 @@ sound_driver_instrument_routine_channel0_pitch_calculate_offset:
 	lds r27, TCB0_CCMPH //load the high bits for timer
 	add r26, r0 //offset the timer values
 	adc r27, r1
-
+	
+	lds r28, pulse1_fx_1xx_total
+	lds r29, pulse1_fx_1xx_total+1
+	sub r26, r28
+	sbc r27, r29
+	lds r28, pulse1_fx_2xx_total
+	lds r29, pulse1_fx_2xx_total+1
+	add r26, r28
+	adc r27, r29
 	lds r28, pulse1_fx_Qxy_total_offset //NOTE: Qxy and Rxy offsets are applied here
 	lds r29, pulse1_fx_Qxy_total_offset+1
 	sub r26, r28
@@ -1445,6 +1568,112 @@ sound_driver_instrument_routine_channel0_duty_load_store:
 
 
 sound_driver_channel0_fx_routines:
+sound_driver_channel0_fx_1xx_routine:
+	lds ZL, pulse1_fx_1xx
+	lds ZH, pulse1_fx_1xx+1
+	adiw Z, 0
+	breq sound_driver_channel0_fx_2xx_routine
+
+	lds r26, pulse1_fx_1xx_total //load the rate to change the pitch by
+	lds r27, pulse1_fx_1xx_total+1
+	add r26, ZL //increase the total offset by the rate
+	adc r27, ZH
+	sts pulse1_fx_1xx_total, r26
+	sts pulse1_fx_1xx_total+1, r27
+
+
+
+sound_driver_channel0_fx_2xx_routine:
+	lds ZL, pulse1_fx_2xx
+	lds ZH, pulse1_fx_2xx+1
+	adiw Z, 0
+	breq sound_driver_channel0_fx_3xx_routine
+
+	lds r26, pulse1_fx_2xx_total //load the rate to change the pitch by
+	lds r27, pulse1_fx_2xx_total+1
+	add r26, ZL //increase the total offset by the rate
+	adc r27, ZH
+	sts pulse1_fx_2xx_total, r26
+	sts pulse1_fx_2xx_total+1, r27
+
+
+
+sound_driver_channel0_fx_3xx_routine:
+	lds ZL, pulse1_fx_3xx_speed
+	lds ZH, pulse1_fx_3xx_speed+1
+	adiw Z, 0
+	brne sound_driver_channel0_fx_3xx_routine_check_start
+	rjmp sound_driver_channel0_fx_Axy_routine
+
+sound_driver_channel0_fx_3xx_routine_check_start:
+	lds r26, pulse1_fx_3xx_start
+	lds r27, pulse1_fx_3xx_start+1
+	adiw r26:r27, 0
+	brne sound_driver_channel0_fx_3xx_routine_main
+	rjmp sound_driver_channel0_fx_Axy_routine
+
+sound_driver_channel0_fx_3xx_routine_main:
+	lds r28, pulse1_fx_3xx_target
+	lds r29, pulse1_fx_3xx_target+1
+
+	cp r26, r28 //check if the target is lower, higher or equal to the starting period
+	cpc r27, r29
+	breq sound_driver_channel0_fx_3xx_routine_disable
+	brlo sound_driver_channel0_fx_3xx_routine_subtract //if target is larger, we need to add to the start (subtract from the current timer)
+	rjmp sound_driver_channel0_fx_3xx_routine_add //if target is smaller, we need to subtract from the start (add to the current timer)
+
+sound_driver_channel0_fx_3xx_routine_disable:
+	sts pulse1_fx_3xx_start, zero //setting the starting period to 0 effectively disables this routine until a note has been changed
+	sts pulse1_fx_3xx_start+1, zero //NOTE: to truly disable the effect, 300 must be written.
+	rjmp sound_driver_channel0_fx_Axy_routine
+
+sound_driver_channel0_fx_3xx_routine_subtract:
+	sub r28, r26 //store the total difference between the start and the target into r28:r29
+	sbc r29, r27
+	lds r26, pulse1_fx_3xx_total_offset
+	lds r27, pulse1_fx_3xx_total_offset+1
+
+	add r26, ZL //add the speed to the total offset
+	adc r27, ZH
+	sub r28, r26 //invert the total difference with the total offset
+	sbc r29, r27
+	brlo sound_driver_channel0_fx_3xx_routine_disable //if the total offset has surpassed the target difference (target note has been reached)
+
+	sts pulse1_fx_3xx_total_offset, r26 //store the new total offset
+	sts pulse1_fx_3xx_total_offset+1, r27
+
+	lds r26, TCB0_CCMPL //load the current timer period
+	lds r27, TCB0_CCMPH
+	sub r26, r28 //offset the current timer period with the total offset
+	sbc r27, r29
+	sts TCB0_CCMPL, r26
+	sts TCB0_CCMPH, r27
+	rjmp sound_driver_channel0_fx_Axy_routine
+
+sound_driver_channel0_fx_3xx_routine_add:
+	sub r26, r28 //store the total difference between the start and the target into r28:r29
+	sbc r27, r29
+	lds r28, pulse1_fx_3xx_total_offset
+	lds r29, pulse1_fx_3xx_total_offset+1
+
+	add r28, ZL //add the speed to the total offset
+	adc r29, ZH
+	sub r26, r28 //invert the total difference with the total offset
+	sbc r27, r29
+	brlo sound_driver_channel0_fx_3xx_routine_disable //if the total offset has surpassed the target difference (target note has been reached)
+
+	sts pulse1_fx_3xx_total_offset, r28 //store the new total offset
+	sts pulse1_fx_3xx_total_offset+1, r29
+
+	lds r28, TCB0_CCMPL //load the current timer period
+	lds r29, TCB0_CCMPH
+	add r28, r26 //offset the current timer period with the total offset
+	adc r29, r27
+	sts TCB0_CCMPL, r28
+	sts TCB0_CCMPH, r29
+
+
+
 sound_driver_channel0_fx_Axy_routine:
 	lds r27, pulse1_fx_Axy
 	cp r27, zero
