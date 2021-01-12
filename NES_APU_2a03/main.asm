@@ -57,6 +57,7 @@ pulse1_duty_macro_offset: .byte 1
 pulse1_duty_macro_loop: .byte 1
 pulse1_duty_macro_release: .byte 1
 
+pulse1_fx_0xy_sequence: .byte 2 //arpeggio sequence in the order of 00:xy. xy are from the parameters in 0xy
 pulse1_fx_1xx: .byte 2 //refers to the rate in which to subtract the pitch from by the 1xx
 pulse1_fx_1xx_total: .byte 2 //the total pitch offset for 1xx
 pulse1_fx_2xx: .byte 2 //refers to the rate in which to add to the pitch by the 2xx
@@ -65,6 +66,13 @@ pulse1_fx_3xx_start: .byte 2 //the starting note period
 pulse1_fx_3xx_target: .byte 2 //target note period
 pulse1_fx_3xx_speed: .byte 2 //the amount to offset by to get to the target
 pulse1_fx_3xx_total_offset: .byte 2
+pulse1_fx_4xy_speed: .byte 1
+pulse1_fx_4xy_depth: .byte 1
+pulse1_fx_4xy_phase: .byte 1
+pulse1_fx_7xy_speed: .byte 1
+pulse1_fx_7xy_depth: .byte 1
+pulse1_fx_7xy_phase: .byte 1
+pulse1_fx_7xy_value: .byte 1 //value to offset the volume
 pulse1_fx_Pxx: .byte 1 //refers to the fine pitch offset set by the Pxx effect
 pulse1_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy effect NOTE: this value is a signed fractional byte, with the decimal between bits 3 and 4.
 pulse1_fx_Qxy_target: .byte 2 //target note period
@@ -241,6 +249,8 @@ init:
 	sbr channel_flags, 0b10000000 //set reload flag
 
 	//FX
+	sts pulse1_fx_0xy_sequence, zero
+	sts pulse1_fx_0xy_sequence+1, zero
 	sts pulse1_fx_1xx, zero
 	sts pulse1_fx_1xx+1, zero
 	sts pulse1_fx_1xx_total, zero
@@ -257,6 +267,13 @@ init:
 	sts pulse1_fx_3xx_speed+1, zero
 	sts pulse1_fx_3xx_total_offset, zero
 	sts pulse1_fx_3xx_total_offset+1, zero
+	sts pulse1_fx_4xy_speed, zero
+	sts pulse1_fx_4xy_depth, zero
+	sts pulse1_fx_4xy_phase, zero
+	sts pulse1_fx_7xy_speed, zero
+	sts pulse1_fx_7xy_depth, zero
+	sts pulse1_fx_7xy_phase, zero
+	sts pulse1_fx_7xy_value, zero
 	sts pulse1_fx_Pxx, zero
 	sts pulse1_fx_Axy, zero
 	sts pulse1_fx_Qxy_target, zero
@@ -480,14 +497,18 @@ sound_driver_channel0_check_if_fx: //fx flags (0xE5 - 0xFE)
 	ijmp
 
 
-
-sound_driver_channel0_fx_0xy: //arpeggio
+//ARPEGGIO
+sound_driver_channel0_fx_0xy:
+	sts pulse1_fx_0xy_sequence, r26
+	sts pulse1_fx_0xy_sequence+1, zero
 	rjmp sound_driver_channel0
 
 //PITCH SLIDE UP
 sound_driver_channel0_fx_1xx:
 	sts pulse1_fx_2xx, zero //turn off any 2xx pitch slide down
 	sts pulse1_fx_2xx+1, zero
+	sts pulse1_fx_0xy_sequence, zero //disable any 0xy effect
+	sts pulse1_fx_0xy_sequence+1, zero
 	push r22 //only registers r16 - r23 can be used with mulsu
 	push r23
 	mov r22, r26 //store the rate into r22
@@ -512,6 +533,8 @@ sound_driver_channel0_fx_1xx:
 sound_driver_channel0_fx_2xx:
 	sts pulse1_fx_1xx, zero //turn off any 1xx pitch slide down
 	sts pulse1_fx_1xx+1, zero
+	sts pulse1_fx_0xy_sequence, zero //disable any 0xy effect
+	sts pulse1_fx_0xy_sequence+1, zero
 	push r22 //only registers r16 - r23 can be used with mulsu
 	push r23
 	mov r22, r26 //store the rate into r22
@@ -569,8 +592,25 @@ sound_driver_channel0_fx_3xx_enabled:
 
 //VIBRATO
 sound_driver_channel0_fx_4xy:
+	mov r27, r26
+	andi r26, 0xF0 //mask r26 for x, the speed param
+	swap r26
+	andi r27, 0x0F //mask r27 for y, the depth param
+	sts pulse1_fx_4xy_speed, r26
+	sts pulse1_fx_4xy_depth, r27
+	sts pulse1_fx_4xy_phase, zero //reset the phase to 0
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_7xy: //tremelo effect
+
+//TREMELO
+sound_driver_channel0_fx_7xy:
+	mov r27, r26
+	andi r26, 0xF0 //mask r26 for x, the speed param
+	swap r26
+	andi r27, 0x0F //mask r27 for y, the depth param
+	sts pulse1_fx_7xy_speed, r26
+	sts pulse1_fx_7xy_depth, r27
+	sts pulse1_fx_7xy_phase, zero //reset the phase to 0
+	sts pulse1_fx_7xy_value, zero //reset the tremelo value
 	rjmp sound_driver_channel0
 
 //VOLUME SLIDE
@@ -750,8 +790,8 @@ sound_driver_channel0_fx_Sxx: //mute delay
 
 //DUTY
 sound_driver_channel0_fx_Vxx:
-	ldi ZH, HIGH(sequences << 1) //point Z to sequence table
-	ldi ZL, LOW(sequences << 1)
+	ldi ZL, LOW(sequences << 1) //point Z to sequence table
+	ldi ZH, HIGH(sequences << 1)
 	add ZL, r26 //offset the pointer
 	adc ZH, zero
 
@@ -1134,6 +1174,11 @@ sound_driver_instrument_routine_channel0_volume_calculate:
 sound_driver_instrument_routine_channel0_volume_load:
 	lds r27, pulse1_param //load main volume
 	andi r27, 0x0F //mask for VVVV volume bits
+
+	lds r26, pulse1_fx_7xy_value
+	cpi r26, 0x00
+	brne sound_driver_instrument_routine_channel0_volume_load_7xy
+
 	add ZL, r27 //offset the volume table by the main volume
 	adc ZH, zero
 	lpm r27, Z
@@ -1143,8 +1188,44 @@ sound_driver_instrument_routine_channel0_volume_load:
 sound_driver_instrument_routine_channel0_volume_default:
 	lds r27, pulse1_param //a multiplier of F means in no change to the main volume, so we just copy the value into the output
 	andi r27, 0x0F //mask for VVVV volume bits
+
+	lds r26, pulse1_fx_7xy_value
+	cpi r26, 0x00
+	brne sound_driver_instrument_routine_channel0_volume_default_7xy
 	sts pulse1_output_volume, r27
+	rjmp sound_driver_instrument_routine_channel0_arpeggio
+
+sound_driver_instrument_routine_channel0_volume_load_7xy:
+	sub r27, r26 //subtract the volume by the tremelo value
+	brcs sound_driver_instrument_routine_channel0_volume_load_7xy_overflow
+	breq sound_driver_instrument_routine_channel0_volume_load_7xy_overflow
+	ldi r27, 0x01 //if the subtraction resulted in a negative volume, cap it to 0x01
+
+	add ZL, r27 //offset the volume table by the main volume
+	adc ZH, zero
+	lpm r27, Z
+	sts pulse1_output_volume, r27 //store the new output volume
+	rjmp sound_driver_instrument_routine_channel0_arpeggio
+
+sound_driver_instrument_routine_channel0_volume_load_7xy_overflow:
+	ldi r27, 0x01 //if the subtraction resulted in a negative volume, cap it to 0x01
+	add ZL, r27 //offset the volume table by the main volume
+	adc ZH, zero
+	lpm r27, Z
+	sts pulse1_output_volume, r27 //store the new output volume
+	rjmp sound_driver_instrument_routine_channel0_arpeggio
+
+sound_driver_instrument_routine_channel0_volume_default_7xy:
+	sub r27, r26 //subtract the volume by the tremelo value
+	brcs sound_driver_instrument_routine_channel0_volume_default_7xy_overflow
+	breq sound_driver_instrument_routine_channel0_volume_default_7xy_overflow
+	sts pulse1_output_volume, r27
+	rjmp sound_driver_instrument_routine_channel0_arpeggio
 	
+sound_driver_instrument_routine_channel0_volume_default_7xy_overflow:
+	ldi r27, 0x01 //if the subtraction resulted in a negative volume, cap it to 0x01
+	sts pulse1_output_volume, r27
+
 
 
 sound_driver_instrument_routine_channel0_arpeggio:
@@ -1174,7 +1255,8 @@ sound_driver_instrument_routine_channel0_arpeggio_increment:
 sound_driver_instrument_routine_channel0_arpeggio_read:
 	lpm r27, Z //load arpeggio data into r27
 	cpi r27, 0x80 //check for macro end flag
-	brne sound_driver_instrument_routine_channel0_arpeggio_process //if the data was not the macro end flag, calculate the volume
+	breq sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process //if the data was not the macro end flag, calculate the volume
 
 
 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag:
@@ -1207,6 +1289,11 @@ sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_check_
 	brne sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload //if a loop flag exists, then load the loop value
 
 sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_no_loop:
+	lds r28, pulse1_fx_0xy_sequence //check for 0xy effect
+	lds r29, pulse1_fx_0xy_sequence+1
+	adiw r29:r28, 0
+	brne sound_driver_instrument_routine_channel0_arpeggio_default_xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
+
 	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
 	sts pulse1_arpeggio_macro_offset, r26 //store the last valid index into the offset
 	rjmp sound_driver_instrument_routine_channel0_arpeggio
@@ -1216,21 +1303,45 @@ sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_reload:
 	rjmp sound_driver_instrument_routine_channel0_arpeggio //go back and re-read the volume data
 
 
+sound_driver_instrument_routine_channel0_arpeggio_default:
+	lds r28, pulse1_fx_0xy_sequence //load 0xy effect
+	lds r29, pulse1_fx_0xy_sequence+1
+	adiw r29:r28, 0 //check for 0xy effect
+	breq sound_driver_instrument_routine_channel0_arpeggio_default_no_0xy //if there is no 0xy effect, we don't need to roll the sequence
+	
+//NOTE: because of the way the xy parameter is stored and processed, using x0 will not create a faster arpeggio
+sound_driver_instrument_routine_channel0_arpeggio_default_xy:
+	lsr r29
+	ror r28
+	ror r29
+	ror r28
+	ror r29
+	ror r28
+	ror r29
+	ror r28
+	ror r29
+	swap r29
+
+	sts pulse1_fx_0xy_sequence, r28 //store the rolled sequence
+	sts pulse1_fx_0xy_sequence+1, r29
+	andi r28, 0x0F //mask out the 4 LSB
+	lds r26, pulse1_note //load the current note index
+	add r26, r28 //add the note offset
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
+	
+sound_driver_instrument_routine_channel0_arpeggio_default_no_0xy:
+	//NOTE: the pitch offset does not need to be reset here because there is no new note being calculated
+	lds r26, pulse1_note //load the current note index
+	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
 
 sound_driver_instrument_routine_channel0_arpeggio_process:
 	sts pulse1_total_pitch_offset, zero //the pitch offsets must be reset when a new note is to be calculated from an arpeggio macro
 	sts pulse1_total_hi_pitch_offset, zero
 	lds r26, pulse1_arpeggio_macro_mode
-	cpi r26, 0x00 //absolute mode
-	breq sound_driver_instrument_routine_channel0_arpeggio_process_absolute
-	cpi r26, 0x01 //fixed mode
+	cpi r26, 0x01 //absolute mode
+	brlo sound_driver_instrument_routine_channel0_arpeggio_process_absolute
 	breq sound_driver_instrument_routine_channel0_arpeggio_process_fixed
 	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_relative //relative mode
-
-sound_driver_instrument_routine_channel0_arpeggio_default:
-	//NOTE: the pitch offset does not need to be reset here because there is no new note being calculated
-	lds r26, pulse1_note //load the current note index
-	rjmp sound_driver_instrument_routine_channel0_arpeggio_process_load
 
 sound_driver_instrument_routine_channel0_arpeggio_process_absolute:
 	lds r26, pulse1_note //load the current note index
@@ -1543,8 +1654,8 @@ sound_driver_instrument_routine_channel0_duty_macro_end_flag_check_loop:
 
 
 sound_driver_instrument_routine_channel0_duty_load:
-	ldi ZH, HIGH(sequences << 1) //point Z to sequence table
-	ldi ZL, LOW(sequences << 1)
+	ldi ZL, LOW(sequences << 1) //point Z to sequence table
+	ldi ZH, HIGH(sequences << 1)
 	add ZL, r27 //offset the pointer by the duty macro data
 	adc ZH, zero
 
@@ -1603,14 +1714,14 @@ sound_driver_channel0_fx_3xx_routine:
 	lds ZH, pulse1_fx_3xx_speed+1
 	adiw Z, 0
 	brne sound_driver_channel0_fx_3xx_routine_check_start
-	rjmp sound_driver_channel0_fx_Axy_routine
+	rjmp sound_driver_channel0_fx_4xy_routine
 
 sound_driver_channel0_fx_3xx_routine_check_start:
 	lds r26, pulse1_fx_3xx_start
 	lds r27, pulse1_fx_3xx_start+1
 	adiw r26:r27, 0
 	brne sound_driver_channel0_fx_3xx_routine_main
-	rjmp sound_driver_channel0_fx_Axy_routine
+	rjmp sound_driver_channel0_fx_4xy_routine
 
 sound_driver_channel0_fx_3xx_routine_main:
 	lds r28, pulse1_fx_3xx_target
@@ -1625,7 +1736,7 @@ sound_driver_channel0_fx_3xx_routine_main:
 sound_driver_channel0_fx_3xx_routine_disable:
 	sts pulse1_fx_3xx_start, zero //setting the starting period to 0 effectively disables this routine until a note has been changed
 	sts pulse1_fx_3xx_start+1, zero //NOTE: to truly disable the effect, 300 must be written.
-	rjmp sound_driver_channel0_fx_Axy_routine
+	rjmp sound_driver_channel0_fx_4xy_routine
 
 sound_driver_channel0_fx_3xx_routine_subtract:
 	sub r28, r26 //store the total difference between the start and the target into r28:r29
@@ -1648,7 +1759,7 @@ sound_driver_channel0_fx_3xx_routine_subtract:
 	sbc r27, r29
 	sts TCB0_CCMPL, r26
 	sts TCB0_CCMPH, r27
-	rjmp sound_driver_channel0_fx_Axy_routine
+	rjmp sound_driver_channel0_fx_4xy_routine
 
 sound_driver_channel0_fx_3xx_routine_add:
 	sub r26, r28 //store the total difference between the start and the target into r28:r29
@@ -1671,6 +1782,162 @@ sound_driver_channel0_fx_3xx_routine_add:
 	adc r29, r27
 	sts TCB0_CCMPL, r28
 	sts TCB0_CCMPH, r29
+
+
+
+sound_driver_channel0_fx_4xy_routine:
+	lds r26, pulse1_fx_4xy_speed
+	cp r26, zero
+	brne sound_driver_channel0_fx_4xy_routine_continue
+	rjmp sound_driver_channel0_fx_7xy_routine //if speed is 0, then the effect is disabled
+
+sound_driver_channel0_fx_4xy_routine_continue:
+	lds r27, pulse1_fx_4xy_depth
+	lds r28, pulse1_fx_4xy_phase
+	add r28, r26 //increase the phase by the speed
+	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	brlo sound_driver_channel0_fx_4xy_routine_phase //if no overflow, map the phase to 0-15.
+	subi r28, 0x63 //if there was overflow, re-adjust the phase
+
+sound_driver_channel0_fx_4xy_routine_phase:
+	sts pulse1_fx_4xy_phase, r28 //store the new phase
+	cpi r28, 16
+	brlo sound_driver_channel0_fx_4xy_routine_phase_0
+	cpi r28, 32
+	brlo sound_driver_channel0_fx_4xy_routine_phase_1
+	cpi r28, 48
+	brlo sound_driver_channel0_fx_4xy_routine_phase_2
+	rjmp sound_driver_channel0_fx_4xy_routine_phase_3
+
+sound_driver_channel0_fx_4xy_routine_phase_0:
+	andi r28, 0x0F //mask for values 0-15
+	rjmp sound_driver_channel0_fx_4xy_routine_load_subtract
+
+sound_driver_channel0_fx_4xy_routine_phase_1:
+	ori r28, 0xF0
+	com r28 //invert values 0-15
+	rjmp sound_driver_channel0_fx_4xy_routine_load_subtract
+
+sound_driver_channel0_fx_4xy_routine_phase_2:
+	andi r28, 0x0F //mask for values 0-15
+	rjmp sound_driver_channel0_fx_4xy_routine_load_add
+
+sound_driver_channel0_fx_4xy_routine_phase_3:
+	ori r28, 0xF0
+	com r28 //invert values 0-15
+	rjmp sound_driver_channel0_fx_4xy_routine_load_add
+
+sound_driver_channel0_fx_4xy_routine_load_add:
+	swap r27 //multiply depth by 16
+	add r28, r27 //add the depth to the phase NOTE: the table is divided into sixteen different set of 8 values, which correspond to the depth
+	
+	ldi ZL, LOW(vibrato_table << 1) //point z to vibrato table
+	ldi ZH, HIGH(vibrato_table << 1)
+	add ZL, r28 //offset the table by the depth+phase
+	adc ZH, zero
+	lpm r28, Z //load the tremelo value into r28
+
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r28 //store the vibrato value into r22
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	
+	lds r26, TCB0_CCMPL
+	lds r27, TCB0_CCMPH
+	add r26, r0
+	adc r27, r1
+	sts TCB0_CCMPL, r26
+	sts TCB0_CCMPH, r27
+	rjmp sound_driver_channel0_fx_7xy_routine
+
+sound_driver_channel0_fx_4xy_routine_load_subtract:
+	swap r27 //multiply depth by 16
+	add r28, r27 //add the depth to the phase NOTE: the table is divided into sixteen different set of 8 values, which correspond to the depth
+	ldi ZL, LOW(vibrato_table << 1) //point z to vibrato table
+	ldi ZH, HIGH(vibrato_table << 1)
+	add ZL, r28 //offset the table by the depth+phase
+	adc ZH, zero
+	lpm r28, Z //load the vibrato value into r28
+
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r28 //store the vibrato value into r22
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+
+	lds r26, TCB0_CCMPL
+	lds r27, TCB0_CCMPH
+	sub r26, r0
+	sbc r27, r1
+	sts TCB0_CCMPL, r26
+	sts TCB0_CCMPH, r27
+
+
+
+sound_driver_channel0_fx_7xy_routine:
+	lds r26, pulse1_fx_7xy_speed
+	cp r26, zero
+	breq sound_driver_channel0_fx_Axy_routine //if speed is 0, then the effect is disabled
+
+	lds r27, pulse1_fx_7xy_depth
+	lds r28, pulse1_fx_7xy_phase
+	add r28, r26 //increase the phase by the speed
+	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	brlo sound_driver_channel0_fx_7xy_routine_phase //if no overflow, map the phase to 0-15.
+	ldi r28, 0x00
+	subi r28, 0x63 //if there was overflow, re-adjust the phase
+
+sound_driver_channel0_fx_7xy_routine_phase:
+	sts pulse1_fx_7xy_phase, r28 //store the new phase
+	lsr r28 //divide the phase by 2 NOTE: 7xy only uses half a sine unlike 4xy
+	sbrs r28, 4
+	rjmp sound_driver_channel0_fx_7xy_routine_phase_0
+	rjmp sound_driver_channel0_fx_7xy_routine_phase_1
+	
+sound_driver_channel0_fx_7xy_routine_phase_0:
+	andi r28, 0x0F //mask for values 0-15
+	rjmp sound_driver_channel0_fx_7xy_routine_load
+
+sound_driver_channel0_fx_7xy_routine_phase_1:
+	ori r28, 0xF0
+	com r28 //invert values 0-15
+	rjmp sound_driver_channel0_fx_7xy_routine_load
+
+sound_driver_channel0_fx_7xy_routine_load:
+	swap r27 //multiply depth by 16
+	add r28, r27 //add the depth to the phase NOTE: the table is divided into sixteen different set of 8 values, which correspond to the depth
+	
+	ldi ZL, LOW(vibrato_table << 1) //point z to vibrato table
+	ldi ZH, HIGH(vibrato_table << 1)
+	add ZL, r28 //offset the table by the depth+phase
+	adc ZH, zero
+	lpm r28, Z //load the vibrato value into r28
+
+	lsr r28 //convert to tremelo value by shifting to the right
+	sts pulse1_fx_7xy_value, r28
 
 
 
@@ -1920,8 +2187,8 @@ pulse1_envelope_routine_clear_start:
 //CONVERTERS (TABLES)
 //converts and loads 5 bit length to corresponding 8 bit length value into r29
 length_converter:
-	ldi ZH, HIGH(length << 1)
 	ldi ZL, LOW(length << 1)
+	ldi ZH, HIGH(length << 1)
 	add ZL, r29
 	adc ZH, zero
 	lpm r29, Z
@@ -1931,8 +2198,8 @@ length: .db $05, $7F, $0A, $01, $14, $02, $28, $03, $50, $04, $1E, $05, $07, $06
 
 //loads pulse sequence into r29
 duty_cycle_sequences:
-	ldi ZH, HIGH(sequences << 1)
 	ldi ZL, LOW(sequences << 1)
+	ldi ZH, HIGH(sequences << 1)
 	add ZL, r29
 	adc ZH, zero
 	lpm r29, Z
