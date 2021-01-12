@@ -22,11 +22,11 @@ pulse1_note: .byte 1 //the current note index in the note table
 
 song_frames: .byte 2
 song_frame_offset: .byte 2
-
+song_speed: .byte 1
 
 
 pulse1_pattern: .byte 2
-pulse1_pattern_delay: .byte 1
+pulse1_pattern_delay: .byte 2
 pulse1_pattern_offset: .byte 2
 
 pulse1_volume_macro: .byte 2
@@ -162,6 +162,7 @@ init:
 	ldi ZH, HIGH(song0_frames << 1)
 	sts song_frames, ZL
 	sts song_frames+1, ZH
+	sts song_speed, zero
 
 	//CHANNEL 0 TEST
 	ldi r27, 0x00
@@ -175,6 +176,7 @@ init:
 	sts pulse1_pattern+1, r27
 	ldi r27, 0x00
 	sts pulse1_pattern_delay, zero
+	sts pulse1_pattern_delay+1, zero
 	sts pulse1_pattern_offset, zero
 	sts pulse1_pattern_offset+1, zero
 
@@ -438,8 +440,10 @@ sound_driver:
 	push r29
 
 	//SOUND DRIVER
-	lds r27, pulse1_pattern_delay
-	cpse r27, zero //if the pattern delay is 0, proceed with sound driver procedures
+	lds r26, pulse1_pattern_delay
+	lds r27, pulse1_pattern_delay+1
+	adiw r27:r26, 0
+	breq sound_driver_channel0 //if the pattern delay is 0, proceed with sound driver procedures
 	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
 
 
@@ -624,16 +628,41 @@ sound_driver_channel0_fx_Cxx: //halt
 	rjmp sound_driver_channel0
 sound_driver_channel0_fx_Dxx: //frame skip
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_Exx: //volume
+
+//VOLUME
+sound_driver_channel0_fx_Exx:
+	lds r27, pulse1_param
+	andi r27, 0xF0 //clear previous VVVV volume bits
+	or r27, r26 //move new VVVV bits into pulse1_param
+	sts pulse1_param, r27
+	sbr channel_flags, 6
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_Fxx: //speed and tempo
+
+//SPEED AND TEMPO
+sound_driver_channel0_fx_Fxx:
+	sts song_speed, r26 //NOTE: only changes to speed are supported
 	rjmp sound_driver_channel0
+
 sound_driver_channel0_fx_Gxx: //note delay
 	rjmp sound_driver_channel0
+
 sound_driver_channel0_fx_Hxy: //hardware sweep up
+	swap r26
+	ori r26, 0b10001000 //enable negate and enable sweep flag
+	mov pulse1_sweep, r26
+	sts pulse1_sweep_param, pulse1_sweep
+	sbr channel_flags, 7 //set reload flag
 	rjmp sound_driver_channel0
-sound_driver_channel0_fx_lxy: //hardware sweep down
+
+sound_driver_channel0_fx_Ixy: //hardware sweep down
+	swap r26
+	andi r26, 0b01111111 //disable negate flag
+	ori r26, 0b00001000 //enable sweep flag
+	mov pulse1_sweep, r26
+	sts pulse1_sweep_param, pulse1_sweep
+	sbr channel_flags, 7 //set reload flag
 	rjmp sound_driver_channel0
+
 sound_driver_channel0_fx_Hxx: //FDS modulation depth
 	rjmp sound_driver_channel0
 sound_driver_channel0_fx_Ixx: //FDS modulation speed
@@ -844,6 +873,8 @@ sound_driver_channel0_note:
 	lds r27, TCB0_CCMPH
 	sts pulse1_fx_3xx_start, r26
 	sts pulse1_fx_3xx_start+1, r27
+	sts pulse1_sweep_param, zero //reset any sweep effect
+	sbr channel_flags, 7 //set reload flag
 	sts pulse1_fx_Qxy_target, zero //reset the Qxy, Rxy effects
 	sts pulse1_fx_Qxy_target+1, zero
 	sts pulse1_fx_Qxy_total_offset, zero
@@ -873,7 +904,7 @@ sound_driver_channel0_delay:
 	subi r27, 0x67 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts pulse1_pattern_delay, r27
 	rcall sound_driver_channel0_increment_offset
-	rjmp sound_driver_instrument_routine
+	rjmp sound_driver_calculate_delays
 
 
 
@@ -1109,9 +1140,29 @@ sound_driver_channel0_increment_offset_twice: //used for data that takes up 2 by
 
 
 
+sound_driver_calculate_delays:
+	push r22
+	push r23
+	lds r22, song_speed
+	mov r26, r22
+	subi r26, 1
+
+	lds r23, pulse1_pattern_delay
+	mul r22, r23
+	add r0, r26
+	adc r1, zero
+	sts pulse1_pattern_delay, r0
+	sts pulse1_pattern_delay+1, r1
+
+	pop r23
+	pop r22
+	rjmp sound_driver_instrument_routine
+
 sound_driver_decrement_frame_delay:
-	dec r27
-	sts pulse1_pattern_delay, r27
+	subi r26, 1
+	sbc r27, zero
+	sts pulse1_pattern_delay, r26
+	sts pulse1_pattern_delay+1, r27
 
 
 
@@ -2097,23 +2148,26 @@ pulse1_sweep_routine_action: //if the divider is == 0, update the pulse timer pe
 	mov r29, pulse1_sweep
 	swap r29
 	andi r29, 0x07 //mask for shift bits
-	brne PC+2 //check of shift == 0
+	brne pulse1_sweep_routine_action_main //shift != 0
 	pop r29
 	rjmp pulse1_sweep_routine_check_reload //if the shift == 0, do nothing and return
 
+pulse1_sweep_routine_action_main:
 	lds r26, TCB0_CCMPL
 	lds r27, TCB0_CCMPH
+pulse1_sweep_routine_action_main_loop:
 	lsr r27
 	ror r26
 	dec r29
-	brne PC-3 //keep looping/shifting until shift count is 0
+	brne pulse1_sweep_routine_action_main_loop //keep looping/shifting until shift count is 0
 
 	sbrs pulse1_sweep, 7 //check the negate flag
-	rjmp PC+3 //if negate flag was clear, go straight to addition
+	rjmp pulse1_sweep_routine_action_main_add //if negate flag was clear, go straight to addition
 
 	com r26 //pulse1 uses one's complement if the negate flag is set
 	com r27
 
+pulse1_sweep_routine_action_main_add:
 	lds r29, TCB0_CCMPL //perform addition to get new timer period
 	add r26, r29
 	lds r29, TCB0_CCMPH
@@ -2151,7 +2205,7 @@ pulse1_sweep_routine_check_reload:
 pulse1_sweep_reload:
 	lds pulse1_sweep, pulse1_sweep_param //NOTE: since the reload flag is kept in bit 6, we clear the reload flag indirectly
 	swap pulse1_sweep //bring data from high byte to low byte
-	cbr channel_flags, 0b10000000 //clear ready flag
+	cbr channel_flags, 0b10000000 //clear reload flag
 	ret
 
 pulse1_envelope_routine:
@@ -2212,7 +2266,7 @@ sequences: .db 0b00000001, 0b00000011, 0b00001111, 0b11111100
 fx:
 	.dw sound_driver_channel0_fx_0xy, sound_driver_channel0_fx_1xx, sound_driver_channel0_fx_2xx, sound_driver_channel0_fx_3xx, sound_driver_channel0_fx_4xy
 	.dw sound_driver_channel0_fx_7xy, sound_driver_channel0_fx_Axy, sound_driver_channel0_fx_Bxx, sound_driver_channel0_fx_Cxx, sound_driver_channel0_fx_Dxx
-	.dw sound_driver_channel0_fx_Exx, sound_driver_channel0_fx_Fxx, sound_driver_channel0_fx_Gxx, sound_driver_channel0_fx_Hxy, sound_driver_channel0_fx_lxy
+	.dw sound_driver_channel0_fx_Exx, sound_driver_channel0_fx_Fxx, sound_driver_channel0_fx_Gxx, sound_driver_channel0_fx_Hxy, sound_driver_channel0_fx_Ixy
 	.dw sound_driver_channel0_fx_Hxx, sound_driver_channel0_fx_Ixx, sound_driver_channel0_fx_Pxx, sound_driver_channel0_fx_Qxy, sound_driver_channel0_fx_Rxy
 	.dw sound_driver_channel0_fx_Sxx, sound_driver_channel0_fx_Vxx, sound_driver_channel0_fx_Wxx, sound_driver_channel0_fx_Xxx, sound_driver_channel0_fx_Yxx
 	.dw sound_driver_channel0_fx_Zxx
