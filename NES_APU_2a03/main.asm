@@ -73,8 +73,10 @@ pulse1_fx_7xy_speed: .byte 1
 pulse1_fx_7xy_depth: .byte 1
 pulse1_fx_7xy_phase: .byte 1
 pulse1_fx_7xy_value: .byte 1 //value to offset the volume
-pulse1_fx_Pxx: .byte 1 //refers to the fine pitch offset set by the Pxx effect
 pulse1_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy effect NOTE: this value is a signed fractional byte, with the decimal between bits 3 and 4.
+pulse1_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
+pulse1_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
+pulse1_fx_Pxx: .byte 1 //refers to the fine pitch offset set by the Pxx effect
 pulse1_fx_Qxy_target: .byte 2 //target note period
 pulse1_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
 pulse1_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
@@ -276,8 +278,10 @@ init:
 	sts pulse1_fx_7xy_depth, zero
 	sts pulse1_fx_7xy_phase, zero
 	sts pulse1_fx_7xy_value, zero
-	sts pulse1_fx_Pxx, zero
 	sts pulse1_fx_Axy, zero
+	sts pulse1_fx_Gxx_pre, zero
+	sts pulse1_fx_Gxx_post, zero
+	sts pulse1_fx_Pxx, zero
 	sts pulse1_fx_Qxy_target, zero
 	sts pulse1_fx_Qxy_target+1, zero
 	sts pulse1_fx_Qxy_speed, zero
@@ -643,7 +647,9 @@ sound_driver_channel0_fx_Fxx:
 	sts song_speed, r26 //NOTE: only changes to speed are supported
 	rjmp sound_driver_channel0
 
-sound_driver_channel0_fx_Gxx: //note delay
+//DELAY
+sound_driver_channel0_fx_Gxx:
+	sts pulse1_fx_Gxx_pre, r26 //NOTE: to be processed in the sound driver delay routine
 	rjmp sound_driver_channel0
 
 sound_driver_channel0_fx_Hxy: //hardware sweep up
@@ -1145,18 +1151,46 @@ sound_driver_calculate_delays:
 	push r23
 	lds r22, song_speed
 	mov r26, r22
+	mov r29, r22
 	subi r26, 1
 
+sound_driver_calculate_delays_pulse1_Gxx:
+	lds r27, pulse1_fx_Gxx_pre
+	lds r28, pulse1_fx_Gxx_post
+	cp r27, r22 //compare the Gxx fx to the song speed
+	brlo sound_driver_calculate_delays_pulse1_Gxx_post
+	ldi r27, 0 //if the Gxx effect exceeds one row (the song speed), then reset the effect to 0
+	sts pulse1_fx_Gxx_pre, zero
+
+sound_driver_calculate_delays_pulse1_Gxx_post:
+	cp r28, zero
+	breq sound_driver_calculate_delays_pulse1_main
+	mov r26, r28 //if there was a Gxx, use its post instead of the (song speed)-1
+	
+sound_driver_calculate_delays_pulse1_main:
 	lds r23, pulse1_pattern_delay
 	mul r22, r23
 	add r0, r26
 	adc r1, zero
+	add r0, r27
+	adc r1, zero
 	sts pulse1_pattern_delay, r0
 	sts pulse1_pattern_delay+1, r1
+	sts pulse1_fx_Gxx_post, zero
 
+sound_driver_calculate_delays_pulse1_Gxx_pre:
+	cp r27, zero //check if the Gxx effect was enabled
+	breq sound_driver_calculate_delays_pulse2_Gxx
+	sub r29, r27 //(song speed)-1-Gxx
+	sts pulse1_fx_Gxx_post, r26
+	sts pulse1_fx_Gxx_pre, zero
+
+sound_driver_calculate_delays_pulse2_Gxx:
 	pop r23
 	pop r22
 	rjmp sound_driver_instrument_routine
+
+
 
 sound_driver_decrement_frame_delay:
 	subi r26, 1
