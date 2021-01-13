@@ -83,6 +83,8 @@ pulse1_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is s
 pulse1_fx_Rxy_target: .byte 2 //target note period
 pulse1_fx_Rxy_speed: .byte 2 //the amount to offset by to get to the target
 pulse1_fx_Rxy_total_offset: .byte 2
+pulse1_fx_Sxx_pre: .byte 1 //NOTE: Gxx and Sxx can not both be in effect at the same time. Sxx has priority.
+pulse1_fx_Sxx_post: .byte 1
 
 pulse2_pattern_delay: .byte 1
 triangle_pattern_delay: .byte 1
@@ -294,6 +296,8 @@ init:
 	sts pulse1_fx_Rxy_speed+1, zero
 	sts pulse1_fx_Rxy_total_offset, zero
 	sts pulse1_fx_Rxy_total_offset+1, zero
+	sts pulse1_fx_Sxx_pre, zero
+	sts pulse1_fx_Sxx_post, zero
 
 	//TIMERS
 	//Frame Counter
@@ -820,7 +824,9 @@ sound_driver_channel0_fx_Rxy_process_continue:
 	sts pulse1_fx_Rxy_total_offset+1, zero
 	rjmp sound_driver_channel0
 
-sound_driver_channel0_fx_Sxx: //mute delay
+//MUTE DELAY
+sound_driver_channel0_fx_Sxx:
+	sts pulse1_fx_Sxx_pre, r26
 	rjmp sound_driver_channel0
 
 //DUTY
@@ -1151,8 +1157,30 @@ sound_driver_calculate_delays:
 	push r23
 	lds r22, song_speed
 	mov r26, r22
-	mov r29, r22
 	subi r26, 1
+	mov r29, r26
+
+sound_driver_calculate_delays_pulse1:
+sound_driver_calculate_delays_pulse1_Sxx:
+	lds r27, pulse1_fx_Sxx_pre
+	lds r28, pulse1_fx_Sxx_post
+ 	sts pulse1_fx_Sxx_pre, zero
+	cp r27, zero
+	breq sound_driver_calculate_delays_pulse1_Sxx_post
+	cp r27, r22 //compare the Gxx fx to the song speed
+	brsh sound_driver_calculate_delays_pulse1_Sxx_post
+	sts pulse1_pattern_delay, r27
+	sts pulse1_pattern_delay+1, zero
+	sub r29, r27 //(song speed)-1-Sxx
+	sts pulse1_fx_Sxx_post, r29
+	rjmp sound_driver_calculate_delays_pulse2
+
+sound_driver_calculate_delays_pulse1_Sxx_post:
+	cp r28, zero
+	breq sound_driver_calculate_delays_pulse1_Gxx
+	sts pulse1_fx_Sxx_post, zero
+	mov r26, r28
+	rjmp sound_driver_calculate_delays_pulse1_main
 
 sound_driver_calculate_delays_pulse1_Gxx:
 	lds r27, pulse1_fx_Gxx_pre
@@ -1180,11 +1208,12 @@ sound_driver_calculate_delays_pulse1_main:
 
 sound_driver_calculate_delays_pulse1_Gxx_pre:
 	cp r27, zero //check if the Gxx effect was enabled
-	breq sound_driver_calculate_delays_pulse2_Gxx
+	breq sound_driver_calculate_delays_pulse2
 	sub r29, r27 //(song speed)-1-Gxx
 	sts pulse1_fx_Gxx_post, r26
 	sts pulse1_fx_Gxx_pre, zero
 
+sound_driver_calculate_delays_pulse2:
 sound_driver_calculate_delays_pulse2_Gxx:
 	pop r23
 	pop r22
