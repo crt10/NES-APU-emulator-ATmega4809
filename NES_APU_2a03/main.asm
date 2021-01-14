@@ -23,6 +23,9 @@ pulse1_note: .byte 1 //the current note index in the note table
 song_frames: .byte 2
 song_frame_offset: .byte 2
 song_speed: .byte 1
+song_fx_Bxx: .byte 1
+song_fx_Cxx: .byte 1
+song_fx_Dxx: .byte 1
 
 
 pulse1_pattern: .byte 2
@@ -255,6 +258,10 @@ init:
 	sbr channel_flags, 0b10000000 //set reload flag
 
 	//FX
+	ldi r29, 0xFF
+	sts song_fx_Bxx, r29
+	sts song_fx_Cxx, zero
+	sts song_fx_Dxx, zero
 	sts pulse1_fx_0xy_sequence, zero
 	sts pulse1_fx_0xy_sequence+1, zero
 	sts pulse1_fx_1xx, zero
@@ -448,15 +455,109 @@ sound_driver:
 	push r29
 
 	//SOUND DRIVER
-	lds r26, pulse1_pattern_delay
-	lds r27, pulse1_pattern_delay+1
-	adiw r27:r26, 0
-	breq sound_driver_channel0 //if the pattern delay is 0, proceed with sound driver procedures
-	rjmp sound_driver_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+	lds r26, song_fx_Bxx
+	cpi r26, 0xFF //0xFF means that the flag is disabled
+	brne sound_driver_fx_Bxx_routine
+	lds r26, song_fx_Cxx
+	cpse r26, zero
+	rjmp sound_driver_fx_Cxx_routine
+	lds r26, song_fx_Dxx
+	cpse r26, zero
+	rjmp sound_driver_fx_Dxx_routine
+	rjmp sound_driver_channel0
+
+
+
+sound_driver_fx_Bxx_routine:
+	lds ZL, song_frames
+	lds ZH, song_frames+1
+	clr r28 //initialize r29:r28 to 0
+	clr r29
+	inc r26 //increment xx parameter by 1
+sound_driver_fx_Bxx_routine_loop:
+	dec r26
+	breq sound_driver_fx_Bxx_routine_loop_exit //once r26 == 0, r29:r28 will hold Bxx*(5*2).
+	adiw r29:r28, 10 //increment the offset by 10 because 5 channels, and each address takes 2 bytes (5*2 = 10)
+	rjmp sound_driver_fx_Bxx_routine_loop
+
+sound_driver_fx_Bxx_routine_loop_exit:
+	sts song_frame_offset, r28
+	sts song_frame_offset+1, r29
+	add ZL, r28
+	adc ZH, r29
+
+	lpm r26, Z+ //load the address of the frame(pattern)
+	lpm r27, Z
+	lsl r26
+	rol r27
+	sts pulse1_pattern, r26
+	sts pulse1_pattern+1, r27
+
+	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
+	sts pulse1_pattern_offset+1, zero
+	sts pulse1_pattern_delay, zero //reset the delay to 0 as well
+	sts pulse1_pattern_delay+1, zero
+
+	ldi r26, 0xFF
+	sts song_fx_Bxx, r26 //reset all song effects
+	sts song_fx_Cxx, zero
+	sts song_fx_Dxx, zero
+	rjmp sound_driver_channel0
+
+sound_driver_fx_Cxx_routine:
+	pop r29
+	pop r28
+	pop r27
+	out CPU_SREG, r27
+	cli //disable global interrupts
+		
+	ldi r26, 0xFF
+	sts song_fx_Bxx, r26 //reset all song effects
+	sts song_fx_Cxx, zero
+	sts song_fx_Dxx, zero
+
+	sts pulse1_output_volume, zero //mute all channels
+	reti
+
+sound_driver_fx_Dxx_routine:
+	lds ZL, song_frames
+	lds ZH, song_frames+1
+	lds r26, song_frame_offset //we must offset to the appropriate channel
+	lds r27, song_frame_offset+1
+	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
+	sts song_frame_offset, r26
+	sts song_frame_offset+1, r27
+	add ZL, r26
+	adc ZH, r27
+
+	lpm r26, Z+ //load the address of the next pattern
+	lpm r27, Z
+	lsl r26
+	rol r27
+	sts pulse1_pattern, r26
+	sts pulse1_pattern+1, r27
+
+	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
+	sts pulse1_pattern_offset+1, zero
+	sts pulse1_pattern_delay, zero //reset the delay to 0 as well
+	sts pulse1_pattern_delay+1, zero
+
+	ldi r26, 0xFF
+	sts song_fx_Bxx, r26 //reset all song effects
+	sts song_fx_Cxx, zero
+	sts song_fx_Dxx, zero
+	rjmp sound_driver_channel0
 
 
 
 sound_driver_channel0:
+	lds r26, pulse1_pattern_delay
+	lds r27, pulse1_pattern_delay+1
+	adiw r27:r26, 0
+	breq sound_driver_channel0_main //if the pattern delay is 0, proceed with sound driver procedures
+	rjmp sound_driver_channel0_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+
+sound_driver_channel0_main:
 	lds ZL, pulse1_pattern //current pattern for pulse 1
 	lds ZH, pulse1_pattern+1
 	lds r26, pulse1_pattern_offset //current offset in the pattern for pulse 1
@@ -513,7 +614,7 @@ sound_driver_channel0_check_if_fx: //fx flags (0xE5 - 0xFE)
 sound_driver_channel0_fx_0xy:
 	sts pulse1_fx_0xy_sequence, r26
 	sts pulse1_fx_0xy_sequence+1, zero
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //PITCH SLIDE UP
 sound_driver_channel0_fx_1xx:
@@ -539,7 +640,7 @@ sound_driver_channel0_fx_1xx:
 	ror r0
 	sts pulse1_fx_1xx, r0
 	sts pulse1_fx_1xx+1, r1
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //PITCH SLIDE DOWN
 sound_driver_channel0_fx_2xx:
@@ -565,7 +666,7 @@ sound_driver_channel0_fx_2xx:
 	ror r0
 	sts pulse1_fx_2xx, r0
 	sts pulse1_fx_2xx+1, r1
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //AUTOMATIC PORTAMENTO
 sound_driver_channel0_fx_3xx:
@@ -590,7 +691,7 @@ sound_driver_channel0_fx_3xx:
 
 	cpse r26, zero //check if the effect was enabled or disabled
 	rjmp sound_driver_channel0_fx_3xx_enabled
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 sound_driver_channel0_fx_3xx_enabled:
 	lds r26, TCB0_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
@@ -600,7 +701,7 @@ sound_driver_channel0_fx_3xx_enabled:
 
 	sts pulse1_fx_3xx_total_offset, zero
 	sts pulse1_fx_3xx_total_offset+1, zero
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //VIBRATO
 sound_driver_channel0_fx_4xy:
@@ -611,7 +712,7 @@ sound_driver_channel0_fx_4xy:
 	sts pulse1_fx_4xy_speed, r26
 	sts pulse1_fx_4xy_depth, r27
 	sts pulse1_fx_4xy_phase, zero //reset the phase to 0
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //TREMELO
 sound_driver_channel0_fx_7xy:
@@ -623,19 +724,27 @@ sound_driver_channel0_fx_7xy:
 	sts pulse1_fx_7xy_depth, r27
 	sts pulse1_fx_7xy_phase, zero //reset the phase to 0
 	sts pulse1_fx_7xy_value, zero //reset the tremelo value
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //VOLUME SLIDE
 sound_driver_channel0_fx_Axy:
 	sts pulse1_fx_Axy, r26
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
-sound_driver_channel0_fx_Bxx: //pattern jump
-	rjmp sound_driver_channel0
-sound_driver_channel0_fx_Cxx: //halt
-	rjmp sound_driver_channel0
-sound_driver_channel0_fx_Dxx: //frame skip
-	rjmp sound_driver_channel0
+//FRAME JUMP
+sound_driver_channel0_fx_Bxx:
+	sts song_fx_Bxx, r26 //NOTE: a Bxx value of FF won't be detected since FF is used to indicate that the flag is disabled
+	rjmp sound_driver_channel0_main
+
+//HALT
+sound_driver_channel0_fx_Cxx:
+	sts song_fx_Cxx, r27 //NOTE: the value stored doesn't mean anything. we only need to check that it is non-zero
+	rjmp sound_driver_channel0_main
+
+//FRAME SKIP
+sound_driver_channel0_fx_Dxx:
+	sts song_fx_Dxx, r27 //NOTE: the value stored doesn't mean anything. we only need to check that it is non-zero
+	rjmp sound_driver_channel0_main
 
 //VOLUME
 sound_driver_channel0_fx_Exx:
@@ -644,17 +753,17 @@ sound_driver_channel0_fx_Exx:
 	or r27, r26 //move new VVVV bits into pulse1_param
 	sts pulse1_param, r27
 	sbr channel_flags, 6
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //SPEED AND TEMPO
 sound_driver_channel0_fx_Fxx:
 	sts song_speed, r26 //NOTE: only changes to speed are supported
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //DELAY
 sound_driver_channel0_fx_Gxx:
 	sts pulse1_fx_Gxx_pre, r26 //NOTE: to be processed in the sound driver delay routine
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 sound_driver_channel0_fx_Hxy: //hardware sweep up
 	swap r26
@@ -662,7 +771,7 @@ sound_driver_channel0_fx_Hxy: //hardware sweep up
 	mov pulse1_sweep, r26
 	sts pulse1_sweep_param, pulse1_sweep
 	sbr channel_flags, 7 //set reload flag
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 sound_driver_channel0_fx_Ixy: //hardware sweep down
 	swap r26
@@ -671,17 +780,17 @@ sound_driver_channel0_fx_Ixy: //hardware sweep down
 	mov pulse1_sweep, r26
 	sts pulse1_sweep_param, pulse1_sweep
 	sbr channel_flags, 7 //set reload flag
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 sound_driver_channel0_fx_Hxx: //FDS modulation depth
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 sound_driver_channel0_fx_Ixx: //FDS modulation speed
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //FINE PITCH
 sound_driver_channel0_fx_Pxx:
 	sts pulse1_fx_Pxx, r26
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //NOTE SLIDE UP
 sound_driver_channel0_fx_Qxy:
@@ -690,21 +799,21 @@ sound_driver_channel0_fx_Qxy_check_arpeggio_macro:
 	lds ZH, pulse1_arpeggio_macro+1
 	adiw Z, 0
 	breq sound_driver_channel0_fx_Qxy_check_pitch_macro
-	rjmp sound_driver_channel0 //if there is an arpeggio macro, don't enable the effect
+	rjmp sound_driver_channel0_main //if there is an arpeggio macro, don't enable the effect
 
 sound_driver_channel0_fx_Qxy_check_pitch_macro:
 	lds ZL, pulse1_pitch_macro
 	lds ZH, pulse1_pitch_macro+1
 	adiw Z, 0
 	breq sound_driver_channel0_fx_Qxy_check_hi_pitch_macro
-	rjmp sound_driver_channel0 //if there is a pitch macro, don't enable the effect
+	rjmp sound_driver_channel0_main //if there is a pitch macro, don't enable the effect
 
 sound_driver_channel0_fx_Qxy_check_hi_pitch_macro:
 	lds ZL, pulse1_hi_pitch_macro
 	lds ZH, pulse1_hi_pitch_macro+1
 	adiw Z, 0
 	breq sound_driver_channel0_fx_Qxy_process
-	rjmp sound_driver_channel0 //if there is a pitch macro, don't enable the effect
+	rjmp sound_driver_channel0_main //if there is a pitch macro, don't enable the effect
 
 sound_driver_channel0_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
@@ -752,7 +861,7 @@ sound_driver_channel0_fx_Qxy_process_continue:
 	sts pulse1_fx_Qxy_speed+1, r1
 	sts pulse1_fx_Qxy_total_offset, zero
 	sts pulse1_fx_Qxy_total_offset+1, zero
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //NOTE SLIDE DOWN
 sound_driver_channel0_fx_Rxy:
@@ -761,21 +870,21 @@ sound_driver_channel0_fx_Rxy_check_arpeggio_macro:
 	lds ZH, pulse1_arpeggio_macro+1
 	adiw Z, 0
 	breq sound_driver_channel0_fx_Rxy_check_pitch_macro
-	rjmp sound_driver_channel0 //if there is an arpeggio macro, don't enable the effect
+	rjmp sound_driver_channel0_main //if there is an arpeggio macro, don't enable the effect
 
 sound_driver_channel0_fx_Rxy_check_pitch_macro:
 	lds ZL, pulse1_pitch_macro
 	lds ZH, pulse1_pitch_macro+1
 	adiw Z, 0
 	breq sound_driver_channel0_fx_Rxy_check_hi_pitch_macro
-	rjmp sound_driver_channel0 //if there is a pitch macro, don't enable the effect
+	rjmp sound_driver_channel0_main //if there is a pitch macro, don't enable the effect
 
 sound_driver_channel0_fx_Rxy_check_hi_pitch_macro:
 	lds ZL, pulse1_hi_pitch_macro
 	lds ZH, pulse1_hi_pitch_macro+1
 	adiw Z, 0
 	breq sound_driver_channel0_fx_Rxy_process
-	rjmp sound_driver_channel0 //if there is a pitch macro, don't enable the effect
+	rjmp sound_driver_channel0_main //if there is a pitch macro, don't enable the effect
 
 sound_driver_channel0_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
@@ -822,12 +931,12 @@ sound_driver_channel0_fx_Rxy_process_continue:
 	sts pulse1_fx_Rxy_speed+1, r1
 	sts pulse1_fx_Rxy_total_offset, zero
 	sts pulse1_fx_Rxy_total_offset+1, zero
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //MUTE DELAY
 sound_driver_channel0_fx_Sxx:
 	sts pulse1_fx_Sxx_pre, r26
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 //DUTY
 sound_driver_channel0_fx_Vxx:
@@ -844,7 +953,7 @@ sound_driver_channel0_fx_Vxx:
 	andi r27, 0b11000000 //mask the duty cycle bits
 	cpse r26, r27 //check if the previous duty cycle and the new duty cycle are equal
 	rjmp sound_driver_channel0_fx_Vxx_store
-	rjmp sound_driver_channel0 //if the previous and new duty cycle are the same, don't reload the sequence
+	rjmp sound_driver_channel0_main //if the previous and new duty cycle are the same, don't reload the sequence
 
 sound_driver_channel0_fx_Vxx_store:
 	lpm pulse1_sequence, Z //store the sequence
@@ -852,16 +961,16 @@ sound_driver_channel0_fx_Vxx_store:
 	andi r28, 0b00111111 //mask out the duty cycle bits
 	or r28, r27 //store the new duty cycle bits into r27
 	sts pulse1_param, r28
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 sound_driver_channel0_fx_Wxx: //DPCM sample speed
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 sound_driver_channel0_fx_Xxx: //DPCM sample retrigger
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 sound_driver_channel0_fx_Yxx: //DPCM sample offset
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 sound_driver_channel0_fx_Zxx: //DPCM sample delta counter
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 
 sound_driver_channel0_note:
@@ -896,7 +1005,7 @@ sound_driver_channel0_note:
 	sts pulse1_fx_Rxy_total_offset, zero
 	sts pulse1_fx_Rxy_total_offset+1, zero
 	rcall sound_driver_channel0_increment_offset
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 
 
@@ -908,7 +1017,7 @@ sound_driver_channel0_volume:
 	sts pulse1_param, r26
 	sbr channel_flags, 6
 	rcall sound_driver_channel0_increment_offset
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 
 
@@ -970,7 +1079,7 @@ sound_driver_channel0_instrument_change_exit:
 	sts pulse1_hi_pitch_macro_offset, r27
 	sts pulse1_duty_macro_offset, r27
 	rcall sound_driver_channel0_increment_offset_twice
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 
 
@@ -1105,7 +1214,7 @@ sound_driver_channel0_release_duty:
 	sts pulse1_duty_macro_offset, r27
 sound_driver_channel0_release_exit:
 	rcall sound_driver_channel0_increment_offset
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 
 
@@ -1130,7 +1239,7 @@ sound_driver_channel0_next_pattern:
 
 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
 	sts pulse1_pattern_offset+1, zero
-	rjmp sound_driver_channel0
+	rjmp sound_driver_channel0_main
 
 
 
@@ -1221,7 +1330,7 @@ sound_driver_calculate_delays_pulse2_Gxx:
 
 
 
-sound_driver_decrement_frame_delay:
+sound_driver_channel0_decrement_frame_delay:
 	subi r26, 1
 	sbc r27, zero
 	sts pulse1_pattern_delay, r26
