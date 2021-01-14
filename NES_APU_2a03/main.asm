@@ -242,7 +242,7 @@ init:
 	
 	//LENGTH
 	lds r29, pulse1_length
-	rcall length_converter
+	ldi r29 ,0xFF
 	mov pulse1_length_counter, r29
 
 	//SEQUENCE
@@ -2223,20 +2223,35 @@ sound_driver_channel0_fx_Qxy_routine:
 	lds r27, pulse1_fx_Qxy_total_offset+1
 	lds r28, TCB0_CCMPL
 	lds r29, TCB0_CCMPH
-	sub r28, r26 //subtract the timer period by the total offset
-	sbc r29, r27
 
-	cp r28, ZL //compare the new timer period with the target
-	cpc r29, ZH
-	brlo sound_driver_channel0_fx_Qxy_routine_end //if the target has been reached (or passed)
-	breq sound_driver_channel0_fx_Qxy_routine_end
-	brsh sound_driver_channel0_fx_Qxy_routine_add
-
-sound_driver_channel0_fx_Qxy_routine_end:
 	sub ZL, r28 //calculate the difference to the target
 	sbc ZH, r29
-	add r26, ZL //increase the total offset to the exact amount needed to reach the target
-	adc r27, ZH
+	brsh sound_driver_channel0_fx_Qxy_routine_end //if the target has been reached (or passed)
+	brlo sound_driver_channel0_fx_Qxy_routine_add
+
+sound_driver_channel0_fx_Qxy_routine_end:
+	sub r26, ZL //decrease the total offset to the exact amount needed to reach the target
+	sbc r27, ZH
+
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	lds r22, pulse1_fx_Pxx
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+
+	add r26, r0
+	adc r27, zero
+
 	sts pulse1_fx_Qxy_total_offset, r26 //store the total offset
 	sts pulse1_fx_Qxy_total_offset+1, r27
 	sts pulse1_fx_Qxy_target, zero //loading the target with 0 stops any further calculations
@@ -2263,20 +2278,35 @@ sound_driver_channel0_fx_Rxy_routine:
 	lds r27, pulse1_fx_Rxy_total_offset+1
 	lds r28, TCB0_CCMPL
 	lds r29, TCB0_CCMPH
-	add r28, r26 //add the total offset to the timer period
-	add r29, r27
 
-	cp r28, ZL //compare the new timer period with the target
-	cpc r29, ZH
-	brlo sound_driver_channel0_fx_Rxy_routine_end //if the target has been reached (or passed)
-	breq sound_driver_channel0_fx_Rxy_routine_end
-	brsh sound_driver_channel0_fx_Rxy_routine_add
+	sub r28, ZL //calculate the difference to the target
+	sbc r29, ZH
+	brsh sound_driver_channel0_fx_Rxy_routine_end //if the target has been reached (or passed)
+	brlo sound_driver_channel0_fx_Rxy_routine_add
 
 sound_driver_channel0_fx_Rxy_routine_end:
-	sub ZL, r28 //calculate the difference to the target
-	sbc ZH, r29
-	add r26, ZL //increase the total offset to the exact amount needed to reach the target
-	adc r27, ZH
+	sub r26, r28 //decrease the total offset to the exact amount needed to reach the target
+	sbc r27, r29
+
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	lds r22, pulse1_fx_Pxx
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+
+	add r26, r0
+	adc r27, zero
+
 	sts pulse1_fx_Rxy_total_offset, r26 //store the total offset
 	sts pulse1_fx_Rxy_total_offset+1, r27
 	sts pulse1_fx_Rxy_target, zero //loading the target with 0 stops any further calculations
