@@ -27,6 +27,7 @@ vibrato_table:
 	.db 0x00, 0x18, 0x31, 0x4a, 0x61, 0x78, 0x8d, 0xa1, 0xb4, 0xc5, 0xd4, 0xe0, 0xeb, 0xf4, 0xfa, 0xfd
 
 song0_frames:
+	.dw 0x014a
 	.dw song0_channel0_pattern0, song0_channel1_pattern0, song0_channel2_pattern0, song0_channel3_pattern0, song0_channel4_pattern127
 	.dw song0_channel0_pattern1, song0_channel1_pattern1, song0_channel2_pattern1, song0_channel3_pattern0, song0_channel4_pattern127
 	.dw song0_channel0_pattern2, song0_channel1_pattern2, song0_channel2_pattern0, song0_channel3_pattern0, song0_channel4_pattern127

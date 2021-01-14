@@ -22,6 +22,7 @@ pulse1_note: .byte 1 //the current note index in the note table
 
 song_frames: .byte 2
 song_frame_offset: .byte 2
+song_size: .byte 2
 song_speed: .byte 1
 song_fx_Bxx: .byte 1
 song_fx_Cxx: .byte 1
@@ -162,13 +163,17 @@ init:
 	sts pulse1_timerH, r27
 	sts pulse1_length, r27
 
-	ldi r27, 0x00
+	ldi r27, 0x02
 	sts song_frame_offset, r27
 	sts song_frame_offset+1, r27
 	ldi ZL, LOW(song0_frames << 1)
 	ldi ZH, HIGH(song0_frames << 1)
 	sts song_frames, ZL
 	sts song_frames+1, ZH
+	lpm r28, Z+ //load the song size
+	lpm r29, Z
+	sts song_size, r28
+	sts song_size, r29
 	sts song_speed, zero
 
 	//CHANNEL 0 TEST
@@ -455,6 +460,14 @@ sound_driver:
 	push r29
 
 	//SOUND DRIVER
+	lds r26, song_frame_offset
+	lds r27, song_frame_offset+1
+	lds r28, song_size
+	lds r29, song_size+1
+	cp r26, r28
+	cpc r27, r29
+	brsh sound_driver_fx_song_loop
+
 	lds r26, song_fx_Bxx
 	cpi r26, 0xFF //0xFF means that the flag is disabled
 	brne sound_driver_fx_Bxx_routine
@@ -467,7 +480,8 @@ sound_driver:
 	rjmp sound_driver_channel0
 
 
-
+sound_driver_fx_song_loop:
+	ldi r26, 0x00
 sound_driver_fx_Bxx_routine:
 	lds ZL, song_frames
 	lds ZH, song_frames+1
@@ -481,6 +495,7 @@ sound_driver_fx_Bxx_routine_loop:
 	rjmp sound_driver_fx_Bxx_routine_loop
 
 sound_driver_fx_Bxx_routine_loop_exit:
+	adiw r29:r28, 2 //add 2 to skip the first 2 bytes (first 2 bytes is the song size)
 	sts song_frame_offset, r28
 	sts song_frame_offset+1, r29
 	add ZL, r28
