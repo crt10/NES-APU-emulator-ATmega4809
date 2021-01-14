@@ -165,21 +165,18 @@ init:
 
 	ldi r27, 0x02
 	sts song_frame_offset, r27
-	sts song_frame_offset+1, r27
+	sts song_frame_offset+1, zero
 	ldi ZL, LOW(song0_frames << 1)
 	ldi ZH, HIGH(song0_frames << 1)
 	sts song_frames, ZL
 	sts song_frames+1, ZH
 	lpm r28, Z+ //load the song size
-	lpm r29, Z
+	lpm r29, Z+
 	sts song_size, r28
-	sts song_size, r29
+	sts song_size+1, r29
 	sts song_speed, zero
 
 	//CHANNEL 0 TEST
-	ldi r27, 0x00
-	add ZL, r27
-	adc ZH, zero
 	lpm r26, Z+
 	lpm r27, Z
 	lsl r26
@@ -250,11 +247,7 @@ init:
 
 	//SEQUENCE
 	lds r29, pulse1_param //load param for sequence table
-	lsl r29 //shift duty cycle bits to LSB
-	rol r29
-	rol r29
-	andi r29, 0b00000011 //mask duty cycle bits
-	rcall duty_cycle_sequences
+	ldi r29, 0b00000001 //12.5% is the default duty cycle sequence
 	mov pulse1_sequence, r29
 
 	//SWEEP
@@ -374,29 +367,25 @@ pulse1:
 	//NOTE: We will just mute the pulse when the current period is < $0008
 	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
 	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
-pulse1_check_timer_08:
 	lds r28, TCB0_CCMPL
-	lds r29, TCB0_CCMPH
-pulse1_check_timer_08_HIGH:
-	cpi r29, 0x01 //check timer HIGH period
-	brlo pulse1_check_timer_08_LOW //if the timer HIGH period is $00, check the LOW period
-	rjmp pulse1_check_timer_7FF_HIGH //if the timer HIGH period is > $01, check > $07FF condition
-pulse1_check_timer_08_LOW:
-	cpi r28, 0x59 //check timer LOW period
-	brlo pulse1_off //if the HIGH period == $00 && LOW period <= $59, pulse off
+	ldi r29, 0x059
+	cp r28, r29
+	lds r28, TCB0_CCMPH
+	ldi r29, 0x00
+	cpc r28, r29
+	brlo pulse1_off
 
 	//NOTE: Since it'd be too taxing to calculate a target period for every APU clock in the sweep unit,
 	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
 	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
 	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
-pulse1_check_timer_7FF_HIGH:
-	cpi r29, 0x59 //check timer HIGH period
-	brlo pulse1_on //if the HIGH period is < $59, then all conditions have passed and pulse is not muted
-	breq pulse1_check_timer_7FF_LOW //if the HIGH period is == $59, we go check if the LOW period is < $65
-	rjmp pulse1_off //pulse off if HIGH period is > $59
-pulse1_check_timer_7FF_LOW:
-	cpi r28, 0x65 //check timer LOW period
-	brsh pulse1_off //if the HIGH period == $59 && LOW period >= $65, pulse off
+	lds r28, TCB0_CCMPL
+	ldi r29, 0x66
+	cp r28, r29
+	lds r28, TCB0_CCMPH
+	ldi r29, 0x59
+	cpc r28, r29
+	brsh pulse1_off
 	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
 
 pulse1_off:
@@ -460,14 +449,6 @@ sound_driver:
 	push r29
 
 	//SOUND DRIVER
-	lds r26, song_frame_offset
-	lds r27, song_frame_offset+1
-	lds r28, song_size
-	lds r29, song_size+1
-	cp r26, r28
-	cpc r27, r29
-	brsh sound_driver_fx_song_loop
-
 	lds r26, song_fx_Bxx
 	cpi r26, 0xFF //0xFF means that the flag is disabled
 	brne sound_driver_fx_Bxx_routine
@@ -477,6 +458,14 @@ sound_driver:
 	lds r26, song_fx_Dxx
 	cpse r26, zero
 	rjmp sound_driver_fx_Dxx_routine
+
+	lds r26, song_frame_offset
+	lds r27, song_frame_offset+1
+	lds r28, song_size
+	lds r29, song_size+1
+	cp r26, r28
+	cpc r27, r29
+	brsh sound_driver_fx_song_loop
 	rjmp sound_driver_channel0
 
 
