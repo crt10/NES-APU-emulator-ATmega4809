@@ -553,46 +553,85 @@ init:
 	sts TCB1_CTRLA, r27
 	sei //global interrupt enable
 
-pulse1:
+volume_mixer:
+	lds r28, pulse1_output_volume
+	lds r29, pulse2_output_volume
+
+volume_mixer_pulse1:
 	sbrs pulse1_sequence, 0 //if the sequence output is zero, return
-	rjmp pulse1_off
+	rjmp volume_mixer_pulse1_off
 
 	cp pulse1_length_counter, zero //if length is zero, return
-	breq pulse1_off
+	breq volume_mixer_pulse1_off
 
 	//NOTE: We will just mute the pulse when the current period is < $0008
 	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
 	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
-	lds r28, TCB0_CCMPL
-	ldi r29, 0x059
-	cp r28, r29
-	lds r28, TCB0_CCMPH
-	ldi r29, 0x00
-	cpc r28, r29
-	brlo pulse1_off
+	lds r30, TCB0_CCMPL
+	ldi r31, 0x059
+	cp r30, r31
+	lds r30, TCB0_CCMPH
+	ldi r31, 0x00
+	cpc r30, r31
+	brlo volume_mixer_pulse1_off
 
 	//NOTE: Since it'd be too taxing to calculate a target period for every APU clock in the sweep unit,
 	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
 	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
 	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
-	lds r28, TCB0_CCMPL
-	ldi r29, 0x66
-	cp r28, r29
-	lds r28, TCB0_CCMPH
-	ldi r29, 0x59
-	cpc r28, r29
-	brsh pulse1_off
-	rjmp pulse1_on //if the HIGH period == $59 && LOW period < $65, pulse on
+	lds r30, TCB0_CCMPL
+	ldi r31, 0x66
+	cp r30, r31
+	lds r30, TCB0_CCMPH
+	ldi r31, 0x59
+	cpc r30, r31
+	brsh volume_mixer_pulse1_off
+	rjmp volume_mixer_pulse2 //if the HIGH period == $59 && LOW period < $65, pulse is not off
+volume_mixer_pulse1_off:
+	clr r28
 
-pulse1_off:
-	out VPORTA_OUT, zero
-	rjmp pulse1
+volume_mixer_pulse2:
+	sbrs pulse2_sequence, 0 //if the sequence output is zero, return
+	rjmp volume_mixer_pulse2_off
 
-pulse1_on:
-	lds r29, pulse1_output_volume
+	cp pulse2_length_counter, zero //if length is zero, return
+	breq volume_mixer_pulse2_off
 
-	out VPORTA_OUT, r29
-	rjmp pulse1
+	//NOTE: We will just mute the pulse when the current period is < $0008
+	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
+	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
+	lds r30, TCB1_CCMPL
+	ldi r31, 0x059
+	cp r30, r31
+	lds r30, TCB1_CCMPH
+	ldi r31, 0x00
+	cpc r30, r31
+	brlo volume_mixer_pulse2_off
+
+	//NOTE: Since it'd be too taxing to calculate a target period for every APU clock in the sweep unit,
+	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
+	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
+	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
+	lds r30, TCB1_CCMPL
+	ldi r31, 0x66
+	cp r30, r31
+	lds r30, TCB1_CCMPH
+	ldi r31, 0x59
+	cpc r30, r31
+	brsh volume_mixer_pulse2_off
+	rjmp volume_mixer_pulse_out //if the HIGH period == $59 && LOW period < $65, pulse is not off
+volume_mixer_pulse2_off:
+	clr r29
+
+volume_mixer_pulse_out:
+	add r28, r29
+	ldi ZL, LOW(pulse_volume_table << 1)
+	ldi ZH, HIGH(pulse_volume_table << 1)
+	add ZL, r28
+	adc ZH, zero
+	lpm r28, Z
+	out VPORTA_OUT, r28
+	rjmp volume_mixer
 
 //FRAME COUNTER/AUDIO SAMPLE ISR
 sequence_0_2:
@@ -877,6 +916,8 @@ sound_driver:
 	cli
 	push r28
 	push r29
+	push r30
+	push r31
 
 	//SOUND DRIVER
 	lds r26, song_fx_Bxx
@@ -949,6 +990,8 @@ sound_driver_fx_Bxx_routine_loop_exit:
 	rjmp sound_driver_channel0
 
 sound_driver_fx_Cxx_routine:
+	pop r31
+	pop r30
 	pop r29
 	pop r28
 	pop r27
@@ -4593,6 +4636,8 @@ sound_driver_channel1_fx_Rxy_routine_add:
 sound_driver_instrument_routine_channel2_volume:
 
 sound_driver_exit:
+	pop r31
+	pop r30
 	pop r29
 	pop r28
 	jmp sequence_1_3 + 3 //+3 is to skip the stack instructions since we already pushed them
