@@ -800,6 +800,22 @@ volume_mixer_pulse_out:
 	add ZL, r28
 	adc ZH, zero
 	lpm r28, Z
+
+volume_mixer_tnd_triangle:
+	mov r29, triangle_sequence
+	sbrc r29, 4 //check 5th bit
+	com r29
+	andi r29, 0x0F
+
+volume_mixer_tnd_out:
+	ldi ZL, LOW(tnd_volume_table << 1)
+	ldi ZH, HIGH(tnd_volume_table << 1)
+	add ZL, r29
+	adc ZH, zero
+	lpm r29, Z
+
+volume_mixer_output:
+	add r28, r29
 	out VPORTA_OUT, r28
 	rjmp volume_mixer
 
@@ -2830,8 +2846,8 @@ sound_driver_channel2_fx_3xx:
 	rjmp sound_driver_channel2_main
 
 sound_driver_channel2_fx_3xx_enabled:
-	lds r26, TCB1_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
-	lds r27, TCB1_CCMPH
+	lds r26, TCB2_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
+	lds r27, TCB2_CCMPH
 	sts triangle_fx_3xx_start, r26
 	sts triangle_fx_3xx_start+1, r27
 
@@ -3101,8 +3117,8 @@ sound_driver_channel2_note:
 	sts triangle_fx_2xx_total+1, zero
 	sts triangle_fx_3xx_total_offset, zero //reset 3xx offset
 	sts triangle_fx_3xx_total_offset+1, zero
-	lds r26, TCB1_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
-	lds r27, TCB1_CCMPH
+	lds r26, TCB2_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
+	lds r27, TCB2_CCMPH
 	sts triangle_fx_3xx_start, r26
 	sts triangle_fx_3xx_start+1, r27
 	sts triangle_fx_Qxy_target, zero //reset the Qxy, Rxy effects
@@ -5932,7 +5948,7 @@ sound_driver_instrument_routine_channel2_pitch_calculate_offset:
 	add r26, r28
 	adc r27, r29
 
-	sts TCB1_CCMPL, r26 //store the new low bits for timer
+	sts TCB2_CCMPL, r26 //store the new low bits for timer
 	sts TCB2_CCMPH, r27 //store the new high bits for timer
 	
 
