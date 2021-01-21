@@ -5678,6 +5678,9 @@ sound_driver_instrument_routine_channel2_volume_process:
 	cp r27, zero
 	breq sound_driver_instrument_routine_channel2_volume_process_disable
 sound_driver_instrument_routine_channel2_volume_process_enable:
+	lds r27, TCB2_INTCTRL
+	cpi r27, TCB_CAPT_bm
+	brne sound_driver_instrument_routine_channel2_volume_default //if the channel has already been muted, don't enable it again
 	ldi r27, TCB_CAPT_bm //enable interrupts
 	sts TCB2_INTCTRL, r27
 	rjmp sound_driver_instrument_routine_channel2_arpeggio
