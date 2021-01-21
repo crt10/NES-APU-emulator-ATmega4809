@@ -723,6 +723,9 @@ init:
 	sts TCB2_CTRLA, r27
 	sei //global interrupt enable
 
+
+
+//https://wiki.nesdev.com/w/index.php/APU_Mixer
 volume_mixer:
 	lds r28, pulse1_output_volume
 	lds r29, pulse2_output_volume
@@ -806,6 +809,9 @@ volume_mixer_tnd_triangle:
 	sbrc r29, 4 //check 5th bit
 	com r29
 	andi r29, 0x0F
+	mov r30, r29
+	add r29, r30 //multiply the triangle volume by 3
+	add r29, r30
 
 volume_mixer_tnd_out:
 	ldi ZL, LOW(tnd_volume_table << 1)
@@ -818,6 +824,8 @@ volume_mixer_output:
 	add r28, r29
 	out VPORTA_OUT, r28
 	rjmp volume_mixer
+
+
 
 //FRAME COUNTER/AUDIO SAMPLE ISR
 sequence_0_2:
@@ -1193,6 +1201,19 @@ sound_driver_fx_Bxx_routine_loop_exit:
 	sts triangle_pattern_delay_frames, zero
 
 	ldi r26, 0xFF
+	sts pulse1_fx_Gxx_pre, r26 //reset all Gxx and Sxx effects. if we don't channels can get desynced
+	sts pulse1_fx_Gxx_post, r26
+	sts pulse1_fx_Sxx_pre, r26
+	sts pulse1_fx_Sxx_post, r26
+	sts pulse2_fx_Gxx_pre, r26
+	sts pulse2_fx_Gxx_post, r26
+	sts pulse2_fx_Sxx_pre, r26
+	sts pulse2_fx_Sxx_post, r26
+	sts triangle_fx_Gxx_pre, r26
+	sts triangle_fx_Gxx_post, r26
+	sts triangle_fx_Sxx_pre, r26
+	sts triangle_fx_Sxx_post, r26
+
 	sts song_fx_Bxx, r26 //reset all song effects
 	sts song_fx_Cxx, zero
 	sts song_fx_Dxx, zero
@@ -1259,6 +1280,19 @@ sound_driver_fx_Dxx_routine:
 	sts triangle_pattern_delay_frames, zero
 
 	ldi r26, 0xFF
+	sts pulse1_fx_Gxx_pre, r26 //reset all Gxx and Sxx effects. if we don't channels can get desynced
+	sts pulse1_fx_Gxx_post, r26
+	sts pulse1_fx_Sxx_pre, r26
+	sts pulse1_fx_Sxx_post, r26
+	sts pulse2_fx_Gxx_pre, r26
+	sts pulse2_fx_Gxx_post, r26
+	sts pulse2_fx_Sxx_pre, r26
+	sts pulse2_fx_Sxx_post, r26
+	sts triangle_fx_Gxx_pre, r26
+	sts triangle_fx_Gxx_post, r26
+	sts triangle_fx_Sxx_pre, r26
+	sts triangle_fx_Sxx_post, r26
+
 	sts song_fx_Bxx, r26 //reset all song effects
 	sts song_fx_Cxx, zero
 	sts song_fx_Dxx, zero
