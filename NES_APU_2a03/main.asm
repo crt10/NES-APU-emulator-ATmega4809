@@ -1010,6 +1010,14 @@ volume_mixer_tnd_triangle:
 	add r29, r30 //multiply the triangle volume by 3
 	add r29, r30
 
+volume_mixer_tnd_noise:
+	clr r29
+	sbrc noise_sequence_LOW, 0 //check 0th bit, skip if set
+	rjmp volume_mixer_tnd_out
+	lds r30, noise_output_volume
+	lsl r30 //multiply noise volume by 2
+	mov r29, r30
+
 volume_mixer_tnd_out:
 	ldi ZL, LOW(tnd_volume_table << 1)
 	ldi ZH, HIGH(tnd_volume_table << 1)
@@ -1019,7 +1027,7 @@ volume_mixer_tnd_out:
 
 volume_mixer_output:
 	add r28, r29
-	out VPORTA_OUT, r28
+	out VPORTA_OUT, r29
 	rjmp volume_mixer
 
 
