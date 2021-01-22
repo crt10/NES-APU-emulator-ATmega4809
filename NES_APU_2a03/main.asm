@@ -59,7 +59,7 @@ pulse1_arpeggio_macro_loop: .byte 1
 pulse1_arpeggio_macro_release: .byte 1
 pulse1_arpeggio_macro_mode: .byte 1
 
-pulse1_total_pitch_offset: .byte 1 //used to reference the overall change in pitch for the pitch macro
+pulse1_total_pitch_offset: .byte 2 //used to reference the overall change in pitch for the pitch macro
 pulse1_pitch_macro: .byte 2
 pulse1_pitch_macro_offset: .byte 1
 pulse1_pitch_macro_loop: .byte 1
@@ -95,7 +95,7 @@ pulse1_fx_7xy_value: .byte 1 //value to offset the volume
 pulse1_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy effect NOTE: this value is a signed fractional byte, with the decimal between bits 3 and 4.
 pulse1_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
 pulse1_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
-pulse1_fx_Pxx: .byte 1 //refers to the fine pitch offset set by the Pxx effect
+pulse1_fx_Pxx_total: .byte 2 //refers to the fine pitch offset set by the Pxx effect
 pulse1_fx_Qxy_target: .byte 2 //target note period
 pulse1_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
 pulse1_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
@@ -122,7 +122,7 @@ pulse2_arpeggio_macro_loop: .byte 1
 pulse2_arpeggio_macro_release: .byte 1
 pulse2_arpeggio_macro_mode: .byte 1
 
-pulse2_total_pitch_offset: .byte 1 //used to reference the overall change in pitch for the pitch macro
+pulse2_total_pitch_offset: .byte 2 //used to reference the overall change in pitch for the pitch macro
 pulse2_pitch_macro: .byte 2
 pulse2_pitch_macro_offset: .byte 1
 pulse2_pitch_macro_loop: .byte 1
@@ -158,7 +158,7 @@ pulse2_fx_7xy_value: .byte 1 //value to offset the volume
 pulse2_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy effect NOTE: this value is a signed fractional byte, with the decimal between bits 3 and 4.
 pulse2_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
 pulse2_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
-pulse2_fx_Pxx: .byte 1 //refers to the fine pitch offset set by the Pxx effect
+pulse2_fx_Pxx_total: .byte 2 //refers to the fine pitch offset set by the Pxx effect
 pulse2_fx_Qxy_target: .byte 2 //target note period
 pulse2_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
 pulse2_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
@@ -185,7 +185,7 @@ triangle_arpeggio_macro_loop: .byte 1
 triangle_arpeggio_macro_release: .byte 1
 triangle_arpeggio_macro_mode: .byte 1
 
-triangle_total_pitch_offset: .byte 1 //used to reference the overall change in pitch for the pitch macro
+triangle_total_pitch_offset: .byte 2 //used to reference the overall change in pitch for the pitch macro
 triangle_pitch_macro: .byte 2
 triangle_pitch_macro_offset: .byte 1
 triangle_pitch_macro_loop: .byte 1
@@ -216,7 +216,7 @@ triangle_fx_4xy_depth: .byte 1
 triangle_fx_4xy_phase: .byte 1
 triangle_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
 triangle_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
-triangle_fx_Pxx: .byte 1 //refers to the fine pitch offset set by the Pxx effect
+triangle_fx_Pxx_total: .byte 2 //refers to the fine pitch offset set by the Pxx effect
 triangle_fx_Qxy_target: .byte 2 //target note period
 triangle_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
 triangle_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
@@ -385,6 +385,7 @@ init:
 	sts pulse1_arpeggio_macro, zero
 	sts pulse1_arpeggio_macro+1, zero
 	sts pulse1_total_pitch_offset, zero
+	sts pulse1_total_pitch_offset+1, zero
 	sts pulse1_pitch_macro, zero
 	sts pulse1_pitch_macro+1, zero
 	sts pulse1_total_hi_pitch_offset, zero
@@ -445,7 +446,8 @@ init:
 	sts pulse1_fx_Axy, zero
 	sts pulse1_fx_Gxx_pre, r28
 	sts pulse1_fx_Gxx_post, r28
-	sts pulse1_fx_Pxx, zero
+	sts pulse1_fx_Pxx_total, zero
+	sts pulse1_fx_Pxx_total+1, zero
 	sts pulse1_fx_Qxy_target, zero
 	sts pulse1_fx_Qxy_target+1, zero
 	sts pulse1_fx_Qxy_speed, zero
@@ -485,6 +487,7 @@ init:
 	sts pulse2_arpeggio_macro, zero
 	sts pulse2_arpeggio_macro+1, zero
 	sts pulse2_total_pitch_offset, zero
+	sts pulse2_total_pitch_offset+1, zero
 	sts pulse2_pitch_macro, zero
 	sts pulse2_pitch_macro+1, zero
 	sts pulse2_total_hi_pitch_offset, zero
@@ -547,7 +550,8 @@ init:
 	sts pulse2_fx_Axy, zero
 	sts pulse2_fx_Gxx_pre, r28
 	sts pulse2_fx_Gxx_post, r28
-	sts pulse2_fx_Pxx, zero
+	sts pulse2_fx_Pxx_total, zero
+	sts pulse2_fx_Pxx_total+1, zero
 	sts pulse2_fx_Qxy_target, zero
 	sts pulse2_fx_Qxy_target+1, zero
 	sts pulse2_fx_Qxy_speed, zero
@@ -587,6 +591,7 @@ init:
 	sts triangle_arpeggio_macro, zero
 	sts triangle_arpeggio_macro+1, zero
 	sts triangle_total_pitch_offset, zero
+	sts triangle_total_pitch_offset+1, zero
 	sts triangle_pitch_macro, zero
 	sts triangle_pitch_macro+1, zero
 	sts triangle_total_hi_pitch_offset, zero
@@ -624,7 +629,8 @@ init:
 	sts triangle_fx_4xy_phase, zero
 	sts triangle_fx_Gxx_pre, r28
 	sts triangle_fx_Gxx_post, r28
-	sts triangle_fx_Pxx, zero
+	sts triangle_fx_Pxx_total, zero
+	sts triangle_fx_Pxx_total+1, zero
 	sts triangle_fx_Qxy_target, zero
 	sts triangle_fx_Qxy_target+1, zero
 	sts triangle_fx_Qxy_speed, zero
@@ -1535,7 +1541,23 @@ sound_driver_channel0_fx_Ixx: //FDS modulation speed
 
 //FINE PITCH
 sound_driver_channel0_fx_Pxx:
-	sts pulse1_fx_Pxx, r26
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r26
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	sts pulse1_fx_Pxx_total, r0
+	sts pulse1_fx_Pxx_total+1, r1
 	rjmp sound_driver_channel0_main
 
 //NOTE SLIDE UP
@@ -1738,6 +1760,7 @@ sound_driver_channel0_note:
 	sts pulse1_hi_pitch_macro_offset, r27
 	sts pulse1_duty_macro_offset, r27
 	sts pulse1_total_pitch_offset, zero //reset the pitch and hi pitch offset
+	sts pulse1_total_pitch_offset+1, zero
 	sts pulse1_total_hi_pitch_offset, zero
 	sts pulse1_fx_1xx_total, zero //reset the total for 1xx and 2xx effects
 	sts pulse1_fx_1xx_total+1, zero
@@ -1796,6 +1819,7 @@ sound_driver_channel0_instrument_change:
 	sts pulse1_duty_macro, zero
 	sts pulse1_duty_macro+1, zero
 	sts pulse1_total_pitch_offset, zero //reset the pitch offset
+	sts pulse1_total_pitch_offset+1, zero
 	sts pulse1_total_hi_pitch_offset, zero //reset the hi pitch offset
 
 	adiw Z, 1 //point to the byte next to the flag
@@ -2254,7 +2278,23 @@ sound_driver_channel1_fx_Ixx: //FDS modulation speed
 
 //FINE PITCH
 sound_driver_channel1_fx_Pxx:
-	sts pulse2_fx_Pxx, r26
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r26
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	sts pulse2_fx_Pxx_total, r0
+	sts pulse2_fx_Pxx_total+1, r1
 	rjmp sound_driver_channel1_main
 
 //NOTE SLIDE UP
@@ -2457,6 +2497,7 @@ sound_driver_channel1_note:
 	sts pulse2_hi_pitch_macro_offset, r27
 	sts pulse2_duty_macro_offset, r27
 	sts pulse2_total_pitch_offset, zero //reset the pitch and hi pitch offset
+	sts pulse2_total_pitch_offset+1, zero
 	sts pulse2_total_hi_pitch_offset, zero
 	sts pulse2_fx_1xx_total, zero //reset the total for 1xx and 2xx effects
 	sts pulse2_fx_1xx_total+1, zero
@@ -2515,6 +2556,7 @@ sound_driver_channel1_instrument_change:
 	sts pulse2_duty_macro, zero
 	sts pulse2_duty_macro+1, zero
 	sts pulse2_total_pitch_offset, zero //reset the pitch offset
+	sts pulse2_total_pitch_offset+1, zero
 	sts pulse2_total_hi_pitch_offset, zero //reset the hi pitch offset
 
 	adiw Z, 1 //point to the byte next to the flag
@@ -2964,7 +3006,23 @@ sound_driver_channel2_fx_Ixx: //FDS modulation speed
 
 //FINE PITCH
 sound_driver_channel2_fx_Pxx:
-	sts triangle_fx_Pxx, r26
+	push r22 //only registers r16 - r23 can be used with mulsu
+	push r23
+	mov r22, r26
+	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
+	mul r22, r23
+	pop r23
+	pop r22
+	lsr r1 //shift out the fractional bits
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	lsr r1
+	ror r0
+	sts triangle_fx_Pxx_total, r0
+	sts triangle_fx_Pxx_total+1, r1
 	rjmp sound_driver_channel2_main
 
 //NOTE SLIDE UP
@@ -3144,6 +3202,7 @@ sound_driver_channel2_note:
 	sts triangle_hi_pitch_macro_offset, r27
 	sts triangle_duty_macro_offset, r27
 	sts triangle_total_pitch_offset, zero //reset the pitch and hi pitch offset
+	sts triangle_total_pitch_offset, zero
 	sts triangle_total_hi_pitch_offset, zero
 	sts triangle_fx_1xx_total, zero //reset the total for 1xx and 2xx effects
 	sts triangle_fx_1xx_total+1, zero
@@ -3163,6 +3222,8 @@ sound_driver_channel2_note:
 	sts triangle_fx_Rxy_target+1, zero
 	sts triangle_fx_Rxy_total_offset, zero
 	sts triangle_fx_Rxy_total_offset+1, zero
+	ldi r27, TCB_CAPT_bm //enable interrupts
+	sts TCB2_INTCTRL, r27
 	rcall sound_driver_channel2_increment_offset
 	rjmp sound_driver_channel2_main
 
@@ -3204,6 +3265,7 @@ sound_driver_channel2_instrument_change:
 	sts triangle_duty_macro, zero
 	sts triangle_duty_macro+1, zero
 	sts triangle_total_pitch_offset, zero //reset the pitch offset
+	sts triangle_total_pitch_offset+1, zero
 	sts triangle_total_hi_pitch_offset, zero //reset the hi pitch offset
 
 	adiw Z, 1 //point to the byte next to the flag
@@ -3886,6 +3948,7 @@ sound_driver_instrument_routine_channel0_arpeggio_default_no_0xy:
 
 sound_driver_instrument_routine_channel0_arpeggio_process:
 	sts pulse1_total_pitch_offset, zero //the pitch offsets must be reset when a new note is to be calculated from an arpeggio macro
+	sts pulse1_total_pitch_offset+1, zero
 	sts pulse1_total_hi_pitch_offset, zero
 	lds r26, pulse1_arpeggio_macro_mode
 	cpi r26, 0x01 //absolute mode
@@ -3955,11 +4018,6 @@ sound_driver_instrument_routine_channel0_arpeggio_process_load:
 
 
 
-//NOTE: There is a limitation with the pitch routines in that the total pitch can not be offset by 127 in both,
-//the positive and negative direction, from the original note pitch. This shouldn't be too much of a problem as
-//most songs that use instruments with the pitch macro, do not stray that far from the original note pitch.
-//In the case of hi pitch, the total pitch can not be offset by 127*16 from the original pitch. This is also
-//not a big deal as you can easily reach the entire note range with an offset of up to 127*16.
 sound_driver_instrument_routine_channel0_pitch:
 	lds ZL, pulse1_pitch_macro
 	lds ZH, pulse1_pitch_macro+1
@@ -4010,19 +4068,8 @@ sound_driver_instrument_routine_channel0_pitch_macro_end_flag_check_loop:
 
 
 sound_driver_instrument_routine_channel0_pitch_default:
-	lds r27, pulse1_total_pitch_offset
-	rjmp sound_driver_instrument_routine_channel0_pitch_calculate_multiply
-
+	ldi r27, 0x00
 sound_driver_instrument_routine_channel0_pitch_calculate:
-	lds r26, pulse1_total_pitch_offset //load the total pitch offset to change
-	add r27, r26
-	sts pulse1_total_pitch_offset, r27
-
-sound_driver_instrument_routine_channel0_pitch_calculate_multiply:
-	//NOTE: The Pxx effect is processed with the pitch instrument macro because the calculations are the same
-	lds r26, pulse1_fx_Pxx
-	add r27, r26
-
 	push r22 //only registers r16 - r23 can be used with mulsu
 	push r23
 	mov r22, r27 //store the signed pitch offset data into r22
@@ -4047,6 +4094,12 @@ sound_driver_instrument_routine_channel0_pitch_calculate_negative:
 	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
 
 sound_driver_instrument_routine_channel0_pitch_calculate_offset:
+	lds r26, pulse1_total_pitch_offset
+	lds r27, pulse1_total_pitch_offset+1
+	add r0, r26
+	adc r1, r27
+	sts pulse1_total_pitch_offset, r0
+	sts pulse1_total_pitch_offset+1, r1
 	lds r26, TCB0_CCMPL //load the low bits for timer
 	lds r27, TCB0_CCMPH //load the high bits for timer
 	add r26, r0 //offset the timer values
@@ -4058,6 +4111,10 @@ sound_driver_instrument_routine_channel0_pitch_calculate_offset:
 	sbc r27, r29
 	lds r28, pulse1_fx_2xx_total
 	lds r29, pulse1_fx_2xx_total+1
+	add r26, r28
+	adc r27, r29
+	lds r28, pulse1_fx_Pxx_total
+	lds r29, pulse1_fx_Pxx_total+1
 	add r26, r28
 	adc r27, r29
 	lds r28, pulse1_fx_Qxy_total_offset //NOTE: Qxy and Rxy offsets are applied here
@@ -4556,24 +4613,11 @@ sound_driver_channel0_fx_Qxy_routine_end:
 	sub r26, ZL //decrease the total offset to the exact amount needed to reach the target
 	sbc r27, ZH
 
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	lds r22, pulse1_fx_Pxx
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
+	lds r28, pulse1_fx_Pxx_total
+	lds r29, pulse1_fx_Pxx_total+1
 
-	add r26, r0
-	adc r27, zero
+	add r26, r28
+	adc r27, r29
 
 	sts pulse1_fx_Qxy_total_offset, r26 //store the total offset
 	sts pulse1_fx_Qxy_total_offset+1, r27
@@ -4611,24 +4655,11 @@ sound_driver_channel0_fx_Rxy_routine_end:
 	sub r26, r28 //decrease the total offset to the exact amount needed to reach the target
 	sbc r27, r29
 
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	lds r22, pulse1_fx_Pxx
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
+	lds r28, pulse1_fx_Pxx_total
+	lds r29, pulse1_fx_Pxx_total+1
 
-	add r26, r0
-	adc r27, zero
+	add r26, r28
+	adc r27, r29
 
 	sts pulse1_fx_Rxy_total_offset, r26 //store the total offset
 	sts pulse1_fx_Rxy_total_offset+1, r27
@@ -4866,6 +4897,7 @@ sound_driver_instrument_routine_channel1_arpeggio_default_no_0xy:
 
 sound_driver_instrument_routine_channel1_arpeggio_process:
 	sts pulse2_total_pitch_offset, zero //the pitch offsets must be reset when a new note is to be calculated from an arpeggio macro
+	sts pulse2_total_pitch_offset+1, zero
 	sts pulse2_total_hi_pitch_offset, zero
 	lds r26, pulse2_arpeggio_macro_mode
 	cpi r26, 0x01 //absolute mode
@@ -4935,11 +4967,6 @@ sound_driver_instrument_routine_channel1_arpeggio_process_load:
 
 
 
-//NOTE: There is a limitation with the pitch routines in that the total pitch can not be offset by 127 in both,
-//the positive and negative direction, from the original note pitch. This shouldn't be too much of a problem as
-//most songs that use instruments with the pitch macro, do not stray that far from the original note pitch.
-//In the case of hi pitch, the total pitch can not be offset by 127*16 from the original pitch. This is also
-//not a big deal as you can easily reach the entire note range with an offset of up to 127*16.
 sound_driver_instrument_routine_channel1_pitch:
 	lds ZL, pulse2_pitch_macro
 	lds ZH, pulse2_pitch_macro+1
@@ -4990,19 +5017,8 @@ sound_driver_instrument_routine_channel1_pitch_macro_end_flag_check_loop:
 
 
 sound_driver_instrument_routine_channel1_pitch_default:
-	lds r27, pulse2_total_pitch_offset
-	rjmp sound_driver_instrument_routine_channel1_pitch_calculate_multiply
-
+	ldi r27, 0x00
 sound_driver_instrument_routine_channel1_pitch_calculate:
-	lds r26, pulse2_total_pitch_offset //load the total pitch offset to change
-	add r27, r26
-	sts pulse2_total_pitch_offset, r27
-
-sound_driver_instrument_routine_channel1_pitch_calculate_multiply:
-	//NOTE: The Pxx effect is processed with the pitch instrument macro because the calculations are the same
-	lds r26, pulse2_fx_Pxx
-	add r27, r26
-
 	push r22 //only registers r16 - r23 can be used with mulsu
 	push r23
 	mov r22, r27 //store the signed pitch offset data into r22
@@ -5027,6 +5043,12 @@ sound_driver_instrument_routine_channel1_pitch_calculate_negative:
 	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
 
 sound_driver_instrument_routine_channel1_pitch_calculate_offset:
+	lds r26, pulse2_total_pitch_offset
+	lds r27, pulse2_total_pitch_offset+1
+	add r0, r26
+	adc r1, r27
+	sts pulse2_total_pitch_offset, r0
+	sts pulse2_total_pitch_offset+1, r1
 	lds r26, TCB1_CCMPL //load the low bits for timer
 	lds r27, TCB1_CCMPH //load the high bits for timer
 	add r26, r0 //offset the timer values
@@ -5038,6 +5060,10 @@ sound_driver_instrument_routine_channel1_pitch_calculate_offset:
 	sbc r27, r29
 	lds r28, pulse2_fx_2xx_total
 	lds r29, pulse2_fx_2xx_total+1
+	add r26, r28
+	adc r27, r29
+	lds r28, pulse2_fx_Pxx_total
+	lds r29, pulse2_fx_Pxx_total+1
 	add r26, r28
 	adc r27, r29
 	lds r28, pulse2_fx_Qxy_total_offset //NOTE: Qxy and Rxy offsets are applied here
@@ -5536,24 +5562,11 @@ sound_driver_channel1_fx_Qxy_routine_end:
 	sub r26, ZL //decrease the total offset to the exact amount needed to reach the target
 	sbc r27, ZH
 
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	lds r22, pulse2_fx_Pxx
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
+	lds r28, pulse2_fx_Pxx_total
+	lds r29, pulse2_fx_Pxx_total+1
 
-	add r26, r0
-	adc r27, zero
+	add r26, r28
+	adc r27, r29
 
 	sts pulse2_fx_Qxy_total_offset, r26 //store the total offset
 	sts pulse2_fx_Qxy_total_offset+1, r27
@@ -5591,24 +5604,11 @@ sound_driver_channel1_fx_Rxy_routine_end:
 	sub r26, r28 //decrease the total offset to the exact amount needed to reach the target
 	sbc r27, r29
 
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	lds r22, pulse2_fx_Pxx
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
+	lds r28, pulse2_fx_Pxx_total
+	lds r29, pulse2_fx_Pxx_total+1
 
-	add r26, r0
-	adc r27, zero
+	add r26, r28
+	adc r27, r29
 
 	sts pulse2_fx_Rxy_total_offset, r26 //store the total offset
 	sts pulse2_fx_Rxy_total_offset+1, r27
@@ -5802,6 +5802,7 @@ sound_driver_instrument_routine_channel2_arpeggio_default_no_0xy:
 
 sound_driver_instrument_routine_channel2_arpeggio_process:
 	sts triangle_total_pitch_offset, zero //the pitch offsets must be reset when a new note is to be calculated from an arpeggio macro
+	sts triangle_total_pitch_offset+1, zero
 	sts triangle_total_hi_pitch_offset, zero
 	lds r26, triangle_arpeggio_macro_mode
 	cpi r26, 0x01 //absolute mode
@@ -5871,11 +5872,6 @@ sound_driver_instrument_routine_channel2_arpeggio_process_load:
 
 
 
-//NOTE: There is a limitation with the pitch routines in that the total pitch can not be offset by 127 in both,
-//the positive and negative direction, from the original note pitch. This shouldn't be too much of a problem as
-//most songs that use instruments with the pitch macro, do not stray that far from the original note pitch.
-//In the case of hi pitch, the total pitch can not be offset by 127*16 from the original pitch. This is also
-//not a big deal as you can easily reach the entire note range with an offset of up to 127*16.
 sound_driver_instrument_routine_channel2_pitch:
 	lds ZL, triangle_pitch_macro
 	lds ZH, triangle_pitch_macro+1
@@ -5926,19 +5922,8 @@ sound_driver_instrument_routine_channel2_pitch_macro_end_flag_check_loop:
 
 
 sound_driver_instrument_routine_channel2_pitch_default:
-	lds r27, triangle_total_pitch_offset
-	rjmp sound_driver_instrument_routine_channel2_pitch_calculate_multiply
-
+	ldi r27, 0x00
 sound_driver_instrument_routine_channel2_pitch_calculate:
-	lds r26, triangle_total_pitch_offset //load the total pitch offset to change
-	add r27, r26
-	sts triangle_total_pitch_offset, r27
-
-sound_driver_instrument_routine_channel2_pitch_calculate_multiply:
-	//NOTE: The Pxx effect is processed with the pitch instrument macro because the calculations are the same
-	lds r26, triangle_fx_Pxx
-	add r27, r26
-
 	push r22 //only registers r16 - r23 can be used with mulsu
 	push r23
 	mov r22, r27 //store the signed pitch offset data into r22
@@ -5963,6 +5948,12 @@ sound_driver_instrument_routine_channel2_pitch_calculate_negative:
 	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
 
 sound_driver_instrument_routine_channel2_pitch_calculate_offset:
+	lds r26, triangle_total_pitch_offset
+	lds r27, triangle_total_pitch_offset+1
+	add r0, r26
+	adc r1, r27
+	sts triangle_total_pitch_offset, r0
+	sts triangle_total_pitch_offset+1, r1
 	lds r26, TCB2_CCMPL //load the low bits for timer
 	lds r27, TCB2_CCMPH //load the high bits for timer
 	add r26, r0 //offset the timer values
@@ -5974,6 +5965,10 @@ sound_driver_instrument_routine_channel2_pitch_calculate_offset:
 	sbc r27, r29
 	lds r28, triangle_fx_2xx_total
 	lds r29, triangle_fx_2xx_total+1
+	add r26, r28
+	adc r27, r29
+	lds r28, triangle_fx_Pxx_total
+	lds r29, triangle_fx_Pxx_total+1
 	add r26, r28
 	adc r27, r29
 	lds r28, triangle_fx_Qxy_total_offset //NOTE: Qxy and Rxy offsets are applied here
@@ -6316,24 +6311,11 @@ sound_driver_channel2_fx_Qxy_routine_end:
 	sub r26, ZL //decrease the total offset to the exact amount needed to reach the target
 	sbc r27, ZH
 
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	lds r22, triangle_fx_Pxx
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
+	lds r28, triangle_fx_Pxx_total
+	lds r29, triangle_fx_Pxx_total+1
 
-	add r26, r0
-	adc r27, zero
+	add r26, r28
+	adc r27, r29
 
 	sts triangle_fx_Qxy_total_offset, r26 //store the total offset
 	sts triangle_fx_Qxy_total_offset+1, r27
@@ -6371,24 +6353,11 @@ sound_driver_channel2_fx_Rxy_routine_end:
 	sub r26, r28 //decrease the total offset to the exact amount needed to reach the target
 	sbc r27, r29
 
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	lds r22, triangle_fx_Pxx
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
+	lds r28, triangle_fx_Pxx_total
+	lds r29, triangle_fx_Pxx_total+1
 
-	add r26, r0
-	adc r27, zero
+	add r26, r28
+	adc r27, r29
 
 	sts triangle_fx_Rxy_total_offset, r26 //store the total offset
 	sts triangle_fx_Rxy_total_offset+1, r27
