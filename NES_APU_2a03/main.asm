@@ -5200,12 +5200,22 @@ sound_driver_instrument_routine_channel0_pitch_calculate:
 	ror r0
 	lsr r1
 	ror r0
+
+sound_driver_instrument_routine_channel0_pitch_calculate_check_negative:
 	sbrs r1, 3 //check if result was a negative number
 	rjmp sound_driver_instrument_routine_channel0_pitch_calculate_offset //if the result was positive, don't fill with 1s
 
 sound_driver_instrument_routine_channel0_pitch_calculate_negative:
-	ldi r27, 0xF0
-	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+	ldi r28, 0xF0
+	or r1, r28 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_instrument_routine_channel0_pitch_calculate_check_divisible_8:
+	andi r27, 0b00000111
+	breq sound_driver_instrument_routine_channel0_pitch_calculate_offset
+
+	ldi r27, 0x01
+	add r0, r27
+	adc r1, zero
 
 sound_driver_instrument_routine_channel0_pitch_calculate_offset:
 	lds r26, pulse1_total_pitch_offset
@@ -6149,12 +6159,22 @@ sound_driver_instrument_routine_channel1_pitch_calculate:
 	ror r0
 	lsr r1
 	ror r0
+
+sound_driver_instrument_routine_channel1_pitch_calculate_check_negative:
 	sbrs r1, 3 //check if result was a negative number
 	rjmp sound_driver_instrument_routine_channel1_pitch_calculate_offset //if the result was positive, don't fill with 1s
 
 sound_driver_instrument_routine_channel1_pitch_calculate_negative:
-	ldi r27, 0xF0
-	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+	ldi r28, 0xF0
+	or r1, r28 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_instrument_routine_channel1_pitch_calculate_check_divisible_8:
+	andi r27, 0b00000111
+	breq sound_driver_instrument_routine_channel1_pitch_calculate_offset
+
+	ldi r27, 0x01
+	add r0, r27
+	adc r1, zero
 
 sound_driver_instrument_routine_channel1_pitch_calculate_offset:
 	lds r26, pulse2_total_pitch_offset
@@ -7054,12 +7074,22 @@ sound_driver_instrument_routine_channel2_pitch_calculate:
 	ror r0
 	lsr r1
 	ror r0
+
+sound_driver_instrument_routine_channel2_pitch_calculate_check_negative:
 	sbrs r1, 3 //check if result was a negative number
 	rjmp sound_driver_instrument_routine_channel2_pitch_calculate_offset //if the result was positive, don't fill with 1s
 
 sound_driver_instrument_routine_channel2_pitch_calculate_negative:
-	ldi r27, 0xF0
-	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+	ldi r28, 0xF0
+	or r1, r28 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_instrument_routine_channel2_pitch_calculate_check_divisible_8:
+	andi r27, 0b00000111
+	breq sound_driver_instrument_routine_channel2_pitch_calculate_offset
+
+	ldi r27, 0x01
+	add r0, r27
+	adc r1, zero
 
 sound_driver_instrument_routine_channel2_pitch_calculate_offset:
 	lds r26, triangle_total_pitch_offset
@@ -7847,12 +7877,22 @@ sound_driver_instrument_routine_channel3_pitch_calculate:
 	ror r0
 	lsr r1
 	ror r0
+
+sound_driver_instrument_routine_channel3_pitch_calculate_check_negative:
 	sbrs r1, 3 //check if result was a negative number
 	rjmp sound_driver_instrument_routine_channel3_pitch_calculate_offset //if the result was positive, don't fill with 1s
 
 sound_driver_instrument_routine_channel3_pitch_calculate_negative:
-	ldi r27, 0xF0
-	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+	ldi r28, 0xF0
+	or r1, r28 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_instrument_routine_channel3_pitch_calculate_check_divisible_8:
+	andi r27, 0b00000111
+	breq sound_driver_instrument_routine_channel3_pitch_calculate_offset
+
+	ldi r27, 0x01
+	add r0, r27
+	adc r1, zero
 
 sound_driver_instrument_routine_channel3_pitch_calculate_offset:
 	lds r26, noise_total_pitch_offset
