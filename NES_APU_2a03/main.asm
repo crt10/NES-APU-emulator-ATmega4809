@@ -899,7 +899,7 @@ init:
 	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
 	sts TCB2_CTRLB, r27
 	ldi r27, TCB_CAPT_bm //enable interrupts
-	sts TCB2_INTCTRL, r27
+	//sts TCB2_INTCTRL, r27
 	lds r27, triangle_timerL //load the LOW bits for timer
 	sts TCB2_CCMPL, r27
 	lds r27, triangle_timerH //load the HIGH bits for timer
@@ -2284,6 +2284,15 @@ sound_driver_channel0_next_pattern:
 	adiw r27:r26, 10 //increment the frame offset by (5*2 = 10) since there are 5 channel patterns per frame. We *2 because we are getting byte values from the table
 	sts song_frame_offset, r26
 	sts song_frame_offset+1, r27
+
+	lds r28, song_size
+	lds r29, song_size+1
+	cp r26, r28
+	cpc r27, r29
+	brlo sound_driver_channel0_next_pattern_exists
+	jmp sound_driver_exit
+
+sound_driver_channel0_next_pattern_exists:
 	add ZL, r26
 	adc ZH, r27
 
@@ -3481,7 +3490,7 @@ sound_driver_channel2_note:
 	sts triangle_hi_pitch_macro_offset, r27
 	sts triangle_duty_macro_offset, r27
 	sts triangle_total_pitch_offset, zero //reset the pitch and hi pitch offset
-	sts triangle_total_pitch_offset, zero
+	sts triangle_total_pitch_offset+1, zero
 	sts triangle_total_hi_pitch_offset, zero
 	sts triangle_fx_1xx_total, zero //reset the total for 1xx and 2xx effects
 	sts triangle_fx_1xx_total+1, zero
