@@ -899,7 +899,7 @@ init:
 	ldi r27, TCB_CNTMODE_INT_gc //interrupt mode
 	sts TCB2_CTRLB, r27
 	ldi r27, TCB_CAPT_bm //enable interrupts
-	//sts TCB2_INTCTRL, r27
+	//sts TCB2_INTCTRL, r27 //keep interrupts disabled to mute channel since triangle doesn't have volume bits
 	lds r27, triangle_timerL //load the LOW bits for timer
 	sts TCB2_CCMPL, r27
 	lds r27, triangle_timerH //load the HIGH bits for timer
@@ -967,9 +967,6 @@ volume_mixer_pulse2:
 	cp pulse2_length_counter, zero //if length is zero, return
 	breq volume_mixer_pulse2_off
 
-	//NOTE: We will just mute the pulse when the current period is < $0008
-	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
-	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
 	lds r30, TCB1_CCMPL
 	ldi r31, 0x059
 	cp r30, r31
@@ -978,10 +975,6 @@ volume_mixer_pulse2:
 	cpc r30, r31
 	brlo volume_mixer_pulse2_off
 
-	//NOTE: Since it'd be too taxing to calculate a target period for every APU clock in the sweep unit,
-	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
-	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
-	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
 	lds r30, TCB1_CCMPL
 	ldi r31, 0x66
 	cp r30, r31
@@ -1835,6 +1828,14 @@ sound_driver_channel0_fx_Pxx:
 	ror r0
 	lsr r1
 	ror r0
+	sbrs r1, 3 //check if result was a negative number
+	rjmp sound_driver_channel0_fx_Pxx_store //if the result was positive, don't fill with 1s
+
+sound_driver_channel0_fx_Pxx_negative:
+	ldi r27, 0xF0
+	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_channel0_fx_Pxx_store:
 	sts pulse1_fx_Pxx_total, r0
 	sts pulse1_fx_Pxx_total+1, r1
 	rjmp sound_driver_channel0_main
@@ -2581,6 +2582,14 @@ sound_driver_channel1_fx_Pxx:
 	ror r0
 	lsr r1
 	ror r0
+	sbrs r1, 3 //check if result was a negative number
+	rjmp sound_driver_channel1_fx_Pxx_store //if the result was positive, don't fill with 1s
+
+sound_driver_channel1_fx_Pxx_negative:
+	ldi r27, 0xF0
+	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_channel1_fx_Pxx_store:
 	sts pulse2_fx_Pxx_total, r0
 	sts pulse2_fx_Pxx_total+1, r1
 	rjmp sound_driver_channel1_main
@@ -3309,6 +3318,14 @@ sound_driver_channel2_fx_Pxx:
 	ror r0
 	lsr r1
 	ror r0
+	sbrs r1, 3 //check if result was a negative number
+	rjmp sound_driver_channel2_fx_Pxx_store //if the result was positive, don't fill with 1s
+
+sound_driver_channel2_fx_Pxx_negative:
+	ldi r27, 0xF0
+	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_channel2_fx_Pxx_store:
 	sts triangle_fx_Pxx_total, r0
 	sts triangle_fx_Pxx_total+1, r1
 	rjmp sound_driver_channel2_main
@@ -4024,6 +4041,14 @@ sound_driver_channel3_fx_Pxx:
 	ror r0
 	lsr r1
 	ror r0
+	sbrs r1, 3 //check if result was a negative number
+	rjmp sound_driver_channel3_fx_Pxx_store //if the result was positive, don't fill with 1s
+
+sound_driver_channel3_fx_Pxx_negative:
+	ldi r27, 0xF0
+	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
+
+sound_driver_channel3_fx_Pxx_store:
 	sts noise_fx_Pxx_total, r0
 	sts noise_fx_Pxx_total+1, r1
 	rjmp sound_driver_channel3_main
