@@ -1011,12 +1011,11 @@ volume_mixer_tnd_triangle:
 	add r29, r30
 
 volume_mixer_tnd_noise:
-	clr r29
-	sbrc noise_sequence_LOW, 0 //check 0th bit, skip if set
+	sbrs noise_sequence_LOW, 0 //check 0th bit, skip if set
 	rjmp volume_mixer_tnd_out
 	lds r30, noise_output_volume
 	lsl r30 //multiply noise volume by 2
-	mov r29, r30
+	add r29, r30
 
 volume_mixer_tnd_out:
 	ldi ZL, LOW(tnd_volume_table << 1)
@@ -1027,7 +1026,7 @@ volume_mixer_tnd_out:
 
 volume_mixer_output:
 	add r28, r29
-	out VPORTA_OUT, r29
+	out VPORTA_OUT, r28
 	rjmp volume_mixer
 
 
@@ -1825,7 +1824,7 @@ sound_driver_channel0_fx_Pxx:
 	push r23
 	mov r22, r26
 	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
+	mulsu r22, r23
 	pop r23
 	pop r22
 	lsr r1 //shift out the fractional bits
@@ -2562,7 +2561,7 @@ sound_driver_channel1_fx_Pxx:
 	push r23
 	mov r22, r26
 	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
+	mulsu r22, r23
 	pop r23
 	pop r22
 	lsr r1 //shift out the fractional bits
@@ -3290,7 +3289,7 @@ sound_driver_channel2_fx_Pxx:
 	push r23
 	mov r22, r26
 	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
+	mulsu r22, r23
 	pop r23
 	pop r22
 	lsr r1 //shift out the fractional bits
@@ -4005,7 +4004,7 @@ sound_driver_channel3_fx_Pxx:
 	push r23
 	mov r22, r26
 	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
+	mulsu r22, r23
 	pop r23
 	pop r22
 	lsr r1 //shift out the fractional bits
