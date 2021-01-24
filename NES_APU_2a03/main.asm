@@ -102,9 +102,11 @@ pulse1_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy e
 pulse1_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
 pulse1_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
 pulse1_fx_Pxx_total: .byte 2 //refers to the fine pitch offset set by the Pxx effect
+pulse1_fx_Qxy_target_note: .byte 1 //target note index
 pulse1_fx_Qxy_target: .byte 2 //target note period
 pulse1_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
 pulse1_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
+pulse1_fx_Rxy_target_note: .byte 1 //target note index
 pulse1_fx_Rxy_target: .byte 2 //target note period
 pulse1_fx_Rxy_speed: .byte 2 //the amount to offset by to get to the target
 pulse1_fx_Rxy_total_offset: .byte 2
@@ -165,9 +167,11 @@ pulse2_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy e
 pulse2_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
 pulse2_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
 pulse2_fx_Pxx_total: .byte 2 //refers to the fine pitch offset set by the Pxx effect
+pulse2_fx_Qxy_target_note: .byte 1 //target note index
 pulse2_fx_Qxy_target: .byte 2 //target note period
 pulse2_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
 pulse2_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
+pulse2_fx_Rxy_target_note: .byte 1 //target note index
 pulse2_fx_Rxy_target: .byte 2 //target note period
 pulse2_fx_Rxy_speed: .byte 2 //the amount to offset by to get to the target
 pulse2_fx_Rxy_total_offset: .byte 2
@@ -223,9 +227,11 @@ triangle_fx_4xy_phase: .byte 1
 triangle_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
 triangle_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
 triangle_fx_Pxx_total: .byte 2 //refers to the fine pitch offset set by the Pxx effect
+triangle_fx_Qxy_target_note: .byte 1 //target note index
 triangle_fx_Qxy_target: .byte 2 //target note period
 triangle_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
 triangle_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
+triangle_fx_Rxy_target_note: .byte 1 //target note index
 triangle_fx_Rxy_target: .byte 2 //target note period
 triangle_fx_Rxy_speed: .byte 2 //the amount to offset by to get to the target
 triangle_fx_Rxy_total_offset: .byte 2
@@ -286,9 +292,11 @@ noise_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy ef
 noise_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
 noise_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
 noise_fx_Pxx_total: .byte 2 //refers to the fine pitch offset set by the Pxx effect
+noise_fx_Qxy_target_note: .byte 1 //target note index
 noise_fx_Qxy_target: .byte 2 //target note period
 noise_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
 noise_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
+noise_fx_Rxy_target_note: .byte 1 //target note index
 noise_fx_Rxy_target: .byte 2 //target note period
 noise_fx_Rxy_speed: .byte 2 //the amount to offset by to get to the target
 noise_fx_Rxy_total_offset: .byte 2
@@ -538,12 +546,14 @@ init:
 	sts pulse1_fx_Gxx_post, r28
 	sts pulse1_fx_Pxx_total, zero
 	sts pulse1_fx_Pxx_total+1, zero
+	sts pulse1_fx_Qxy_target_note, zero
 	sts pulse1_fx_Qxy_target, zero
 	sts pulse1_fx_Qxy_target+1, zero
 	sts pulse1_fx_Qxy_speed, zero
 	sts pulse1_fx_Qxy_speed+1, zero
 	sts pulse1_fx_Qxy_total_offset, zero
 	sts pulse1_fx_Qxy_total_offset+1, zero
+	sts pulse1_fx_Rxy_target_note, zero
 	sts pulse1_fx_Rxy_target, zero
 	sts pulse1_fx_Rxy_target+1, zero
 	sts pulse1_fx_Rxy_speed, zero
@@ -642,12 +652,14 @@ init:
 	sts pulse2_fx_Gxx_post, r28
 	sts pulse2_fx_Pxx_total, zero
 	sts pulse2_fx_Pxx_total+1, zero
+	sts pulse2_fx_Qxy_target_note, zero
 	sts pulse2_fx_Qxy_target, zero
 	sts pulse2_fx_Qxy_target+1, zero
 	sts pulse2_fx_Qxy_speed, zero
 	sts pulse2_fx_Qxy_speed+1, zero
 	sts pulse2_fx_Qxy_total_offset, zero
 	sts pulse2_fx_Qxy_total_offset+1, zero
+	sts pulse2_fx_Rxy_target_note, zero
 	sts pulse2_fx_Rxy_target, zero
 	sts pulse2_fx_Rxy_target+1, zero
 	sts pulse2_fx_Rxy_speed, zero
@@ -721,12 +733,14 @@ init:
 	sts triangle_fx_Gxx_post, r28
 	sts triangle_fx_Pxx_total, zero
 	sts triangle_fx_Pxx_total+1, zero
+	sts triangle_fx_Qxy_target_note, zero
 	sts triangle_fx_Qxy_target, zero
 	sts triangle_fx_Qxy_target+1, zero
 	sts triangle_fx_Qxy_speed, zero
 	sts triangle_fx_Qxy_speed+1, zero
 	sts triangle_fx_Qxy_total_offset, zero
 	sts triangle_fx_Qxy_total_offset+1, zero
+	sts triangle_fx_Rxy_target_note, zero
 	sts triangle_fx_Rxy_target, zero
 	sts triangle_fx_Rxy_target+1, zero
 	sts triangle_fx_Rxy_speed, zero
@@ -810,12 +824,14 @@ init:
 	sts noise_fx_Gxx_post, r28
 	sts noise_fx_Pxx_total, zero
 	sts noise_fx_Pxx_total+1, zero
+	sts noise_fx_Qxy_target_note, zero
 	sts noise_fx_Qxy_target, zero
 	sts noise_fx_Qxy_target+1, zero
 	sts noise_fx_Qxy_speed, zero
 	sts noise_fx_Qxy_speed+1, zero
 	sts noise_fx_Qxy_total_offset, zero
 	sts noise_fx_Qxy_total_offset+1, zero
+	sts noise_fx_Rxy_target_note, zero
 	sts noise_fx_Rxy_target, zero
 	sts noise_fx_Rxy_target+1, zero
 	sts noise_fx_Rxy_speed, zero
@@ -1873,6 +1889,7 @@ sound_driver_channel0_fx_Qxy_process:
 	ldi r27, 0x56 //if the target note was larger than the highest possible note index, keep the target at 0x56
 
 sound_driver_channel0_fx_Qxy_process_continue:
+	sts pulse1_fx_Qxy_target_note, r27
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r27 //double the offset for the note table because we are getting byte data
@@ -1943,6 +1960,7 @@ sound_driver_channel0_fx_Rxy_process:
 	ldi r28, 0x00
 
 sound_driver_channel0_fx_Rxy_process_continue:
+	sts pulse1_fx_Rxy_target_note, r28
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r28 //double the offset for the note table because we are getting byte data
@@ -2627,6 +2645,7 @@ sound_driver_channel1_fx_Qxy_process:
 	ldi r27, 0x56 //if the target note was larger than the highest possible note index, keep the target at 0x56
 
 sound_driver_channel1_fx_Qxy_process_continue:
+	sts pulse2_fx_Qxy_target_note, r27
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r27 //double the offset for the note table because we are getting byte data
@@ -2697,6 +2716,7 @@ sound_driver_channel1_fx_Rxy_process:
 	ldi r28, 0x00
 
 sound_driver_channel1_fx_Rxy_process_continue:
+	sts pulse2_fx_Rxy_target_note, r28
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r28 //double the offset for the note table because we are getting byte data
@@ -3363,6 +3383,7 @@ sound_driver_channel2_fx_Qxy_process:
 	ldi r27, 0x56 //if the target note was larger than the highest possible note index, keep the target at 0x56
 
 sound_driver_channel2_fx_Qxy_process_continue:
+	sts triangle_fx_Qxy_target_note, r27
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r27 //double the offset for the note table because we are getting byte data
@@ -3433,6 +3454,7 @@ sound_driver_channel2_fx_Rxy_process:
 	ldi r28, 0x00
 
 sound_driver_channel2_fx_Rxy_process_continue:
+	sts triangle_fx_Rxy_target_note, r28
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r28 //double the offset for the note table because we are getting byte data
@@ -4086,6 +4108,7 @@ sound_driver_channel3_fx_Qxy_process:
 	ldi r27, 0x56 //if the target note was larger than the highest possible note index, keep the target at 0x56
 
 sound_driver_channel3_fx_Qxy_process_continue:
+	sts noise_fx_Qxy_target_note, r27
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r27 //double the offset for the note table because we are getting byte data
@@ -4156,6 +4179,7 @@ sound_driver_channel3_fx_Rxy_process:
 	ldi r28, 0x00
 
 sound_driver_channel3_fx_Rxy_process_continue:
+	sts noise_fx_Rxy_target_note, r28
 	ldi ZL, LOW(note_table << 1) //load in note table
 	ldi ZH, HIGH(note_table << 1)
 	lsl r28 //double the offset for the note table because we are getting byte data
@@ -5732,19 +5756,12 @@ sound_driver_channel0_fx_Qxy_routine:
 	brlo sound_driver_channel0_fx_Qxy_routine_add
 
 sound_driver_channel0_fx_Qxy_routine_end:
-	sub r26, ZL //decrease the total offset to the exact amount needed to reach the target
-	sbc r27, ZH
-
-	lds r28, pulse1_fx_Pxx_total
-	lds r29, pulse1_fx_Pxx_total+1
-
-	add r26, r28
-	adc r27, r29
-
-	sts pulse1_fx_Qxy_total_offset, r26 //store the total offset
-	sts pulse1_fx_Qxy_total_offset+1, r27
-	sts pulse1_fx_Qxy_target, zero //loading the target with 0 stops any further calculations
+	sts pulse1_fx_Qxy_total_offset, zero //turn off the effect
+	sts pulse1_fx_Qxy_total_offset+1, zero
+	sts pulse1_fx_Qxy_target, zero
 	sts pulse1_fx_Qxy_target+1, zero
+	lds r27, pulse1_fx_Qxy_target_note
+	sts pulse1_note, r27 //replace the note with the final target note
 	rjmp sound_driver_channel0_fx_Rxy_routine
 
 sound_driver_channel0_fx_Qxy_routine_add:
@@ -5774,19 +5791,12 @@ sound_driver_channel0_fx_Rxy_routine:
 	brlo sound_driver_channel0_fx_Rxy_routine_add
 
 sound_driver_channel0_fx_Rxy_routine_end:
-	sub r26, r28 //decrease the total offset to the exact amount needed to reach the target
-	sbc r27, r29
-
-	lds r28, pulse1_fx_Pxx_total
-	lds r29, pulse1_fx_Pxx_total+1
-
-	add r26, r28
-	adc r27, r29
-
-	sts pulse1_fx_Rxy_total_offset, r26 //store the total offset
-	sts pulse1_fx_Rxy_total_offset+1, r27
-	sts pulse1_fx_Rxy_target, zero //loading the target with 0 stops any further calculations
+	sts pulse1_fx_Rxy_total_offset, zero //disable the effect
+	sts pulse1_fx_Rxy_total_offset+1, zero
+	sts pulse1_fx_Rxy_target, zero
 	sts pulse1_fx_Rxy_target+1, zero
+	lds r27, pulse1_fx_Rxy_target_note
+	sts pulse1_note, r27 //replace the note with the final target note
 	rjmp sound_driver_instrument_routine_channel1_volume
 
 sound_driver_channel0_fx_Rxy_routine_add:
@@ -6689,19 +6699,12 @@ sound_driver_channel1_fx_Qxy_routine:
 	brlo sound_driver_channel1_fx_Qxy_routine_add
 
 sound_driver_channel1_fx_Qxy_routine_end:
-	sub r26, ZL //decrease the total offset to the exact amount needed to reach the target
-	sbc r27, ZH
-
-	lds r28, pulse2_fx_Pxx_total
-	lds r29, pulse2_fx_Pxx_total+1
-
-	add r26, r28
-	adc r27, r29
-
-	sts pulse2_fx_Qxy_total_offset, r26 //store the total offset
-	sts pulse2_fx_Qxy_total_offset+1, r27
-	sts pulse2_fx_Qxy_target, zero //loading the target with 0 stops any further calculations
+	sts pulse2_fx_Qxy_total_offset, zero //turn off the effect
+	sts pulse2_fx_Qxy_total_offset+1, zero
+	sts pulse2_fx_Qxy_target, zero
 	sts pulse2_fx_Qxy_target+1, zero
+	lds r27, pulse2_fx_Qxy_target_note
+	sts pulse2_note, r27 //replace the note with the final target note
 	rjmp sound_driver_channel1_fx_Rxy_routine
 
 sound_driver_channel1_fx_Qxy_routine_add:
@@ -6731,19 +6734,12 @@ sound_driver_channel1_fx_Rxy_routine:
 	brlo sound_driver_channel1_fx_Rxy_routine_add
 
 sound_driver_channel1_fx_Rxy_routine_end:
-	sub r26, r28 //decrease the total offset to the exact amount needed to reach the target
-	sbc r27, r29
-
-	lds r28, pulse2_fx_Pxx_total
-	lds r29, pulse2_fx_Pxx_total+1
-
-	add r26, r28
-	adc r27, r29
-
-	sts pulse2_fx_Rxy_total_offset, r26 //store the total offset
-	sts pulse2_fx_Rxy_total_offset+1, r27
-	sts pulse2_fx_Rxy_target, zero //loading the target with 0 stops any further calculations
+	sts pulse2_fx_Rxy_total_offset, zero //disable the effect
+	sts pulse2_fx_Rxy_total_offset+1, zero
+	sts pulse2_fx_Rxy_target, zero
 	sts pulse2_fx_Rxy_target+1, zero
+	lds r27, pulse2_fx_Rxy_target_note
+	sts pulse2_note, r27 //replace the note with the final target note
 	rjmp sound_driver_instrument_routine_channel2_volume
 
 sound_driver_channel1_fx_Rxy_routine_add:
@@ -7448,19 +7444,12 @@ sound_driver_channel2_fx_Qxy_routine:
 	brlo sound_driver_channel2_fx_Qxy_routine_add
 
 sound_driver_channel2_fx_Qxy_routine_end:
-	sub r26, ZL //decrease the total offset to the exact amount needed to reach the target
-	sbc r27, ZH
-
-	lds r28, triangle_fx_Pxx_total
-	lds r29, triangle_fx_Pxx_total+1
-
-	add r26, r28
-	adc r27, r29
-
-	sts triangle_fx_Qxy_total_offset, r26 //store the total offset
-	sts triangle_fx_Qxy_total_offset+1, r27
-	sts triangle_fx_Qxy_target, zero //loading the target with 0 stops any further calculations
+	sts triangle_fx_Qxy_total_offset, zero //turn off the effect
+	sts triangle_fx_Qxy_total_offset+1, zero
+	sts triangle_fx_Qxy_target, zero
 	sts triangle_fx_Qxy_target+1, zero
+	lds r27, triangle_fx_Qxy_target_note
+	sts triangle_note, r27 //replace the note with the final target note
 	rjmp sound_driver_channel2_fx_Rxy_routine
 
 sound_driver_channel2_fx_Qxy_routine_add:
@@ -7490,19 +7479,12 @@ sound_driver_channel2_fx_Rxy_routine:
 	brlo sound_driver_channel2_fx_Rxy_routine_add
 
 sound_driver_channel2_fx_Rxy_routine_end:
-	sub r26, r28 //decrease the total offset to the exact amount needed to reach the target
-	sbc r27, r29
-
-	lds r28, triangle_fx_Pxx_total
-	lds r29, triangle_fx_Pxx_total+1
-
-	add r26, r28
-	adc r27, r29
-
-	sts triangle_fx_Rxy_total_offset, r26 //store the total offset
-	sts triangle_fx_Rxy_total_offset+1, r27
-	sts triangle_fx_Rxy_target, zero //loading the target with 0 stops any further calculations
+	sts triangle_fx_Rxy_total_offset, zero //disable the effect
+	sts triangle_fx_Rxy_total_offset+1, zero
+	sts triangle_fx_Rxy_target, zero
 	sts triangle_fx_Rxy_target+1, zero
+	lds r27, triangle_fx_Rxy_target_note
+	sts triangle_note, r27 //replace the note with the final target note
 	rjmp sound_driver_instrument_routine_channel3_volume
 
 sound_driver_channel2_fx_Rxy_routine_add:
@@ -8392,19 +8374,12 @@ sound_driver_channel3_fx_Qxy_routine:
 	brlo sound_driver_channel3_fx_Qxy_routine_add
 
 sound_driver_channel3_fx_Qxy_routine_end:
-	sub r26, ZL //decrease the total offset to the exact amount needed to reach the target
-	sbc r27, ZH
-
-	lds r28, noise_fx_Pxx_total
-	lds r29, noise_fx_Pxx_total+1
-
-	add r26, r28
-	adc r27, r29
-
-	sts noise_fx_Qxy_total_offset, r26 //store the total offset
-	sts noise_fx_Qxy_total_offset+1, r27
-	sts noise_fx_Qxy_target, zero //loading the target with 0 stops any further calculations
+	sts noise_fx_Qxy_total_offset, zero //turn off the effect
+	sts noise_fx_Qxy_total_offset+1, zero
+	sts noise_fx_Qxy_target, zero
 	sts noise_fx_Qxy_target+1, zero
+	lds r27, noise_fx_Qxy_target_note
+	sts noise_note, r27 //replace the note with the final target note
 	rjmp sound_driver_channel3_fx_Rxy_routine
 
 sound_driver_channel3_fx_Qxy_routine_add:
@@ -8434,19 +8409,12 @@ sound_driver_channel3_fx_Rxy_routine:
 	brlo sound_driver_channel3_fx_Rxy_routine_add
 
 sound_driver_channel3_fx_Rxy_routine_end:
-	sub r26, r28 //decrease the total offset to the exact amount needed to reach the target
-	sbc r27, r29
-
-	lds r28, noise_fx_Pxx_total
-	lds r29, noise_fx_Pxx_total+1
-
-	add r26, r28
-	adc r27, r29
-
-	sts noise_fx_Rxy_total_offset, r26 //store the total offset
-	sts noise_fx_Rxy_total_offset+1, r27
-	sts noise_fx_Rxy_target, zero //loading the target with 0 stops any further calculations
+	sts noise_fx_Rxy_total_offset, zero //disable the effect
+	sts noise_fx_Rxy_total_offset+1, zero
+	sts noise_fx_Rxy_target, zero
 	sts noise_fx_Rxy_target+1, zero
+	lds r27, noise_fx_Rxy_target_note
+	sts noise_note, r27 //replace the note with the final target note
 	rjmp sound_driver_instrument_routine_channel4_volume
 
 sound_driver_channel3_fx_Rxy_routine_add:
