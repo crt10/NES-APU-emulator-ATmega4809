@@ -51,9 +51,9 @@ song0_frames:
 	.dw 0x00ca
 	.dw song0_channel0_pattern15, song0_channel1_pattern18, song0_channel2_pattern7, song0_channel3_pattern10, song0_channel4_pattern1
 	.dw song0_channel0_pattern0, song0_channel1_pattern0, song0_channel2_pattern8, song0_channel3_pattern0, song0_channel4_pattern0
-	.dw song0_channel0_pattern9, song0_channel1_pattern8, song0_channel2_pattern1, song0_channel3_pattern1, song0_channel4_pattern0
-	.dw song0_channel0_pattern9, song0_channel1_pattern8, song0_channel2_pattern0, song0_channel3_pattern2, song0_channel4_pattern0
-	.dw song0_channel0_pattern9, song0_channel1_pattern8, song0_channel2_pattern0, song0_channel3_pattern3, song0_channel4_pattern0
+	.dw song0_channel0_pattern2, song0_channel1_pattern1, song0_channel2_pattern1, song0_channel3_pattern1, song0_channel4_pattern0
+	.dw song0_channel0_pattern1, song0_channel1_pattern2, song0_channel2_pattern0, song0_channel3_pattern2, song0_channel4_pattern0
+	.dw song0_channel0_pattern3, song0_channel1_pattern3, song0_channel2_pattern0, song0_channel3_pattern3, song0_channel4_pattern0
 	.dw song0_channel0_pattern4, song0_channel1_pattern2, song0_channel2_pattern0, song0_channel3_pattern3, song0_channel4_pattern0
 	.dw song0_channel0_pattern5, song0_channel1_pattern4, song0_channel2_pattern2, song0_channel3_pattern4, song0_channel4_pattern0
 	.dw song0_channel0_pattern6, song0_channel1_pattern5, song0_channel2_pattern3, song0_channel3_pattern5, song0_channel4_pattern0

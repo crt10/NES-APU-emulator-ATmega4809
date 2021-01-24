@@ -1882,6 +1882,12 @@ sound_driver_channel0_fx_Qxy_check_hi_pitch_macro:
 sound_driver_channel0_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
+
+	cpse r27, zero
+	rjmp sound_driver_channel0_fx_Qxy_process_refresh
+	rjmp sound_driver_channel0_fx_Qxy_process_speed //if there is no given target note, we only adjust the speed
+
+sound_driver_channel0_fx_Qxy_process_refresh:
 	lds r28, pulse1_note //load current note index
 	add r27, r28
 	cpi r27, 0x57 //largest possible note index is 0x56
@@ -1900,6 +1906,7 @@ sound_driver_channel0_fx_Qxy_process_continue:
 	sts pulse1_fx_Qxy_target, r28 //load the LOW bits for the target period
 	sts pulse1_fx_Qxy_target+1, r29 //load the HIGH bits for the target period
 
+sound_driver_channel0_fx_Qxy_process_speed:
 	swap r26
 	andi r26, 0x0F //mask effect speed
 	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
@@ -1924,8 +1931,6 @@ sound_driver_channel0_fx_Qxy_process_continue:
 
 	sts pulse1_fx_Qxy_speed, r0 //store the effect speed
 	sts pulse1_fx_Qxy_speed+1, r1
-	sts pulse1_fx_Qxy_total_offset, zero
-	sts pulse1_fx_Qxy_total_offset+1, zero
 	rjmp sound_driver_channel0_main
 
 //NOTE SLIDE DOWN
@@ -1954,6 +1959,12 @@ sound_driver_channel0_fx_Rxy_check_hi_pitch_macro:
 sound_driver_channel0_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
+
+	cpse r27, zero
+	rjmp sound_driver_channel0_fx_Rxy_process_refresh
+	rjmp sound_driver_channel0_fx_Rxy_process_speed //if there is no given target note, we only adjust the speed
+
+sound_driver_channel0_fx_Rxy_process_refresh:
 	lds r28, pulse1_note //load current note index
 	sub r28, r27
 	brcc sound_driver_channel0_fx_Rxy_process_continue
@@ -1971,6 +1982,7 @@ sound_driver_channel0_fx_Rxy_process_continue:
 	sts pulse1_fx_Rxy_target, r28 //load the LOW bits for the target period
 	sts pulse1_fx_Rxy_target+1, r29 //load the HIGH bits for the target period
 
+sound_driver_channel0_fx_Rxy_process_speed:
 	swap r26
 	andi r26, 0x0F //mask effect speed
 	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
@@ -1995,8 +2007,6 @@ sound_driver_channel0_fx_Rxy_process_continue:
 
 	sts pulse1_fx_Rxy_speed, r0 //store the effect speed
 	sts pulse1_fx_Rxy_speed+1, r1
-	sts pulse1_fx_Rxy_total_offset, zero
-	sts pulse1_fx_Rxy_total_offset+1, zero
 	rjmp sound_driver_channel0_main
 
 //MUTE DELAY
@@ -2638,6 +2648,12 @@ sound_driver_channel1_fx_Qxy_check_hi_pitch_macro:
 sound_driver_channel1_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
+
+	cpse r27, zero
+	rjmp sound_driver_channel1_fx_Qxy_process_refresh
+	rjmp sound_driver_channel1_fx_Qxy_process_speed //if there is no given target note, we only adjust the speed
+
+sound_driver_channel1_fx_Qxy_process_refresh:
 	lds r28, pulse2_note //load current note index
 	add r27, r28
 	cpi r27, 0x57 //largest possible note index is 0x56
@@ -2656,6 +2672,7 @@ sound_driver_channel1_fx_Qxy_process_continue:
 	sts pulse2_fx_Qxy_target, r28 //load the LOW bits for the target period
 	sts pulse2_fx_Qxy_target+1, r29 //load the HIGH bits for the target period
 
+sound_driver_channel1_fx_Qxy_process_speed:
 	swap r26
 	andi r26, 0x0F //mask effect speed
 	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
@@ -2680,8 +2697,6 @@ sound_driver_channel1_fx_Qxy_process_continue:
 
 	sts pulse2_fx_Qxy_speed, r0 //store the effect speed
 	sts pulse2_fx_Qxy_speed+1, r1
-	sts pulse2_fx_Qxy_total_offset, zero
-	sts pulse2_fx_Qxy_total_offset+1, zero
 	rjmp sound_driver_channel1_main
 
 //NOTE SLIDE DOWN
@@ -2710,6 +2725,12 @@ sound_driver_channel1_fx_Rxy_check_hi_pitch_macro:
 sound_driver_channel1_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
+
+	cpse r27, zero
+	rjmp sound_driver_channel1_fx_Rxy_process_refresh
+	rjmp sound_driver_channel1_fx_Rxy_process_speed //if there is no given target note, we only adjust the speed
+
+sound_driver_channel1_fx_Rxy_process_refresh:
 	lds r28, pulse2_note //load current note index
 	sub r28, r27
 	brcc sound_driver_channel1_fx_Rxy_process_continue
@@ -2727,6 +2748,7 @@ sound_driver_channel1_fx_Rxy_process_continue:
 	sts pulse2_fx_Rxy_target, r28 //load the LOW bits for the target period
 	sts pulse2_fx_Rxy_target+1, r29 //load the HIGH bits for the target period
 
+sound_driver_channel1_fx_Rxy_process_speed:
 	swap r26
 	andi r26, 0x0F //mask effect speed
 	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
@@ -2751,8 +2773,6 @@ sound_driver_channel1_fx_Rxy_process_continue:
 
 	sts pulse2_fx_Rxy_speed, r0 //store the effect speed
 	sts pulse2_fx_Rxy_speed+1, r1
-	sts pulse2_fx_Rxy_total_offset, zero
-	sts pulse2_fx_Rxy_total_offset+1, zero
 	rjmp sound_driver_channel1_main
 
 //MUTE DELAY
@@ -3376,6 +3396,12 @@ sound_driver_channel2_fx_Qxy_check_hi_pitch_macro:
 sound_driver_channel2_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
+
+	cpse r27, zero
+	rjmp sound_driver_channel2_fx_Qxy_process_refresh
+	rjmp sound_driver_channel2_fx_Qxy_process_speed //if there is no given target note, we only adjust the speed
+
+sound_driver_channel2_fx_Qxy_process_refresh:
 	lds r28, triangle_note //load current note index
 	add r27, r28
 	cpi r27, 0x57 //largest possible note index is 0x56
@@ -3394,6 +3420,7 @@ sound_driver_channel2_fx_Qxy_process_continue:
 	sts triangle_fx_Qxy_target, r28 //load the LOW bits for the target period
 	sts triangle_fx_Qxy_target+1, r29 //load the HIGH bits for the target period
 
+sound_driver_channel2_fx_Qxy_process_speed:
 	swap r26
 	andi r26, 0x0F //mask effect speed
 	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
@@ -3418,8 +3445,6 @@ sound_driver_channel2_fx_Qxy_process_continue:
 
 	sts triangle_fx_Qxy_speed, r0 //store the effect speed
 	sts triangle_fx_Qxy_speed+1, r1
-	sts triangle_fx_Qxy_total_offset, zero
-	sts triangle_fx_Qxy_total_offset+1, zero
 	rjmp sound_driver_channel2_main
 
 //NOTE SLIDE DOWN
@@ -3448,6 +3473,12 @@ sound_driver_channel2_fx_Rxy_check_hi_pitch_macro:
 sound_driver_channel2_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
+
+	cpse r27, zero
+	rjmp sound_driver_channel2_fx_Rxy_process_refresh
+	rjmp sound_driver_channel2_fx_Rxy_process_speed //if there is no given target note, we only adjust the speed
+
+sound_driver_channel2_fx_Rxy_process_refresh:
 	lds r28, triangle_note //load current note index
 	sub r28, r27
 	brcc sound_driver_channel2_fx_Rxy_process_continue
@@ -3465,6 +3496,7 @@ sound_driver_channel2_fx_Rxy_process_continue:
 	sts triangle_fx_Rxy_target, r28 //load the LOW bits for the target period
 	sts triangle_fx_Rxy_target+1, r29 //load the HIGH bits for the target period
 
+sound_driver_channel2_fx_Rxy_process_speed:
 	swap r26
 	andi r26, 0x0F //mask effect speed
 	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
@@ -3489,8 +3521,6 @@ sound_driver_channel2_fx_Rxy_process_continue:
 
 	sts triangle_fx_Rxy_speed, r0 //store the effect speed
 	sts triangle_fx_Rxy_speed+1, r1
-	sts triangle_fx_Rxy_total_offset, zero
-	sts triangle_fx_Rxy_total_offset+1, zero
 	rjmp sound_driver_channel2_main
 
 //MUTE DELAY
@@ -4101,6 +4131,12 @@ sound_driver_channel3_fx_Qxy_check_hi_pitch_macro:
 sound_driver_channel3_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
+
+	cpse r27, zero
+	rjmp sound_driver_channel3_fx_Qxy_process_refresh
+	rjmp sound_driver_channel3_fx_Qxy_process_speed //if there is no given target note, we only adjust the speed
+
+sound_driver_channel3_fx_Qxy_process_refresh:
 	lds r28, noise_note //load current note index
 	add r27, r28
 	cpi r27, 0x57 //largest possible note index is 0x56
@@ -4119,6 +4155,7 @@ sound_driver_channel3_fx_Qxy_process_continue:
 	sts noise_fx_Qxy_target, r28 //load the LOW bits for the target period
 	sts noise_fx_Qxy_target+1, r29 //load the HIGH bits for the target period
 
+sound_driver_channel3_fx_Qxy_process_speed:
 	swap r26
 	andi r26, 0x0F //mask effect speed
 	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
@@ -4143,8 +4180,6 @@ sound_driver_channel3_fx_Qxy_process_continue:
 
 	sts noise_fx_Qxy_speed, r0 //store the effect speed
 	sts noise_fx_Qxy_speed+1, r1
-	sts noise_fx_Qxy_total_offset, zero
-	sts noise_fx_Qxy_total_offset+1, zero
 	rjmp sound_driver_channel3_main
 
 //NOTE SLIDE DOWN
@@ -4173,6 +4208,12 @@ sound_driver_channel3_fx_Rxy_check_hi_pitch_macro:
 sound_driver_channel3_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
+
+	cpse r27, zero
+	rjmp sound_driver_channel3_fx_Rxy_process_refresh
+	rjmp sound_driver_channel3_fx_Rxy_process_speed //if there is no given target note, we only adjust the speed
+
+sound_driver_channel3_fx_Rxy_process_refresh:
 	lds r28, noise_note //load current note index
 	sub r28, r27
 	brcc sound_driver_channel3_fx_Rxy_process_continue
@@ -4190,6 +4231,7 @@ sound_driver_channel3_fx_Rxy_process_continue:
 	sts noise_fx_Rxy_target, r28 //load the LOW bits for the target period
 	sts noise_fx_Rxy_target+1, r29 //load the HIGH bits for the target period
 
+sound_driver_channel3_fx_Rxy_process_speed:
 	swap r26
 	andi r26, 0x0F //mask effect speed
 	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
@@ -4214,8 +4256,6 @@ sound_driver_channel3_fx_Rxy_process_continue:
 
 	sts noise_fx_Rxy_speed, r0 //store the effect speed
 	sts noise_fx_Rxy_speed+1, r1
-	sts noise_fx_Rxy_total_offset, zero
-	sts noise_fx_Rxy_total_offset+1, zero
 	rjmp sound_driver_channel3_main
 
 //MUTE DELAY
