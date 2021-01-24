@@ -954,7 +954,7 @@ volume_mixer_pulse1:
 	//This is done in order to account for the sweep unit muting the channel when the period is < $0008,
 	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $0008 becomes $0059
 	lds r30, TCB0_CCMPL
-	ldi r31, 0x059
+	ldi r31, 0x59
 	cp r30, r31
 	lds r30, TCB0_CCMPH
 	ldi r31, 0x00
@@ -964,9 +964,9 @@ volume_mixer_pulse1:
 	//NOTE: Since it'd be too taxing to calculate a target period for every APU clock in the sweep unit,
 	//we will be muting the channel if it's period ever reaches $07FF, aka the target period was == $07FF
 	//Doing this does not account for the real NES "feature" of muting the pulse even if the sweep unit was disabled.
-	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $5965
+	//Due to the 11.1746014718 timer multiplier being applied to the timer periods, $07FF becomes $595A
 	lds r30, TCB0_CCMPL
-	ldi r31, 0x66
+	ldi r31, 0x5A
 	cp r30, r31
 	lds r30, TCB0_CCMPH
 	ldi r31, 0x59
@@ -984,7 +984,7 @@ volume_mixer_pulse2:
 	breq volume_mixer_pulse2_off
 
 	lds r30, TCB1_CCMPL
-	ldi r31, 0x059
+	ldi r31, 0x59
 	cp r30, r31
 	lds r30, TCB1_CCMPH
 	ldi r31, 0x00
@@ -992,7 +992,7 @@ volume_mixer_pulse2:
 	brlo volume_mixer_pulse2_off
 
 	lds r30, TCB1_CCMPL
-	ldi r31, 0x66
+	ldi r31, 0x5A
 	cp r30, r31
 	lds r30, TCB1_CCMPH
 	ldi r31, 0x59
@@ -5273,6 +5273,30 @@ sound_driver_instrument_routine_channel0_pitch_calculate_offset:
 	add r26, r28
 	adc r27, r29
 
+	ldi r28, 0x59
+	ldi r29, 0x00
+	cp r26, r28
+	cpc r27, r29
+	brlo sound_driver_instrument_routine_channel0_pitch_min
+
+	ldi r28, 0x5A
+	ldi r29, 0x59
+	cp r26, r28
+	cpc r27, r29
+	brsh sound_driver_instrument_routine_channel0_pitch_max
+	rjmp sound_driver_instrument_routine_channel0_pitch_store
+
+sound_driver_instrument_routine_channel0_pitch_min:
+	ldi r28, 0x59
+	ldi r29, 0x00
+	rjmp sound_driver_instrument_routine_channel0_pitch_store
+
+sound_driver_instrument_routine_channel0_pitch_max:
+	ldi r28, 0x59
+	ldi r29, 0x59
+	rjmp sound_driver_instrument_routine_channel0_pitch_store
+
+sound_driver_instrument_routine_channel0_pitch_store:
 	sts TCB0_CCMPL, r26 //store the new low bits for timer
 	sts TCB0_CCMPH, r27 //store the new high bits for timer
 	
@@ -6216,6 +6240,30 @@ sound_driver_instrument_routine_channel1_pitch_calculate_offset:
 	add r26, r28
 	adc r27, r29
 
+	ldi r28, 0x59
+	ldi r29, 0x00
+	cp r26, r28
+	cpc r27, r29
+	brlo sound_driver_instrument_routine_channel1_pitch_min
+
+	ldi r28, 0x5A
+	ldi r29, 0x59
+	cp r26, r28
+	cpc r27, r29
+	brsh sound_driver_instrument_routine_channel1_pitch_max
+	rjmp sound_driver_instrument_routine_channel1_pitch_store
+
+sound_driver_instrument_routine_channel1_pitch_min:
+	ldi r28, 0x59
+	ldi r29, 0x00
+	rjmp sound_driver_instrument_routine_channel1_pitch_store
+
+sound_driver_instrument_routine_channel1_pitch_max:
+	ldi r28, 0x59
+	ldi r29, 0x59
+	rjmp sound_driver_instrument_routine_channel1_pitch_store
+
+sound_driver_instrument_routine_channel1_pitch_store:
 	sts TCB1_CCMPL, r26 //store the new low bits for timer
 	sts TCB1_CCMPH, r27 //store the new high bits for timer
 	
@@ -7116,6 +7164,30 @@ sound_driver_instrument_routine_channel2_pitch_calculate_offset:
 	add r26, r28
 	adc r27, r29
 
+	ldi r28, 0x59
+	ldi r29, 0x00
+	cp r26, r28
+	cpc r27, r29
+	brlo sound_driver_instrument_routine_channel2_pitch_min
+
+	ldi r28, 0x5A
+	ldi r29, 0x59
+	cp r26, r28
+	cpc r27, r29
+	brsh sound_driver_instrument_routine_channel2_pitch_max
+	rjmp sound_driver_instrument_routine_channel2_pitch_store
+
+sound_driver_instrument_routine_channel2_pitch_min:
+	ldi r28, 0x59
+	ldi r29, 0x00
+	rjmp sound_driver_instrument_routine_channel2_pitch_store
+
+sound_driver_instrument_routine_channel2_pitch_max:
+	ldi r28, 0x59
+	ldi r29, 0x59
+	rjmp sound_driver_instrument_routine_channel2_pitch_store
+
+sound_driver_instrument_routine_channel2_pitch_store:
 	sts TCB2_CCMPL, r26 //store the new low bits for timer
 	sts TCB2_CCMPH, r27 //store the new high bits for timer
 	
