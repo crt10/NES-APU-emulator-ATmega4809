@@ -1882,13 +1882,7 @@ sound_driver_channel0_fx_Qxy_check_hi_pitch_macro:
 sound_driver_channel0_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
-
-	cpse r27, zero
-	rjmp sound_driver_channel0_fx_Qxy_process_refresh
-	rjmp sound_driver_channel0_fx_Qxy_process_speed //if there is no given target note, we only adjust the speed
-
-sound_driver_channel0_fx_Qxy_process_refresh:
-	lds r28, pulse1_note //load current note index
+	lds r28, pulse1_fx_Qxy_target_note //load current note index
 	add r27, r28
 	cpi r27, 0x57 //largest possible note index is 0x56
 	brlo sound_driver_channel0_fx_Qxy_process_continue
@@ -1959,13 +1953,7 @@ sound_driver_channel0_fx_Rxy_check_hi_pitch_macro:
 sound_driver_channel0_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
-
-	cpse r27, zero
-	rjmp sound_driver_channel0_fx_Rxy_process_refresh
-	rjmp sound_driver_channel0_fx_Rxy_process_speed //if there is no given target note, we only adjust the speed
-
-sound_driver_channel0_fx_Rxy_process_refresh:
-	lds r28, pulse1_note //load current note index
+	lds r28, pulse1_fx_Rxy_target_note //load current note index
 	sub r28, r27
 	brcc sound_driver_channel0_fx_Rxy_process_continue
 	ldi r28, 0x00
@@ -2060,6 +2048,8 @@ sound_driver_channel0_fx_Zxx: //DPCM sample delta counter
 
 sound_driver_channel0_note:
 	sts pulse1_note, r27 //store the note index
+	sts pulse1_fx_Qxy_target_note, r27
+	sts pulse1_fx_Rxy_target_note, r27
 	ldi r26, 0x03
 	ldi r27, 0x02
 	sts pulse1_volume_macro_offset, r27 //reset all macro offsets
@@ -2648,13 +2638,7 @@ sound_driver_channel1_fx_Qxy_check_hi_pitch_macro:
 sound_driver_channel1_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
-
-	cpse r27, zero
-	rjmp sound_driver_channel1_fx_Qxy_process_refresh
-	rjmp sound_driver_channel1_fx_Qxy_process_speed //if there is no given target note, we only adjust the speed
-
-sound_driver_channel1_fx_Qxy_process_refresh:
-	lds r28, pulse2_note //load current note index
+	lds r28, pulse2_fx_Qxy_target_note //load current note index
 	add r27, r28
 	cpi r27, 0x57 //largest possible note index is 0x56
 	brlo sound_driver_channel1_fx_Qxy_process_continue
@@ -2725,13 +2709,7 @@ sound_driver_channel1_fx_Rxy_check_hi_pitch_macro:
 sound_driver_channel1_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
-
-	cpse r27, zero
-	rjmp sound_driver_channel1_fx_Rxy_process_refresh
-	rjmp sound_driver_channel1_fx_Rxy_process_speed //if there is no given target note, we only adjust the speed
-
-sound_driver_channel1_fx_Rxy_process_refresh:
-	lds r28, pulse2_note //load current note index
+	lds r28, pulse2_fx_Rxy_target_note //load current note index
 	sub r28, r27
 	brcc sound_driver_channel1_fx_Rxy_process_continue
 	ldi r28, 0x00
@@ -2826,6 +2804,8 @@ sound_driver_channel1_fx_Zxx: //DPCM sample delta counter
 
 sound_driver_channel1_note:
 	sts pulse2_note, r27 //store the note index
+	sts pulse2_fx_Qxy_target_note, r27
+	sts pulse2_fx_Rxy_target_note, r27
 	ldi r26, 0x03
 	ldi r27, 0x02
 	sts pulse2_volume_macro_offset, r27 //reset all macro offsets
@@ -3396,13 +3376,7 @@ sound_driver_channel2_fx_Qxy_check_hi_pitch_macro:
 sound_driver_channel2_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
-
-	cpse r27, zero
-	rjmp sound_driver_channel2_fx_Qxy_process_refresh
-	rjmp sound_driver_channel2_fx_Qxy_process_speed //if there is no given target note, we only adjust the speed
-
-sound_driver_channel2_fx_Qxy_process_refresh:
-	lds r28, triangle_note //load current note index
+	lds r28, triangle_fx_Qxy_target_note //load current note index
 	add r27, r28
 	cpi r27, 0x57 //largest possible note index is 0x56
 	brlo sound_driver_channel2_fx_Qxy_process_continue
@@ -3473,13 +3447,7 @@ sound_driver_channel2_fx_Rxy_check_hi_pitch_macro:
 sound_driver_channel2_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
-
-	cpse r27, zero
-	rjmp sound_driver_channel2_fx_Rxy_process_refresh
-	rjmp sound_driver_channel2_fx_Rxy_process_speed //if there is no given target note, we only adjust the speed
-
-sound_driver_channel2_fx_Rxy_process_refresh:
-	lds r28, triangle_note //load current note index
+	lds r28, triangle_fx_Rxy_target_note //load current note index
 	sub r28, r27
 	brcc sound_driver_channel2_fx_Rxy_process_continue
 	ldi r28, 0x00
@@ -3551,6 +3519,8 @@ sound_driver_channel2_fx_Zxx: //DPCM sample delta counter
 
 sound_driver_channel2_note:
 	sts triangle_note, r27 //store the note index
+	sts triangle_fx_Qxy_target_note, r27
+	sts triangle_fx_Rxy_target_note, r27
 	ldi r26, 0x03
 	ldi r27, 0x02
 	sts triangle_volume_macro_offset, r27 //reset all macro offsets
@@ -4131,13 +4101,7 @@ sound_driver_channel3_fx_Qxy_check_hi_pitch_macro:
 sound_driver_channel3_fx_Qxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
-
-	cpse r27, zero
-	rjmp sound_driver_channel3_fx_Qxy_process_refresh
-	rjmp sound_driver_channel3_fx_Qxy_process_speed //if there is no given target note, we only adjust the speed
-
-sound_driver_channel3_fx_Qxy_process_refresh:
-	lds r28, noise_note //load current note index
+	lds r28, noise_fx_Qxy_target_note //load current note index
 	add r27, r28
 	cpi r27, 0x57 //largest possible note index is 0x56
 	brlo sound_driver_channel3_fx_Qxy_process_continue
@@ -4208,13 +4172,7 @@ sound_driver_channel3_fx_Rxy_check_hi_pitch_macro:
 sound_driver_channel3_fx_Rxy_process:
 	mov r27, r26 //copy fx parameters into r27
 	andi r27, 0x0F //mask note index offset
-
-	cpse r27, zero
-	rjmp sound_driver_channel3_fx_Rxy_process_refresh
-	rjmp sound_driver_channel3_fx_Rxy_process_speed //if there is no given target note, we only adjust the speed
-
-sound_driver_channel3_fx_Rxy_process_refresh:
-	lds r28, noise_note //load current note index
+	lds r28, noise_fx_Rxy_target_note //load current note index
 	sub r28, r27
 	brcc sound_driver_channel3_fx_Rxy_process_continue
 	ldi r28, 0x00
@@ -4297,6 +4255,8 @@ sound_driver_channel3_fx_Zxx: //DPCM sample delta counter
 
 sound_driver_channel3_note:
 	sts noise_note, r27 //store the note index
+	sts noise_fx_Qxy_target_note, r27
+	sts noise_fx_Rxy_target_note, r27
 	ldi r26, 0x03
 	ldi r27, 0x02
 	sts noise_volume_macro_offset, r27 //reset all macro offsets
@@ -5081,7 +5041,7 @@ sound_driver_instrument_routine_channel0_arpeggio_macro_end_flag_absolute_no_loo
 	lds r28, pulse1_fx_0xy_sequence //check for 0xy effect
 	lds r29, pulse1_fx_0xy_sequence+1
 	adiw r29:r28, 0
-	brne sound_driver_instrument_routine_channel0_arpeggio_default_xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
+	brne sound_driver_instrument_routine_channel0_arpeggio_default_0xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
 
 	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
 	sts pulse1_arpeggio_macro_offset, r26 //store the last valid index into the offset
@@ -5098,8 +5058,8 @@ sound_driver_instrument_routine_channel0_arpeggio_default:
 	adiw r29:r28, 0 //check for 0xy effect
 	breq sound_driver_instrument_routine_channel0_arpeggio_default_no_0xy //if there is no 0xy effect, we don't need to roll the sequence
 	
-//NOTE: because of the way the xy parameter is stored and processed, using x0 will not create a faster arpeggio
-sound_driver_instrument_routine_channel0_arpeggio_default_xy:
+//NOTE: because of the way the 0xy parameter is stored and processed, using x0 will not create a faster arpeggio
+sound_driver_instrument_routine_channel0_arpeggio_default_0xy:
 	lsr r29
 	ror r28
 	ror r29
@@ -6024,7 +5984,7 @@ sound_driver_instrument_routine_channel1_arpeggio_macro_end_flag_absolute_no_loo
 	lds r28, pulse2_fx_0xy_sequence //check for 0xy effect
 	lds r29, pulse2_fx_0xy_sequence+1
 	adiw r29:r28, 0
-	brne sound_driver_instrument_routine_channel1_arpeggio_default_xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
+	brne sound_driver_instrument_routine_channel1_arpeggio_default_0xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
 
 	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
 	sts pulse2_arpeggio_macro_offset, r26 //store the last valid index into the offset
@@ -6041,8 +6001,8 @@ sound_driver_instrument_routine_channel1_arpeggio_default:
 	adiw r29:r28, 0 //check for 0xy effect
 	breq sound_driver_instrument_routine_channel1_arpeggio_default_no_0xy //if there is no 0xy effect, we don't need to roll the sequence
 	
-//NOTE: because of the way the xy parameter is stored and processed, using x0 will not create a faster arpeggio
-sound_driver_instrument_routine_channel1_arpeggio_default_xy:
+//NOTE: because of the way the 0xy parameter is stored and processed, using x0 will not create a faster arpeggio
+sound_driver_instrument_routine_channel1_arpeggio_default_0xy:
 	lsr r29
 	ror r28
 	ror r29
@@ -6924,7 +6884,7 @@ sound_driver_instrument_routine_channel2_arpeggio_macro_end_flag_absolute_no_loo
 	lds r28, triangle_fx_0xy_sequence //check for 0xy effect
 	lds r29, triangle_fx_0xy_sequence+1
 	adiw r29:r28, 0
-	brne sound_driver_instrument_routine_channel2_arpeggio_default_xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
+	brne sound_driver_instrument_routine_channel2_arpeggio_default_0xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
 
 	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
 	sts triangle_arpeggio_macro_offset, r26 //store the last valid index into the offset
@@ -6941,8 +6901,8 @@ sound_driver_instrument_routine_channel2_arpeggio_default:
 	adiw r29:r28, 0 //check for 0xy effect
 	breq sound_driver_instrument_routine_channel2_arpeggio_default_no_0xy //if there is no 0xy effect, we don't need to roll the sequence
 	
-//NOTE: because of the way the xy parameter is stored and processed, using x0 will not create a faster arpeggio
-sound_driver_instrument_routine_channel2_arpeggio_default_xy:
+//NOTE: because of the way the 0xy parameter is stored and processed, using x0 will not create a faster arpeggio
+sound_driver_instrument_routine_channel2_arpeggio_default_0xy:
 	lsr r29
 	ror r28
 	ror r29
@@ -7712,7 +7672,7 @@ sound_driver_instrument_routine_channel3_arpeggio_macro_end_flag_absolute_no_loo
 	lds r28, noise_fx_0xy_sequence //check for 0xy effect
 	lds r29, noise_fx_0xy_sequence+1
 	adiw r29:r28, 0
-	brne sound_driver_instrument_routine_channel3_arpeggio_default_xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
+	brne sound_driver_instrument_routine_channel3_arpeggio_default_0xy //if 0xy effect exists, and there is no release/loop, use the default routine and apply the 0xy effect
 
 	subi r26, 1 //if a loop flag does not exist and fixed mode is not used, use the last valid index
 	sts noise_arpeggio_macro_offset, r26 //store the last valid index into the offset
@@ -7729,8 +7689,8 @@ sound_driver_instrument_routine_channel3_arpeggio_default:
 	adiw r29:r28, 0 //check for 0xy effect
 	breq sound_driver_instrument_routine_channel3_arpeggio_default_no_0xy //if there is no 0xy effect, we don't need to roll the sequence
 	
-//NOTE: because of the way the xy parameter is stored and processed, using x0 will not create a faster arpeggio
-sound_driver_instrument_routine_channel3_arpeggio_default_xy:
+//NOTE: because of the way the 0xy parameter is stored and processed, using x0 will not create a faster arpeggio
+sound_driver_instrument_routine_channel3_arpeggio_default_0xy:
 	lsr r29
 	ror r28
 	ror r29
