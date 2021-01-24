@@ -4925,7 +4925,6 @@ sound_driver_instrument_routine_channel0_volume_load_7xy:
 	sub r27, r26 //subtract the volume by the tremelo value
 	brcs sound_driver_instrument_routine_channel0_volume_load_7xy_overflow
 	breq sound_driver_instrument_routine_channel0_volume_load_7xy_overflow
-	ldi r27, 0x01 //if the subtraction resulted in a negative volume, cap it to 0x01
 
 	add ZL, r27 //offset the volume table by the main volume
 	adc ZH, zero
@@ -5526,9 +5525,9 @@ sound_driver_channel0_fx_4xy_routine_continue:
 	lds r27, pulse1_fx_4xy_depth
 	lds r28, pulse1_fx_4xy_phase
 	add r28, r26 //increase the phase by the speed
-	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	cpi r28, 64 //check if the phase overflowed NOTE: phase values range from 0-63
 	brlo sound_driver_channel0_fx_4xy_routine_phase //if no overflow, map the phase to 0-15.
-	subi r28, 0x63 //if there was overflow, re-adjust the phase
+	ldi r28, 0x00 //reset the phase if there was overflow
 
 sound_driver_channel0_fx_4xy_routine_phase:
 	sts pulse1_fx_4xy_phase, r28 //store the new phase
@@ -5636,10 +5635,9 @@ sound_driver_channel0_fx_7xy_routine:
 	lds r27, pulse1_fx_7xy_depth
 	lds r28, pulse1_fx_7xy_phase
 	add r28, r26 //increase the phase by the speed
-	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	cpi r28, 64 //check if the phase overflowed NOTE: phase values range from 0-63
 	brlo sound_driver_channel0_fx_7xy_routine_phase //if no overflow, map the phase to 0-15.
-	ldi r28, 0x00
-	subi r28, 0x63 //if there was overflow, re-adjust the phase
+	ldi r28, 0x00 //reset the phase if there was overflow
 
 sound_driver_channel0_fx_7xy_routine_phase:
 	sts pulse1_fx_7xy_phase, r28 //store the new phase
@@ -5884,7 +5882,6 @@ sound_driver_instrument_routine_channel1_volume_load_7xy:
 	sub r27, r26 //subtract the volume by the tremelo value
 	brcs sound_driver_instrument_routine_channel1_volume_load_7xy_overflow
 	breq sound_driver_instrument_routine_channel1_volume_load_7xy_overflow
-	ldi r27, 0x01 //if the subtraction resulted in a negative volume, cap it to 0x01
 
 	add ZL, r27 //offset the volume table by the main volume
 	adc ZH, zero
@@ -6485,9 +6482,9 @@ sound_driver_channel1_fx_4xy_routine_continue:
 	lds r27, pulse2_fx_4xy_depth
 	lds r28, pulse2_fx_4xy_phase
 	add r28, r26 //increase the phase by the speed
-	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	cpi r28, 64 //check if the phase overflowed NOTE: phase values range from 0-63
 	brlo sound_driver_channel1_fx_4xy_routine_phase //if no overflow, map the phase to 0-15.
-	subi r28, 0x63 //if there was overflow, re-adjust the phase
+	ldi r28, 0x00 //reset the phase if there was overflow
 
 sound_driver_channel1_fx_4xy_routine_phase:
 	sts pulse2_fx_4xy_phase, r28 //store the new phase
@@ -6595,10 +6592,9 @@ sound_driver_channel1_fx_7xy_routine:
 	lds r27, pulse2_fx_7xy_depth
 	lds r28, pulse2_fx_7xy_phase
 	add r28, r26 //increase the phase by the speed
-	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	cpi r28, 64 //check if the phase overflowed NOTE: phase values range from 0-63
 	brlo sound_driver_channel1_fx_7xy_routine_phase //if no overflow, map the phase to 0-15.
-	ldi r28, 0x00
-	subi r28, 0x63 //if there was overflow, re-adjust the phase
+	ldi r28, 0x00 //reset the phase if there was overflow
 
 sound_driver_channel1_fx_7xy_routine_phase:
 	sts pulse2_fx_7xy_phase, r28 //store the new phase
@@ -7332,9 +7328,9 @@ sound_driver_channel2_fx_4xy_routine_continue:
 	lds r27, triangle_fx_4xy_depth
 	lds r28, triangle_fx_4xy_phase
 	add r28, r26 //increase the phase by the speed
-	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	cpi r28, 64 //check if the phase overflowed NOTE: phase values range from 0-63
 	brlo sound_driver_channel2_fx_4xy_routine_phase //if no overflow, map the phase to 0-15.
-	subi r28, 0x63 //if there was overflow, re-adjust the phase
+	ldi r28, 0x00 //reset the phase if there was overflow
 
 sound_driver_channel2_fx_4xy_routine_phase:
 	sts triangle_fx_4xy_phase, r28 //store the new phase
@@ -7602,7 +7598,6 @@ sound_driver_instrument_routine_channel3_volume_load_7xy:
 	sub r27, r26 //subtract the volume by the tremelo value
 	brcs sound_driver_instrument_routine_channel3_volume_load_7xy_overflow
 	breq sound_driver_instrument_routine_channel3_volume_load_7xy_overflow
-	ldi r27, 0x01 //if the subtraction resulted in a negative volume, cap it to 0x01
 
 	add ZL, r27 //offset the volume table by the main volume
 	adc ZH, zero
@@ -8190,9 +8185,9 @@ sound_driver_channel3_fx_4xy_routine_continue:
 	lds r27, noise_fx_4xy_depth
 	lds r28, noise_fx_4xy_phase
 	add r28, r26 //increase the phase by the speed
-	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	cpi r28, 64 //check if the phase overflowed NOTE: phase values range from 0-63
 	brlo sound_driver_channel3_fx_4xy_routine_phase //if no overflow, map the phase to 0-15.
-	subi r28, 0x63 //if there was overflow, re-adjust the phase
+	ldi r28, 0x00 //reset the phase if there was overflow
 
 sound_driver_channel3_fx_4xy_routine_phase:
 	sts noise_fx_4xy_phase, r28 //store the new phase
@@ -8300,10 +8295,9 @@ sound_driver_channel3_fx_7xy_routine:
 	lds r27, noise_fx_7xy_depth
 	lds r28, noise_fx_7xy_phase
 	add r28, r26 //increase the phase by the speed
-	cpi r28, 0x64 //check if the phase overflowed NOTE: phase values range from 0-63
+	cpi r28, 64 //check if the phase overflowed NOTE: phase values range from 0-63
 	brlo sound_driver_channel3_fx_7xy_routine_phase //if no overflow, map the phase to 0-15.
-	ldi r28, 0x00
-	subi r28, 0x63 //if there was overflow, re-adjust the phase
+	ldi r28, 0x00 //reset the phase if there was overflow
 
 sound_driver_channel3_fx_7xy_routine_phase:
 	sts noise_fx_7xy_phase, r28 //store the new phase
