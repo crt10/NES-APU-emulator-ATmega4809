@@ -7835,6 +7835,8 @@ sound_driver_channel3_fx_4xy_routine_load_add:
 	add ZL, r28 //offset the table by the depth+phase
 	adc ZH, zero
 	lpm r28, Z //load the tremelo value into r28
+	swap r28
+	andi r28, 0x0F
 
 	sts noise_fx_4xy_offset, r28
 	rjmp sound_driver_channel3_fx_7xy_routine
@@ -7847,6 +7849,8 @@ sound_driver_channel3_fx_4xy_routine_load_subtract:
 	add ZL, r28 //offset the table by the depth+phase
 	adc ZH, zero
 	lpm r28, Z //load the vibrato value into r28
+	swap r28
+	andi r28, 0x0F
 
 	neg r28
 	sts noise_fx_4xy_offset, r28
