@@ -38,6 +38,7 @@ noise_period: .byte 1 //$400E M000.PPPP = Mode, Period
 noise_fractional_volume: .byte 1 //used with the Axy effect to calculate volume. represents the VVVV bits in $4000, but with fractional data in bits 0 to 3.
 noise_output_volume: .byte 1 //this is the final output volume of pulse 2
 noise_note: .byte 1 //the current note index in the period table
+noise_adjusted_note: .byte 1 //the resultant note index after the arpeggio macro
 
 song_frames: .byte 2
 song_frame_offset: .byte 2
@@ -273,17 +274,14 @@ noise_duty_macro_loop: .byte 1
 noise_duty_macro_release: .byte 1
 
 noise_fx_0xy_sequence: .byte 2 //arpeggio sequence in the order of 00:xy. xy are from the parameters in 0xy
-noise_fx_1xx: .byte 2 //refers to the rate in which to subtract the pitch from by the 1xx
-noise_fx_1xx_total: .byte 2 //the total pitch offset for 1xx
-noise_fx_2xx: .byte 2 //refers to the rate in which to add to the pitch by the 2xx
-noise_fx_2xx_total: .byte 2 //the total pitch offset for 2xx
-noise_fx_3xx_start: .byte 2 //the starting note period
-noise_fx_3xx_target: .byte 2 //target note period
-noise_fx_3xx_speed: .byte 2 //the amount to offset by to get to the target
-noise_fx_3xx_total_offset: .byte 2
+noise_fx_1xx: .byte 1 //refers to the rate in which to subtract the pitch from by the 1xx
+noise_fx_1xx_total: .byte 1 //the total pitch offset for 1xx
+noise_fx_2xx: .byte 1 //refers to the rate in which to add to the pitch by the 2xx
+noise_fx_2xx_total: .byte 1 //the total pitch offset for 2xx
 noise_fx_4xy_speed: .byte 1
 noise_fx_4xy_depth: .byte 1
 noise_fx_4xy_phase: .byte 1
+noise_fx_4xy_offset: .byte 1
 noise_fx_7xy_speed: .byte 1
 noise_fx_7xy_depth: .byte 1
 noise_fx_7xy_phase: .byte 1
@@ -291,15 +289,7 @@ noise_fx_7xy_value: .byte 1 //value to offset the volume
 noise_fx_Axy: .byte 1 //refers to the decay/addition in volume set by the Axy effect NOTE: this value is a signed fractional byte, with the decimal between bits 3 and 4.
 noise_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
 noise_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
-noise_fx_Pxx_total: .byte 2 //refers to the fine pitch offset set by the Pxx effect
-noise_fx_Qxy_target_note: .byte 1 //target note index
-noise_fx_Qxy_target: .byte 2 //target note period
-noise_fx_Qxy_speed: .byte 2 //the amount to offset by to get to the target
-noise_fx_Qxy_total_offset: .byte 2 //NOTE: due to the way the sound driver is setup, we need to keep track of the total pitch offset
-noise_fx_Rxy_target_note: .byte 1 //target note index
-noise_fx_Rxy_target: .byte 2 //target note period
-noise_fx_Rxy_speed: .byte 2 //the amount to offset by to get to the target
-noise_fx_Rxy_total_offset: .byte 2
+noise_fx_Pxx_total: .byte 1 //refers to the fine pitch offset set by the Pxx effect
 noise_fx_Sxx_pre: .byte 1 //NOTE: Gxx and Sxx can not both be in effect at the same time. Sxx has priority.
 noise_fx_Sxx_post: .byte 1
 
@@ -797,24 +787,13 @@ init:
 	sts noise_fx_0xy_sequence, zero
 	sts noise_fx_0xy_sequence+1, zero
 	sts noise_fx_1xx, zero
-	sts noise_fx_1xx+1, zero
 	sts noise_fx_1xx_total, zero
-	sts noise_fx_1xx_total+1, zero
 	sts noise_fx_2xx, zero
-	sts noise_fx_2xx+1, zero
 	sts noise_fx_2xx_total, zero
-	sts noise_fx_2xx_total+1, zero
-	sts noise_fx_3xx_start, zero
-	sts noise_fx_3xx_start+1, zero
-	sts noise_fx_3xx_target, zero
-	sts noise_fx_3xx_target+1, zero
-	sts noise_fx_3xx_speed, zero
-	sts noise_fx_3xx_speed+1, zero
-	sts noise_fx_3xx_total_offset, zero
-	sts noise_fx_3xx_total_offset+1, zero
 	sts noise_fx_4xy_speed, zero
 	sts noise_fx_4xy_depth, zero
 	sts noise_fx_4xy_phase, zero
+	sts noise_fx_4xy_offset, zero
 	sts noise_fx_7xy_speed, zero
 	sts noise_fx_7xy_depth, zero
 	sts noise_fx_7xy_phase, zero
@@ -823,21 +802,6 @@ init:
 	sts noise_fx_Gxx_pre, r28
 	sts noise_fx_Gxx_post, r28
 	sts noise_fx_Pxx_total, zero
-	sts noise_fx_Pxx_total+1, zero
-	sts noise_fx_Qxy_target_note, zero
-	sts noise_fx_Qxy_target, zero
-	sts noise_fx_Qxy_target+1, zero
-	sts noise_fx_Qxy_speed, zero
-	sts noise_fx_Qxy_speed+1, zero
-	sts noise_fx_Qxy_total_offset, zero
-	sts noise_fx_Qxy_total_offset+1, zero
-	sts noise_fx_Rxy_target_note, zero
-	sts noise_fx_Rxy_target, zero
-	sts noise_fx_Rxy_target+1, zero
-	sts noise_fx_Rxy_speed, zero
-	sts noise_fx_Rxy_speed+1, zero
-	sts noise_fx_Rxy_total_offset, zero
-	sts noise_fx_Rxy_total_offset+1, zero
 	sts noise_fx_Sxx_pre, r28
 	sts noise_fx_Sxx_post, r28
 
@@ -3883,88 +3847,20 @@ sound_driver_channel3_fx_0xy:
 //PITCH SLIDE UP
 sound_driver_channel3_fx_1xx:
 	sts noise_fx_2xx, zero //turn off any 2xx pitch slide down
-	sts noise_fx_2xx+1, zero
 	sts noise_fx_0xy_sequence, zero //disable any 0xy effect
 	sts noise_fx_0xy_sequence+1, zero
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r26 //store the rate into r22
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	sts noise_fx_1xx, r0
-	sts noise_fx_1xx+1, r1
+	sts noise_fx_1xx, r26
 	rjmp sound_driver_channel3_main
 
 //PITCH SLIDE DOWN
 sound_driver_channel3_fx_2xx:
 	sts noise_fx_1xx, zero //turn off any 1xx pitch slide down
-	sts noise_fx_1xx+1, zero
 	sts noise_fx_0xy_sequence, zero //disable any 0xy effect
 	sts noise_fx_0xy_sequence+1, zero
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r26 //store the rate into r22
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	sts noise_fx_2xx, r0
-	sts noise_fx_2xx+1, r1
+	sts noise_fx_2xx, r26
 	rjmp sound_driver_channel3_main
 
-//AUTOMATIC PORTAMENTO
-sound_driver_channel3_fx_3xx:
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r26 //store the rate into r22
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	sts noise_fx_3xx_speed, r0
-	sts noise_fx_3xx_speed+1, r1
-
-	cpse r26, zero //check if the effect was enabled or disabled
-	rjmp sound_driver_channel3_fx_3xx_enabled
-	rjmp sound_driver_channel3_main
-
-sound_driver_channel3_fx_3xx_enabled:
-	lds r26, TCB3_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
-	lds r27, TCB3_CCMPH
-	sts noise_fx_3xx_start, r26
-	sts noise_fx_3xx_start+1, r27
-
-	sts noise_fx_3xx_total_offset, zero
-	sts noise_fx_3xx_total_offset+1, zero
+sound_driver_channel3_fx_3xx: //automatic portamento
 	rjmp sound_driver_channel3_main
 
 //VIBRATO
@@ -3976,6 +3872,7 @@ sound_driver_channel3_fx_4xy:
 	sts noise_fx_4xy_speed, r26
 	sts noise_fx_4xy_depth, r27
 	sts noise_fx_4xy_phase, zero //reset the phase to 0
+	sts noise_fx_4xy_offset, zero
 	rjmp sound_driver_channel3_main
 
 //TREMELO
@@ -4048,172 +3945,12 @@ sound_driver_channel3_fx_Ixx: //FDS modulation speed
 
 //FINE PITCH
 sound_driver_channel3_fx_Pxx:
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r26
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mulsu r22, r23
-	pop r23
-	pop r22
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	sbrs r1, 3 //check if result was a negative number
-	rjmp sound_driver_channel3_fx_Pxx_store //if the result was positive, don't fill with 1s
-
-sound_driver_channel3_fx_Pxx_negative:
-	ldi r27, 0xF0
-	or r1, r27 //when right shifting a two's complement number, must use 1s instead of 0s to fill
-
-sound_driver_channel3_fx_Pxx_store:
-	sts noise_fx_Pxx_total, r0
-	sts noise_fx_Pxx_total+1, r1
+	sts noise_fx_Pxx_total, r26
 	rjmp sound_driver_channel3_main
 
-//NOTE SLIDE UP
-sound_driver_channel3_fx_Qxy:
-sound_driver_channel3_fx_Qxy_check_arpeggio_macro:
-	lds ZL, noise_arpeggio_macro
-	lds ZH, noise_arpeggio_macro+1
-	adiw Z, 0
-	breq sound_driver_channel3_fx_Qxy_check_pitch_macro
-	rjmp sound_driver_channel3_main //if there is an arpeggio macro, don't enable the effect
-
-sound_driver_channel3_fx_Qxy_check_pitch_macro:
-	lds ZL, noise_pitch_macro
-	lds ZH, noise_pitch_macro+1
-	adiw Z, 0
-	breq sound_driver_channel3_fx_Qxy_check_hi_pitch_macro
-	rjmp sound_driver_channel3_main //if there is a pitch macro, don't enable the effect
-
-sound_driver_channel3_fx_Qxy_check_hi_pitch_macro:
-	lds ZL, noise_hi_pitch_macro
-	lds ZH, noise_hi_pitch_macro+1
-	adiw Z, 0
-	breq sound_driver_channel3_fx_Qxy_process
-	rjmp sound_driver_channel3_main //if there is a pitch macro, don't enable the effect
-
-sound_driver_channel3_fx_Qxy_process:
-	mov r27, r26 //copy fx parameters into r27
-	andi r27, 0x0F //mask note index offset
-	lds r28, noise_fx_Qxy_target_note //load current note index
-	add r27, r28
-	cpi r27, 0x57 //largest possible note index is 0x56
-	brlo sound_driver_channel3_fx_Qxy_process_continue
-	ldi r27, 0x56 //if the target note was larger than the highest possible note index, keep the target at 0x56
-
-sound_driver_channel3_fx_Qxy_process_continue:
-	sts noise_fx_Qxy_target_note, r27
-	ldi ZL, LOW(note_table << 1) //load in note table
-	ldi ZH, HIGH(note_table << 1)
-	lsl r27 //double the offset for the note table because we are getting byte data
-	add ZL, r27 //add offset
-	adc ZH, zero
-	lpm r28, Z+ //load bytes
-	lpm r29, Z
-	sts noise_fx_Qxy_target, r28 //load the LOW bits for the target period
-	sts noise_fx_Qxy_target+1, r29 //load the HIGH bits for the target period
-
-sound_driver_channel3_fx_Qxy_process_speed:
-	swap r26
-	andi r26, 0x0F //mask effect speed
-	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
-	inc r26 //increment the speed by 1
-
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r26 //store the speed data into r27
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-
-	sts noise_fx_Qxy_speed, r0 //store the effect speed
-	sts noise_fx_Qxy_speed+1, r1
+sound_driver_channel3_fx_Qxy: //note slide up
 	rjmp sound_driver_channel3_main
-
-//NOTE SLIDE DOWN
-sound_driver_channel3_fx_Rxy:
-sound_driver_channel3_fx_Rxy_check_arpeggio_macro:
-	lds ZL, noise_arpeggio_macro
-	lds ZH, noise_arpeggio_macro+1
-	adiw Z, 0
-	breq sound_driver_channel3_fx_Rxy_check_pitch_macro
-	rjmp sound_driver_channel3_main //if there is an arpeggio macro, don't enable the effect
-
-sound_driver_channel3_fx_Rxy_check_pitch_macro:
-	lds ZL, noise_pitch_macro
-	lds ZH, noise_pitch_macro+1
-	adiw Z, 0
-	breq sound_driver_channel3_fx_Rxy_check_hi_pitch_macro
-	rjmp sound_driver_channel3_main //if there is a pitch macro, don't enable the effect
-
-sound_driver_channel3_fx_Rxy_check_hi_pitch_macro:
-	lds ZL, noise_hi_pitch_macro
-	lds ZH, noise_hi_pitch_macro+1
-	adiw Z, 0
-	breq sound_driver_channel3_fx_Rxy_process
-	rjmp sound_driver_channel3_main //if there is a pitch macro, don't enable the effect
-
-sound_driver_channel3_fx_Rxy_process:
-	mov r27, r26 //copy fx parameters into r27
-	andi r27, 0x0F //mask note index offset
-	lds r28, noise_fx_Rxy_target_note //load current note index
-	sub r28, r27
-	brcc sound_driver_channel3_fx_Rxy_process_continue
-	ldi r28, 0x00
-
-sound_driver_channel3_fx_Rxy_process_continue:
-	sts noise_fx_Rxy_target_note, r28
-	ldi ZL, LOW(note_table << 1) //load in note table
-	ldi ZH, HIGH(note_table << 1)
-	lsl r28 //double the offset for the note table because we are getting byte data
-	add ZL, r28 //add offset
-	adc ZH, zero
-	lpm r28, Z+ //load bytes
-	lpm r29, Z
-	sts noise_fx_Rxy_target, r28 //load the LOW bits for the target period
-	sts noise_fx_Rxy_target+1, r29 //load the HIGH bits for the target period
-
-sound_driver_channel3_fx_Rxy_process_speed:
-	swap r26
-	andi r26, 0x0F //mask effect speed
-	lsl r26 //multiply the speed by 2 NOTE: formula for the speed is 2x+1
-	inc r26 //increment the speed by 1
-
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r26 //store the speed data into r27
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-
-	sts noise_fx_Rxy_speed, r0 //store the effect speed
-	sts noise_fx_Rxy_speed+1, r1
+sound_driver_channel3_fx_Rxy: //note slide down
 	rjmp sound_driver_channel3_main
 
 //MUTE DELAY
@@ -4254,9 +3991,8 @@ sound_driver_channel3_fx_Zxx: //DPCM sample delta counter
 
 
 sound_driver_channel3_note:
-	sts noise_note, r27 //store the note index
-	sts noise_fx_Qxy_target_note, r27
-	sts noise_fx_Rxy_target_note, r27
+	sts noise_note, r27
+	sts noise_adjusted_note, r27
 	ldi r26, 0x03
 	ldi r27, 0x02
 	sts noise_volume_macro_offset, r27 //reset all macro offsets
@@ -4268,23 +4004,8 @@ sound_driver_channel3_note:
 	sts noise_total_pitch_offset+1, zero
 	sts noise_total_hi_pitch_offset, zero
 	sts noise_fx_1xx_total, zero //reset the total for 1xx and 2xx effects
-	sts noise_fx_1xx_total+1, zero
 	sts noise_fx_2xx_total, zero
-	sts noise_fx_2xx_total+1, zero
-	sts noise_fx_3xx_total_offset, zero //reset 3xx offset
-	sts noise_fx_3xx_total_offset+1, zero
-	lds r26, TCB3_CCMPL //if the 3xx effect is enabled, we need to store the current timer period
-	lds r27, TCB3_CCMPH
-	sts noise_fx_3xx_start, r26
-	sts noise_fx_3xx_start+1, r27
-	sts noise_fx_Qxy_target, zero //reset the Qxy, Rxy effects
-	sts noise_fx_Qxy_target+1, zero
-	sts noise_fx_Qxy_total_offset, zero
-	sts noise_fx_Qxy_total_offset+1, zero
-	sts noise_fx_Rxy_target, zero
-	sts noise_fx_Rxy_target+1, zero
-	sts noise_fx_Rxy_total_offset, zero
-	sts noise_fx_Rxy_total_offset+1, zero
+	sts noise_fx_4xy_offset, zero
 	rcall sound_driver_channel3_increment_offset
 	rjmp sound_driver_channel3_main
 
@@ -4389,20 +4110,12 @@ sound_driver_channel3_instrument_change_load_macro_volume:
 sound_driver_channel3_instrument_change_load_macro_arpeggio:
 	sts noise_arpeggio_macro, r28
 	sts noise_arpeggio_macro+1, r29
-	sts noise_fx_Qxy_target, zero //reset the Qxy, Rxy effects
-	sts noise_fx_Qxy_target+1, zero
-	sts noise_fx_Rxy_target, zero
-	sts noise_fx_Rxy_target+1, zero
 	rcall sound_driver_channel3_instrument_change_read_header_arpeggio
 	rjmp sound_driver_channel3_instrument_change_macro_loop
 
 sound_driver_channel3_instrument_change_load_macro_pitch:
 	sts noise_pitch_macro, r28
 	sts noise_pitch_macro+1, r29
-	sts noise_fx_Qxy_target, zero //reset the Qxy, Rxy effects
-	sts noise_fx_Qxy_target+1, zero
-	sts noise_fx_Rxy_target, zero
-	sts noise_fx_Rxy_target+1, zero
 	rcall sound_driver_channel3_instrument_change_read_header
 	sts noise_pitch_macro_release, r28
 	sts noise_pitch_macro_loop, r29
@@ -4411,10 +4124,6 @@ sound_driver_channel3_instrument_change_load_macro_pitch:
 sound_driver_channel3_instrument_change_load_macro_hi_pitch:
 	sts noise_hi_pitch_macro, r28
 	sts noise_hi_pitch_macro+1, r29
-	sts noise_fx_Qxy_target, zero //reset the Qxy, Rxy effects
-	sts noise_fx_Qxy_target+1, zero
-	sts noise_fx_Rxy_target, zero
-	sts noise_fx_Rxy_target+1, zero
 	rcall sound_driver_channel3_instrument_change_read_header
 	sts noise_hi_pitch_macro_release, r28
 	sts noise_hi_pitch_macro_loop, r29
@@ -7155,7 +6864,7 @@ sound_driver_instrument_routine_channel2_pitch_calculate_offset:
 	lds r29, triangle_fx_Pxx_total+1
 	add r26, r28
 	adc r27, r29
-	lds r28, triangle_fx_Qxy_total_offset //NOTE: Qxy and Rxy offsets are applied here
+	lds r28, triangle_fx_Qxy_total_offset
 	lds r29, triangle_fx_Qxy_total_offset+1
 	sub r26, r28
 	sbc r27, r29
@@ -7799,19 +7508,9 @@ sound_driver_instrument_routine_channel3_arpeggio_process:
 sound_driver_instrument_routine_channel3_arpeggio_process_absolute:
 	lds r26, noise_note //load the current note index
 	add r26, r27 //offset the note with the arpeggio data
-	sbrc r27, 7 //check sign bit to check if we are subtracting from the note index
-	rjmp sound_driver_instrument_routine_channel3_arpeggio_process_absolute_subtract
-
-sound_driver_instrument_routine_channel3_arpeggio_process_absolute_add:
-	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
-	brlo sound_driver_instrument_routine_channel3_arpeggio_process_load //if the result is valid, go load the new note
-	ldi r26, 0x56 //if the result was too large, just set the result to the highest possible note index
+	andi r26, 0x0F //keep only bits 0-3 in case there was overflow
 	rjmp sound_driver_instrument_routine_channel3_arpeggio_process_load
 
-sound_driver_instrument_routine_channel3_arpeggio_process_absolute_subtract:
-	sbrc r26, 7 //check if result is negative
-	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
-	rjmp sound_driver_instrument_routine_channel3_arpeggio_process_load
 
 
 
@@ -7824,36 +7523,13 @@ sound_driver_instrument_routine_channel3_arpeggio_process_fixed:
 sound_driver_instrument_routine_channel3_arpeggio_process_relative:
 	lds r26, noise_note //load the current note index
 	add r26, r27 //offset the note with the arpeggio data
-	sbrc r27, 7 //check sign bit to check if we are subtracting from the note index
-	rjmp sound_driver_instrument_routine_channel3_arpeggio_process_relative_subtract
-
-sound_driver_instrument_routine_channel3_arpeggio_process_relative_add:
-	sts noise_note, r26 //NOTE: relative mode modifies the original note index
-	cpi r26, 0x57 //check if the result is larger than the size of the note table (0x56 is the highest possible index)
-	brlo sound_driver_instrument_routine_channel3_arpeggio_process_load //if the result is valid, go load the new note
-	ldi r26, 0x56 //if the result was too large, just set the result to the highest possible note index
-	sts noise_note, r26
-	rjmp sound_driver_instrument_routine_channel3_arpeggio_process_load
-
-sound_driver_instrument_routine_channel3_arpeggio_process_relative_subtract:
-	sbrc r26, 7 //check if result is negative
-	ldi r26, 0x00 //if the result was negative, reset it to the 0th index
+	andi r26, 0x0F //keep only bits 0-3 in case there was overflow
 	sts noise_note, r26
 
 
 
 sound_driver_instrument_routine_channel3_arpeggio_process_load:
-	ldi ZL, LOW(noise_period_table << 1) //load in note table
-	ldi ZH, HIGH(noise_period_table << 1)
-	lsl r26 //double the offset for the note table because we are getting byte data
-	add ZL, r26 //add offset
-	adc ZH, zero
-	lpm r26, Z+ //load bytes
-	lpm r27, Z
-	sts TCB3_CCMPL, r26 //load the LOW bits for timer
-	sts TCB3_CCMPH, r27 //load the HIGH bits for timer
-	sts noise_fx_3xx_target, r26 //NOTE: 3xx target note is stored here because the true note is always read in this arpeggio macro routine
-	sts noise_fx_3xx_target+1, r27
+	sts noise_adjusted_note, r26
 	rjmp sound_driver_instrument_routine_channel3_pitch
 
 
@@ -7910,74 +7586,33 @@ sound_driver_instrument_routine_channel3_pitch_macro_end_flag_check_loop:
 sound_driver_instrument_routine_channel3_pitch_default:
 	ldi r27, 0x00
 sound_driver_instrument_routine_channel3_pitch_calculate:
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r27 //store the signed pitch offset data into r22
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mulsu r22, r23
-	pop r23
-	pop r22
-
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-
-sound_driver_instrument_routine_channel3_pitch_calculate_check_negative:
-	sbrs r1, 3 //check if result was a negative number
-	rjmp sound_driver_instrument_routine_channel3_pitch_calculate_offset //if the result was positive, don't fill with 1s
-
-sound_driver_instrument_routine_channel3_pitch_calculate_negative:
-	ldi r28, 0xF0
-	or r1, r28 //when right shifting a two's complement number, must use 1s instead of 0s to fill
-
-sound_driver_instrument_routine_channel3_pitch_calculate_check_divisible_8:
-	andi r27, 0b00000111
-	breq sound_driver_instrument_routine_channel3_pitch_calculate_offset
-
-	ldi r27, 0x01
-	add r0, r27
-	adc r1, zero
-
 sound_driver_instrument_routine_channel3_pitch_calculate_offset:
 	lds r26, noise_total_pitch_offset
-	lds r27, noise_total_pitch_offset+1
-	add r0, r26
-	adc r1, r27
-	sts noise_total_pitch_offset, r0
-	sts noise_total_pitch_offset+1, r1
-	lds r26, TCB3_CCMPL //load the low bits for timer
-	lds r27, TCB3_CCMPH //load the high bits for timer
-	add r26, r0 //offset the timer values
-	adc r27, r1
+	add r27, r26
+	sts noise_total_pitch_offset, r27
+	lds r26, noise_adjusted_note
+	sub r26, r27
 	
-	lds r28, noise_fx_1xx_total
-	lds r29, noise_fx_1xx_total+1
-	sub r26, r28
-	sbc r27, r29
-	lds r28, noise_fx_2xx_total
-	lds r29, noise_fx_2xx_total+1
-	add r26, r28
-	adc r27, r29
-	lds r28, noise_fx_Pxx_total
-	lds r29, noise_fx_Pxx_total+1
-	add r26, r28
-	adc r27, r29
-	lds r28, noise_fx_Qxy_total_offset //NOTE: Qxy and Rxy offsets are applied here
-	lds r29, noise_fx_Qxy_total_offset+1
-	sub r26, r28
-	sbc r27, r29
-	lds r28, noise_fx_Rxy_total_offset
-	lds r29, noise_fx_Rxy_total_offset+1
-	add r26, r28
-	adc r27, r29
+	lds r27, noise_fx_1xx_total
+	add r26, r27
+	lds r27, noise_fx_2xx_total
+	sub r26, r27
+	lds r27, noise_fx_4xy_offset
+	sub r26, r27
+	lds r27, noise_fx_Pxx_total
+	sub r26, r27
 
-	sts TCB3_CCMPL, r26 //store the new low bits for timer
-	sts TCB3_CCMPH, r27 //store the new high bits for timer
+	andi r26, 0x0F
+
+	ldi ZL, LOW(noise_period_table << 1) //load in note table
+	ldi ZH, HIGH(noise_period_table << 1)
+	lsl r26 //double the offset for the note table because we are getting byte data
+	add ZL, r26 //add offset
+	adc ZH, zero
+	lpm r26, Z+ //load bytes
+	lpm r27, Z
+	sts TCB3_CCMPL, r26 //load the LOW bits for timer
+	sts TCB3_CCMPH, r27 //load the HIGH bits for timer
 	
 
 
@@ -8125,107 +7760,27 @@ sound_driver_instrument_routine_channel3_duty_load:
 sound_driver_channel3_fx_routines:
 sound_driver_channel3_fx_1xx_routine:
 	lds ZL, noise_fx_1xx
-	lds ZH, noise_fx_1xx+1
-	adiw Z, 0
+	cpi ZL, 0
 	breq sound_driver_channel3_fx_2xx_routine
 
 	lds r26, noise_fx_1xx_total //load the rate to change the pitch by
-	lds r27, noise_fx_1xx_total+1
 	add r26, ZL //increase the total offset by the rate
-	adc r27, ZH
 	sts noise_fx_1xx_total, r26
-	sts noise_fx_1xx_total+1, r27
 
 
 
 sound_driver_channel3_fx_2xx_routine:
 	lds ZL, noise_fx_2xx
-	lds ZH, noise_fx_2xx+1
-	adiw Z, 0
+	cpi ZL, 0
 	breq sound_driver_channel3_fx_3xx_routine
 
 	lds r26, noise_fx_2xx_total //load the rate to change the pitch by
-	lds r27, noise_fx_2xx_total+1
 	add r26, ZL //increase the total offset by the rate
-	adc r27, ZH
 	sts noise_fx_2xx_total, r26
-	sts noise_fx_2xx_total+1, r27
 
 
 
 sound_driver_channel3_fx_3xx_routine:
-	lds ZL, noise_fx_3xx_speed
-	lds ZH, noise_fx_3xx_speed+1
-	adiw Z, 0
-	brne sound_driver_channel3_fx_3xx_routine_check_start
-	rjmp sound_driver_channel3_fx_4xy_routine
-
-sound_driver_channel3_fx_3xx_routine_check_start:
-	lds r26, noise_fx_3xx_start
-	lds r27, noise_fx_3xx_start+1
-	adiw r26:r27, 0
-	brne sound_driver_channel3_fx_3xx_routine_main
-	rjmp sound_driver_channel3_fx_4xy_routine
-
-sound_driver_channel3_fx_3xx_routine_main:
-	lds r28, noise_fx_3xx_target
-	lds r29, noise_fx_3xx_target+1
-
-	cp r26, r28 //check if the target is lower, higher or equal to the starting period
-	cpc r27, r29
-	breq sound_driver_channel3_fx_3xx_routine_disable
-	brlo sound_driver_channel3_fx_3xx_routine_subtract //if target is larger, we need to add to the start (subtract from the current timer)
-	rjmp sound_driver_channel3_fx_3xx_routine_add //if target is smaller, we need to subtract from the start (add to the current timer)
-
-sound_driver_channel3_fx_3xx_routine_disable:
-	sts noise_fx_3xx_start, zero //setting the starting period to 0 effectively disables this routine until a note has been changed
-	sts noise_fx_3xx_start+1, zero //NOTE: to truly disable the effect, 300 must be written.
-	rjmp sound_driver_channel3_fx_4xy_routine
-
-sound_driver_channel3_fx_3xx_routine_subtract:
-	sub r28, r26 //store the total difference between the start and the target into r28:r29
-	sbc r29, r27
-	lds r26, noise_fx_3xx_total_offset
-	lds r27, noise_fx_3xx_total_offset+1
-
-	add r26, ZL //add the speed to the total offset
-	adc r27, ZH
-	sub r28, r26 //invert the total difference with the total offset
-	sbc r29, r27
-	brlo sound_driver_channel3_fx_3xx_routine_disable //if the total offset has surpassed the target difference (target note has been reached)
-
-	sts noise_fx_3xx_total_offset, r26 //store the new total offset
-	sts noise_fx_3xx_total_offset+1, r27
-
-	lds r26, TCB3_CCMPL //load the current timer period
-	lds r27, TCB3_CCMPH
-	sub r26, r28 //offset the current timer period with the total offset
-	sbc r27, r29
-	sts TCB3_CCMPL, r26
-	sts TCB3_CCMPH, r27
-	rjmp sound_driver_channel3_fx_4xy_routine
-
-sound_driver_channel3_fx_3xx_routine_add:
-	sub r26, r28 //store the total difference between the start and the target into r28:r29
-	sbc r27, r29
-	lds r28, noise_fx_3xx_total_offset
-	lds r29, noise_fx_3xx_total_offset+1
-
-	add r28, ZL //add the speed to the total offset
-	adc r29, ZH
-	sub r26, r28 //invert the total difference with the total offset
-	sbc r27, r29
-	brlo sound_driver_channel3_fx_3xx_routine_disable //if the total offset has surpassed the target difference (target note has been reached)
-
-	sts noise_fx_3xx_total_offset, r28 //store the new total offset
-	sts noise_fx_3xx_total_offset+1, r29
-
-	lds r28, TCB3_CCMPL //load the current timer period
-	lds r29, TCB3_CCMPH
-	add r28, r26 //offset the current timer period with the total offset
-	adc r29, r27
-	sts TCB3_CCMPL, r28
-	sts TCB3_CCMPH, r29
 
 
 
@@ -8281,29 +7836,7 @@ sound_driver_channel3_fx_4xy_routine_load_add:
 	adc ZH, zero
 	lpm r28, Z //load the tremelo value into r28
 
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r28 //store the vibrato value into r22
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	
-	lds r26, TCB3_CCMPL
-	lds r27, TCB3_CCMPH
-	add r26, r0
-	adc r27, r1
-	sts TCB3_CCMPL, r26
-	sts TCB3_CCMPH, r27
+	sts noise_fx_4xy_offset, r28
 	rjmp sound_driver_channel3_fx_7xy_routine
 
 sound_driver_channel3_fx_4xy_routine_load_subtract:
@@ -8315,29 +7848,8 @@ sound_driver_channel3_fx_4xy_routine_load_subtract:
 	adc ZH, zero
 	lpm r28, Z //load the vibrato value into r28
 
-	push r22 //only registers r16 - r23 can be used with mulsu
-	push r23
-	mov r22, r28 //store the vibrato value into r22
-	ldi r23, 0b10110010 //store r23 with 11.125 note: this is the closest approximation to the 11.1746014718 multiplier we can get with 8 bits
-	mul r22, r23
-	pop r23
-	pop r22
-
-	lsr r1 //shift out the fractional bits
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-	lsr r1
-	ror r0
-
-	lds r26, TCB3_CCMPL
-	lds r27, TCB3_CCMPH
-	sub r26, r0
-	sbc r27, r1
-	sts TCB3_CCMPL, r26
-	sts TCB3_CCMPH, r27
+	neg r28
+	sts noise_fx_4xy_offset, r28
 
 
 
@@ -8428,74 +7940,13 @@ sound_driver_channel3_fx_Axy_routine_calculate_store:
 
 
 
-//NOTE: The Qxy and Rxy routines ONLY calculate the total offset. The offset is applied in the pitch macro routine
 sound_driver_channel3_fx_Qxy_routine:
-	lds ZL, noise_fx_Qxy_target
-	lds ZH, noise_fx_Qxy_target+1
-	adiw Z, 0
-	breq sound_driver_channel3_fx_Rxy_routine //if the effect is not enabled, skip the routine
-
-	lds r26, noise_fx_Qxy_total_offset
-	lds r27, noise_fx_Qxy_total_offset+1
-	lds r28, TCB3_CCMPL
-	lds r29, TCB3_CCMPH
-
-	sub ZL, r28 //calculate the difference to the target
-	sbc ZH, r29
-	brsh sound_driver_channel3_fx_Qxy_routine_end //if the target has been reached (or passed)
-	brlo sound_driver_channel3_fx_Qxy_routine_add
-
-sound_driver_channel3_fx_Qxy_routine_end:
-	sts noise_fx_Qxy_total_offset, zero //turn off the effect
-	sts noise_fx_Qxy_total_offset+1, zero
-	sts noise_fx_Qxy_target, zero
-	sts noise_fx_Qxy_target+1, zero
-	lds r27, noise_fx_Qxy_target_note
-	sts noise_note, r27 //replace the note with the final target note
-	rjmp sound_driver_channel3_fx_Rxy_routine
-
-sound_driver_channel3_fx_Qxy_routine_add:
-	lds r28, noise_fx_Qxy_speed
-	lds r29, noise_fx_Qxy_speed+1
-	add r26, r28 //increase the total offset by the speed
-	adc r27, r29
-	sts noise_fx_Qxy_total_offset, r26 //store the total offset
-	sts noise_fx_Qxy_total_offset+1, r27
 
 
 
 sound_driver_channel3_fx_Rxy_routine:
-	lds ZL, noise_fx_Rxy_target
-	lds ZH, noise_fx_Rxy_target+1
-	adiw Z, 0
-	breq sound_driver_instrument_routine_channel4_volume //if the effect is not enabled, skip the routine
 
-	lds r26, noise_fx_Rxy_total_offset
-	lds r27, noise_fx_Rxy_total_offset+1
-	lds r28, TCB3_CCMPL
-	lds r29, TCB3_CCMPH
 
-	sub r28, ZL //calculate the difference to the target
-	sbc r29, ZH
-	brsh sound_driver_channel3_fx_Rxy_routine_end //if the target has been reached (or passed)
-	brlo sound_driver_channel3_fx_Rxy_routine_add
-
-sound_driver_channel3_fx_Rxy_routine_end:
-	sts noise_fx_Rxy_total_offset, zero //disable the effect
-	sts noise_fx_Rxy_total_offset+1, zero
-	sts noise_fx_Rxy_target, zero
-	sts noise_fx_Rxy_target+1, zero
-	lds r27, noise_fx_Rxy_target_note
-	sts noise_note, r27 //replace the note with the final target note
-	rjmp sound_driver_instrument_routine_channel4_volume
-
-sound_driver_channel3_fx_Rxy_routine_add:
-	lds r28, noise_fx_Rxy_speed
-	lds r29, noise_fx_Rxy_speed+1
-	add r26, r28 //increase the total offset by the speed
-	adc r27, r29
-	sts noise_fx_Rxy_total_offset, r26 //store the total offset
-	sts noise_fx_Rxy_total_offset+1, r27
 
 sound_driver_instrument_routine_channel4_volume:
 
