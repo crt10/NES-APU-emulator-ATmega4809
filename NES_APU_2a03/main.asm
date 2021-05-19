@@ -294,26 +294,45 @@ noise_fx_Sxx_pre: .byte 1 //NOTE: Gxx and Sxx can not both be in effect at the s
 noise_fx_Sxx_post: .byte 1
 
 //DPCM
-dcpm_pattern_delay: .byte 1
+dpcm_pattern: .byte 2
+dpcm_pattern_delay_rows: .byte 1
+dpcm_pattern_delay_frames: .byte 1
+dpcm_pattern_offset: .byte 2
+
+dpcm_sample: .byte 2
+dpcm_sample_offset: .byte 2
+
+dpcm_fx_Gxx_pre: .byte 1 //holds the # of NES frames to wait before executing the current row
+dpcm_fx_Gxx_post: .byte 1 //holds the # of NES frames to add to the delay before going to the next famitracker row NOTE: Gxx is limited to delay up till the end of the row it was called on
+dpcm_fx_Sxx_pre: .byte 1 //NOTE: Gxx and Sxx can not both be in effect at the same time. Sxx has priority.
+dpcm_fx_Sxx_post: .byte 1
 
 .cseg
 
 //NOTE: zero is defined in order to use the cp instruction without the need to load 0x00 into a register beforehand
+//NOTE: same idea with one
 .def zero = r2
+.def one = r3
 .def pulse_channel_flags = r25 //[pulse1.pulse2] RSlc.RSlc = Reload, Start, Length halt/Loop, Constant volume
-.def pulse1_sequence = r10
-.def pulse1_length_counter = r11
-.def pulse1_sweep = r12 //NSSS.EPPP = Negate sweep flag, Shift, Enable sweep flag, Period divider
+.def pulse1_sequence = r7
+.def pulse1_length_counter = r8
+.def pulse1_sweep = r9 //NSSS.EPPP = Negate sweep flag, Shift, Enable sweep flag, Period divider
 .def pulse1_volume_divider = r16 //0000.PPPP = Period divider
 .def pulse1_volume_decay = r17 //0000.dddd = Decay
-.def pulse2_sequence = r13
-.def pulse2_length_counter = r14
-.def pulse2_sweep = r15 //NSSS.EPPP = Negate sweep flag, Shift, Enable sweep flag, Period divider
+.def pulse2_sequence = r10
+.def pulse2_length_counter = r11
+.def pulse2_sweep = r12 //NSSS.EPPP = Negate sweep flag, Shift, Enable sweep flag, Period divider
 .def pulse2_volume_divider = r18 //0000.PPPP = Period divider
 .def pulse2_volume_decay = r19 //0000.dddd = Decay
 .def triangle_sequence = r20
 .def noise_sequence_LOW = r21
 .def noise_sequence_HIGH = r22
+.def dpcm_shift = r13
+.def dpcm_bit_counter = r14
+.def dpcm_period = r15
+.def dpcm_length_LOW = r23
+.def dpcm_length_HIGH = r24
+
 
 reset:
 	jmp init
@@ -355,6 +374,9 @@ init:
 
 	//ZERO
 	clr zero
+	//ONE
+	ldi r28, 1
+	mov one, r28
 
 	//MEMORY
 	ldi r28, 0b00110000
@@ -448,6 +470,18 @@ init:
 	sts noise_pattern_delay_frames, zero
 	sts noise_pattern_offset, zero
 	sts noise_pattern_offset+1, zero
+
+	//CHANNEL 4
+	lpm r28, Z+
+	lpm r29, Z+
+	lsl r28
+	rol r29
+	sts dpcm_pattern, r28
+	sts dpcm_pattern+1, r29
+	sts dpcm_pattern_delay_rows, zero
+	sts dpcm_pattern_delay_frames, zero
+	sts dpcm_pattern_offset, zero
+	sts dpcm_pattern_offset+1, zero
 
 	//CHANNEL 0 instrument macros
 	ldi r28, 0xFF
@@ -802,6 +836,23 @@ init:
 	sts noise_fx_Gxx_pre, r28
 	sts noise_fx_Gxx_post, r28
 	sts noise_fx_Pxx_total, zero
+	sts noise_fx_Sxx_pre, r28
+	sts noise_fx_Sxx_post, r28
+
+	//CHANNEL 4 SAMPLE
+	sts dpcm_sample, zero
+	sts dpcm_sample+1, zero
+	sts dpcm_sample_offset, zero
+	sts dpcm_sample_offset+1, zero
+	mov dpcm_shift, zero
+	mov dpcm_bit_counter, zero
+	mov dpcm_period, zero
+	mov dpcm_length_LOW, zero
+	mov dpcm_length_HIGH, zero
+
+	//CHANNEL 4 FX
+	sts noise_fx_Gxx_pre, r28
+	sts noise_fx_Gxx_post, r28
 	sts noise_fx_Sxx_pre, r28
 	sts noise_fx_Sxx_post, r28
 
@@ -3860,7 +3911,8 @@ sound_driver_channel3_fx_2xx:
 	sts noise_fx_2xx, r26
 	rjmp sound_driver_channel3_main
 
-sound_driver_channel3_fx_3xx: //automatic portamento
+//AUTOMATIC PORTAMENTO
+sound_driver_channel3_fx_3xx:
 	rjmp sound_driver_channel3_main
 
 //VIBRATO
@@ -4255,6 +4307,264 @@ sound_driver_channel3_decrement_frame_delay:
 
 
 sound_driver_channel4:
+	lds r26, dpcm_pattern_delay_rows
+	lds r27, dpcm_pattern_delay_frames
+	adiw r27:r26, 0
+	breq sound_driver_channel4_main //if the pattern delay is 0, proceed with sound driver procedures
+	rjmp sound_driver_channel4_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+
+sound_driver_channel4_main:
+	lds ZL, dpcm_pattern //current pattern for dpcm
+	lds ZH, dpcm_pattern+1
+	lds r26, dpcm_pattern_offset //current offset in the pattern for dpcm
+	lds r27, dpcm_pattern_offset+1
+	add ZL, r26 //offset the current pattern pointer to point to new byte data
+	adc ZH, r27
+	lpm r27, Z //load the byte data from the current pattern
+
+sound_driver_channel4_check_if_note: //check if data is a note (0x00 - 0x56)
+	cpi r27, 0x57
+	brsh sound_driver_channel4_check_if_volume
+	rjmp sound_driver_channel4_note
+sound_driver_channel4_check_if_volume: //check if data is volume (0x57-0x66)
+	cpi r27, 0x67
+	brsh sound_driver_channel4_check_if_delay
+	rjmp sound_driver_channel4_volume
+sound_driver_channel4_check_if_delay: //check if data is a delay (0x67 - 0xE2)
+	cpi r27, 0xE3
+	brsh sound_driver_channel4_check_if_instrument
+	rjmp sound_driver_channel4_delay
+sound_driver_channel4_check_if_instrument: //check for instrument flag (0xE3)
+	brne sound_driver_channel4_check_if_release
+	rjmp sound_driver_channel4_instrument_change 
+sound_driver_channel4_check_if_release: //check for note release flag (0xE4)
+	cpi r27, 0xE4
+	brne sound_driver_channel4_check_if_end
+	rjmp sound_driver_channel4_release
+sound_driver_channel4_check_if_end:
+	cpi r27, 0xFF
+	brne sound_driver_channel4_check_if_fx
+	rjmp sound_driver_channel4_next_pattern
+
+
+
+sound_driver_channel4_check_if_fx: //fx flags (0xE5 - 0xFE)
+	adiw Z, 1 //point Z to the byte next to the flag
+	lpm r26, Z //load the fx data into r26
+	rcall sound_driver_channel4_increment_offset_twice
+
+	subi r27, 0xE5 //prepare offset to perform table lookup
+	ldi ZL, LOW(channel4_fx << 1) //load in note table
+	ldi ZH, HIGH(channel4_fx << 1)
+	lsl r27 //double the offset for the table because we are getting byte data
+	add ZL, r27 //add offset
+	adc ZH, zero
+	lpm r28, Z+ //load address bytes
+	lpm r29, Z
+	mov ZL, r28 //move address bytes back into Z for an indirect jump
+	mov ZH, r29
+	ijmp
+
+
+
+sound_driver_channel4_fx_0xy: //arpeggio
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_1xx: //pitch slide up
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_2xx: //pitch slide down
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_3xx: //automatic portamento
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_4xy: //vibrato
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_7xy: //tremelo
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Axy: //volume slide
+	rjmp sound_driver_channel4_main
+
+//FRAME JUMP
+sound_driver_channel4_fx_Bxx:
+	sts song_fx_Bxx, r26 //NOTE: a Bxx value of FF won't be detected since FF is used to indicate that the flag is disabled
+	rjmp sound_driver_channel4_main
+
+//HALT
+sound_driver_channel4_fx_Cxx:
+	sts song_fx_Cxx, r27 //NOTE: the value stored doesn't mean anything. we only need to check that it is non-zero
+	rjmp sound_driver_channel4_main
+
+//FRAME SKIP
+sound_driver_channel4_fx_Dxx:
+	sts song_fx_Dxx, r27 //NOTE: the value stored doesn't mean anything. we only need to check that it is non-zero
+	rjmp sound_driver_channel4_main
+
+sound_driver_channel4_fx_Exx: //volume
+	rjmp sound_driver_channel4_main
+
+//SPEED AND TEMPO
+sound_driver_channel4_fx_Fxx:
+	sts song_speed, r26 //NOTE: only changes to speed are supported
+	rjmp sound_driver_channel4_main
+
+//DELAY
+sound_driver_channel4_fx_Gxx:
+	cp r26, zero
+	breq sound_driver_channel4_fx_Gxx_invalid
+	lds r27, song_speed
+	cp r26, r27
+	brsh sound_driver_channel4_fx_Gxx_invalid
+	sts dpcm_fx_Gxx_pre, r26 //NOTE: to be processed in the sound driver delay routine
+	ldi r27, 0x01
+	sts dpcm_pattern_delay_rows, r27
+	rjmp sound_driver_calculate_delays
+sound_driver_channel4_fx_Gxx_invalid:
+	rjmp sound_driver_channel4_main //if Gxx was 0 or >= the song speed, ignore it and continue reading note data
+
+sound_driver_channel4_fx_Hxy: //hardware sweep up
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Ixy: //hardware sweep down
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Hxx: //FDS modulation depth
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Ixx: //FDS modulation speed
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Pxx: //fine pitch
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Qxy: //note slide up
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Rxy: //note slide down
+	rjmp sound_driver_channel4_main
+
+//MUTE DELAY
+sound_driver_channel4_fx_Sxx:
+	cp r26, zero
+	breq sound_driver_channel4_fx_Sxx_invalid
+	lds r27, song_speed
+	cp r26, r27
+	brsh sound_driver_channel4_fx_Sxx_invalid
+	sts dpcm_fx_Sxx_pre, r26 //NOTE: to be processed in the sound driver delay routine
+	ldi r27, 0x01
+	sts dpcm_pattern_delay_rows, r27
+	rjmp sound_driver_calculate_delays
+sound_driver_channel4_fx_Sxx_invalid:
+	rjmp sound_driver_channel4_main //if Sxx was 0 or >= the song speed, ignore it and continue reading note data
+
+sound_driver_channel4_fx_Vxx: //duty
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Wxx: //DPCM sample speed
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Xxx: //DPCM sample retrigger
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Yxx: //DPCM sample offset
+	rjmp sound_driver_channel4_main
+sound_driver_channel4_fx_Zxx: //DPCM sample delta counter
+	rjmp sound_driver_channel4_main
+
+
+
+sound_driver_channel4_note:
+	adiw Z, 1 //point to the byte next to the flag
+	lpm dpcm_period, Z //store the DPCM sample rate
+	ldi ZL, LOW(dpcm_samples) //point Z to dpcm_samples table
+	ldi ZH, HIGH(dpcm_samples)
+	add ZL, r27 //point Z to offsetted sample
+	adc ZH, zero
+	lsl ZL //multiply by 2 to make Z into a byte pointer for the samples's address
+	rol ZH
+	lpm r26, Z+ //r26:r27 now points to the sample
+	lpm r27, Z
+
+	lsl r26 //multiply by 2 to make r26:r27 into a byte pointer for the sample's data
+	rol r27
+	mov ZL, r26
+	mov ZH, r27
+	lpm r27, Z //get sample length
+	ldi dpcm_length_LOW, 0b11110000
+	ldi dpcm_length_HIGH, 0b00001111
+	swap r27
+	and dpcm_length_LOW, r27
+	and dpcm_length_HIGH, r27
+
+	sts dpcm_sample, ZL //store address to sample
+	sts dpcm_sample+1, ZH
+	sts dpcm_sample_offset, one //start sample offset at 1 (0th byte was used for sample length)
+	sts dpcm_sample_offset+1, zero
+
+	rcall sound_driver_channel4_increment_offset_twice
+	rjmp sound_driver_channel4_main
+
+
+
+sound_driver_channel4_volume:
+	rcall sound_driver_channel4_increment_offset
+	rjmp sound_driver_channel4_main
+
+
+
+sound_driver_channel4_delay:
+	subi r27, 0x66 //NOTE: the delay values are offset by the highest volume value, which is 0x66
+	sts dpcm_pattern_delay_rows, r27
+	rcall sound_driver_channel4_increment_offset
+	rjmp sound_driver_calculate_delays
+
+
+
+sound_driver_channel4_instrument_change:
+	rcall sound_driver_channel4_increment_offset_twice
+	rjmp sound_driver_channel4_main
+
+
+
+sound_driver_channel4_release:
+	rcall sound_driver_channel4_increment_offset
+	rjmp sound_driver_channel4_main
+
+
+
+sound_driver_channel4_next_pattern:
+	lds ZL, song_frames
+	lds ZH, song_frames+1
+	lds r26, song_frame_offset //we must offset to the appropriate channel
+	lds r27, song_frame_offset+1
+	sts song_frame_offset, r26
+	sts song_frame_offset+1, r27
+	adiw r27:r26, 8 //offset for channel 4
+	add ZL, r26
+	adc ZH, r27
+
+	lpm r26, Z+ //load the address of the next pattern
+	lpm r27, Z
+	lsl r26
+	rol r27
+	sts dpcm_pattern, r26
+	sts dpcm_pattern+1, r27
+
+	sts dpcm_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
+	sts dpcm_pattern_offset+1, zero
+	rjmp sound_driver_channel4_main
+
+
+
+sound_driver_channel4_increment_offset:
+	lds ZL, dpcm_pattern_offset //current offset in the pattern for dpcm
+	lds ZH, dpcm_pattern_offset+1
+	adiw Z, 1
+	sts dpcm_pattern_offset, ZL
+	sts dpcm_pattern_offset+1, ZH
+	ret
+
+sound_driver_channel4_increment_offset_twice: //used for data that takes up 2 bytes worth of space
+	lds ZL, dpcm_pattern_offset //current offset in the pattern for dpcm
+	lds ZH, dpcm_pattern_offset+1
+	adiw Z, 2 //increment the pointer twice
+	sts dpcm_pattern_offset, ZL
+	sts dpcm_pattern_offset+1, ZH
+	ret
+
+sound_driver_channel4_decrement_frame_delay:
+	dec r27
+	sts dpcm_pattern_delay_frames, r27
+
+
 
 sound_driver_calculate_delays:
 	lds r31, song_speed
@@ -4573,6 +4883,82 @@ sound_driver_calculate_delays_noise_store:
 
 
 sound_driver_calculate_delays_dpcm:
+	lds r26, dpcm_pattern_delay_frames
+	cpse r26, zero
+	rjmp sound_driver_instrument_fx_routine
+	rjmp sound_driver_calculate_delays_dpcm_main
+
+sound_driver_calculate_delays_dpcm_main:
+	mov r26, r31 //move the speed to r26
+	lds r27, dpcm_pattern_delay_rows //decrement the delay rows
+	cp r27, zero
+	brne PC+2
+	rjmp sound_driver_instrument_fx_routine
+	dec r27
+	sts dpcm_pattern_delay_rows, r27
+	cpse r27, zero
+	rjmp sound_driver_calculate_delays_dpcm_store
+	dec r26
+
+sound_driver_calculate_delays_dpcm_Sxx:
+	ldi r27, 0xFF
+	lds r28, dpcm_fx_Sxx_pre
+	lds r29, dpcm_fx_Sxx_post
+sound_driver_calculate_delays_dpcm_Sxx_check_pre:
+	cp r28, r27
+	breq sound_driver_calculate_delays_dpcm_Sxx_check_post
+	rjmp sound_driver_calculate_delays_dpcm_Sxx_pre
+sound_driver_calculate_delays_dpcm_Sxx_check_post:
+	cp r29, r27
+	breq sound_driver_calculate_delays_dpcm_Gxx
+	rjmp sound_driver_calculate_delays_dpcm_Sxx_post
+
+sound_driver_calculate_delays_dpcm_Gxx:
+	lds r28, dpcm_fx_Gxx_pre
+	lds r29, dpcm_fx_Gxx_post
+sound_driver_calculate_delays_dpcm_Gxx_check_pre:
+	cp r28, r27
+	breq sound_driver_calculate_delays_dpcm_Gxx_check_post
+	rjmp sound_driver_calculate_delays_dpcm_Gxx_pre
+sound_driver_calculate_delays_dpcm_Gxx_check_post:
+	cp r29, r27
+	breq sound_driver_calculate_delays_dpcm_store
+	rjmp sound_driver_calculate_delays_dpcm_Gxx_post
+
+sound_driver_calculate_delays_dpcm_Sxx_pre:
+	sts dpcm_fx_Sxx_pre, r27
+	sub r30, r28 //(song speed)-1-Sxx
+	sts dpcm_fx_Sxx_post, r30
+	dec r28
+	sts dpcm_pattern_delay_frames, r28
+	mov r30, r31
+	subi r30, 1
+	rjmp sound_driver_instrument_fx_routine
+
+sound_driver_calculate_delays_dpcm_Sxx_post:
+	sts dpcm_fx_Sxx_post, r27
+	mov r26, r29
+	rjmp sound_driver_calculate_delays_dpcm_store
+
+sound_driver_calculate_delays_dpcm_Gxx_pre:
+	sts dpcm_fx_Gxx_pre, r27
+	sub r30, r28 //(song speed)-1-Sxx
+	sts dpcm_fx_Gxx_post, r30
+	dec r28
+	sts dpcm_pattern_delay_frames, r28
+	mov r30, r31
+	subi r30, 1
+	rjmp sound_driver_instrument_fx_routine
+	
+sound_driver_calculate_delays_dpcm_Gxx_post:
+	sts dpcm_fx_Gxx_post, r27
+	mov r26, r29
+	rjmp sound_driver_calculate_delays_dpcm_store
+
+sound_driver_calculate_delays_dpcm_store:
+	sts dpcm_pattern_delay_frames, r26
+
+
 
 sound_driver_instrument_fx_routine:
 sound_driver_instrument_routine_channel0_volume:
@@ -7952,8 +8338,6 @@ sound_driver_channel3_fx_Rxy_routine:
 
 
 
-sound_driver_instrument_routine_channel4_volume:
-
 sound_driver_exit:
 	pop r31
 	pop r30
@@ -8001,6 +8385,14 @@ channel3_fx:
 	.dw sound_driver_channel3_fx_Hxx, sound_driver_channel3_fx_Ixx, sound_driver_channel3_fx_Pxx, sound_driver_channel3_fx_Qxy, sound_driver_channel3_fx_Rxy
 	.dw sound_driver_channel3_fx_Sxx, sound_driver_channel3_fx_Vxx, sound_driver_channel3_fx_Wxx, sound_driver_channel3_fx_Xxx, sound_driver_channel3_fx_Yxx
 	.dw sound_driver_channel3_fx_Zxx
+
+channel4_fx:
+	.dw sound_driver_channel4_fx_0xy, sound_driver_channel4_fx_1xx, sound_driver_channel4_fx_2xx, sound_driver_channel4_fx_3xx, sound_driver_channel4_fx_4xy
+	.dw sound_driver_channel4_fx_7xy, sound_driver_channel4_fx_Axy, sound_driver_channel4_fx_Bxx, sound_driver_channel4_fx_Cxx, sound_driver_channel4_fx_Dxx
+	.dw sound_driver_channel4_fx_Exx, sound_driver_channel4_fx_Fxx, sound_driver_channel4_fx_Gxx, sound_driver_channel4_fx_Hxy, sound_driver_channel4_fx_Ixy
+	.dw sound_driver_channel4_fx_Hxx, sound_driver_channel4_fx_Ixx, sound_driver_channel4_fx_Pxx, sound_driver_channel4_fx_Qxy, sound_driver_channel4_fx_Rxy
+	.dw sound_driver_channel4_fx_Sxx, sound_driver_channel4_fx_Vxx, sound_driver_channel4_fx_Wxx, sound_driver_channel4_fx_Xxx, sound_driver_channel4_fx_Yxx
+	.dw sound_driver_channel4_fx_Zxx
 
 //famitracker volumes table: http://famitracker.com/wiki/index.php?title=Volume
 volumes:
