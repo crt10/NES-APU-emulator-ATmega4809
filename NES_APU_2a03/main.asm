@@ -4576,13 +4576,11 @@ sound_driver_channel4_increment_offset_twice: //used for data that takes up 2 by
 sound_driver_channel4_decrement_frame_delay:
 	dec r27
 	sts dpcm_pattern_delay_frames, r27
-
-
-
 sound_driver_calculate_delays:
 	lds r31, song_speed
 	mov r30, r31
 	subi r30, 1
+
 sound_driver_calculate_delays_pulse1:
 	lds r26, pulse1_pattern_delay_frames
 	cpse r26, zero
@@ -4628,32 +4626,32 @@ sound_driver_calculate_delays_pulse1_Gxx_check_post:
 
 sound_driver_calculate_delays_pulse1_Sxx_pre:
 	sts pulse1_fx_Sxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts pulse1_fx_Sxx_post, r30
+	sts pulse1_fx_Sxx_post, r28
 	dec r28
 	sts pulse1_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_calculate_delays_pulse2
 
 sound_driver_calculate_delays_pulse1_Sxx_post:
 	sts pulse1_fx_Sxx_post, r27
-	mov r26, r29
+	sub r30, r29 //(song speed)-1-Sxx
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_pulse1_store
 
 sound_driver_calculate_delays_pulse1_Gxx_pre:
 	sts pulse1_fx_Gxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts pulse1_fx_Gxx_post, r30
+	sts pulse1_fx_Gxx_post, r28
 	dec r28
 	sts pulse1_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_calculate_delays_pulse2
 	
 sound_driver_calculate_delays_pulse1_Gxx_post:
 	sts pulse1_fx_Gxx_post, r27
-	mov r26, r29
+	sub r30, r29 //(song speed)-1-Gxx
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_pulse1_store
 
 sound_driver_calculate_delays_pulse1_store:
@@ -4706,32 +4704,32 @@ sound_driver_calculate_delays_pulse2_Gxx_check_post:
 
 sound_driver_calculate_delays_pulse2_Sxx_pre:
 	sts pulse2_fx_Sxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts pulse2_fx_Sxx_post, r30
+	sts pulse2_fx_Sxx_post, r28
 	dec r28
 	sts pulse2_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_calculate_delays_pulse2
 
 sound_driver_calculate_delays_pulse2_Sxx_post:
 	sts pulse2_fx_Sxx_post, r27
-	mov r26, r29
+	sub r30, r29 //(song speed)-1-Sxx
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_pulse2_store
 
 sound_driver_calculate_delays_pulse2_Gxx_pre:
 	sts pulse2_fx_Gxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts pulse2_fx_Gxx_post, r30
+	sts pulse2_fx_Gxx_post, r28
 	dec r28
 	sts pulse2_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_calculate_delays_pulse2
 	
 sound_driver_calculate_delays_pulse2_Gxx_post:
-	sts pulse2_fx_Gxx_post, r27
-	mov r26, r29
+	sts pulse2_fx_Gxx_post, r27 //(song speed)-1-Gxx
+	sub r30, r29
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_pulse2_store
 
 sound_driver_calculate_delays_pulse2_store:
@@ -4784,32 +4782,32 @@ sound_driver_calculate_delays_triangle_Gxx_check_post:
 
 sound_driver_calculate_delays_triangle_Sxx_pre:
 	sts triangle_fx_Sxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts triangle_fx_Sxx_post, r30
+	sts triangle_fx_Sxx_post, r28
 	dec r28
 	sts triangle_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_calculate_delays_noise
 
 sound_driver_calculate_delays_triangle_Sxx_post:
 	sts triangle_fx_Sxx_post, r27
-	mov r26, r29
+	sub r30, r29 //(song speed)-1-Sxx
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_triangle_store
 
 sound_driver_calculate_delays_triangle_Gxx_pre:
 	sts triangle_fx_Gxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts triangle_fx_Gxx_post, r30
+	sts triangle_fx_Gxx_post, r28
 	dec r28
 	sts triangle_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_calculate_delays_noise
 	
 sound_driver_calculate_delays_triangle_Gxx_post:
-	sts triangle_fx_Gxx_post, r27
-	mov r26, r29
+	sts triangle_fx_Gxx_post, r27 //(song speed)-1-Gxx
+	sub r30, r29
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_triangle_store
 
 sound_driver_calculate_delays_triangle_store:
@@ -4862,32 +4860,32 @@ sound_driver_calculate_delays_noise_Gxx_check_post:
 
 sound_driver_calculate_delays_noise_Sxx_pre:
 	sts noise_fx_Sxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts noise_fx_Sxx_post, r30
+	sts noise_fx_Sxx_post, r28
 	dec r28
 	sts noise_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_calculate_delays_dpcm
 
 sound_driver_calculate_delays_noise_Sxx_post:
 	sts noise_fx_Sxx_post, r27
-	mov r26, r29
+	sub r30, r29 //(song speed)-1-Sxx
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_noise_store
 
 sound_driver_calculate_delays_noise_Gxx_pre:
 	sts noise_fx_Gxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts noise_fx_Gxx_post, r30
+	sts noise_fx_Gxx_post, r28
 	dec r28
 	sts noise_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_calculate_delays_dpcm
 	
 sound_driver_calculate_delays_noise_Gxx_post:
-	sts noise_fx_Gxx_post, r27
-	mov r26, r29
+	sts noise_fx_Gxx_post, r27 //(song speed)-1-Gxx
+	sub r30, r29
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_noise_store
 
 sound_driver_calculate_delays_noise_store:
@@ -4940,32 +4938,32 @@ sound_driver_calculate_delays_dpcm_Gxx_check_post:
 
 sound_driver_calculate_delays_dpcm_Sxx_pre:
 	sts dpcm_fx_Sxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts dpcm_fx_Sxx_post, r30
+	sts dpcm_fx_Sxx_post, r28
 	dec r28
 	sts dpcm_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_instrument_fx_routine
 
 sound_driver_calculate_delays_dpcm_Sxx_post:
 	sts dpcm_fx_Sxx_post, r27
-	mov r26, r29
+	sub r30, r29 //(song speed)-1-Sxx
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_dpcm_store
 
 sound_driver_calculate_delays_dpcm_Gxx_pre:
 	sts dpcm_fx_Gxx_pre, r27
-	sub r30, r28 //(song speed)-1-Sxx
-	sts dpcm_fx_Gxx_post, r30
+	sts dpcm_fx_Gxx_post, r28
 	dec r28
 	sts dpcm_pattern_delay_frames, r28
-	mov r30, r31
-	subi r30, 1
 	rjmp sound_driver_instrument_fx_routine
 	
 sound_driver_calculate_delays_dpcm_Gxx_post:
-	sts dpcm_fx_Gxx_post, r27
-	mov r26, r29
+	sts dpcm_fx_Gxx_post, r27 //(song speed)-1-Gxx
+	sub r30, r29
+	mov r26, r30
+	mov r30, r31
+	subi r30, 1
 	rjmp sound_driver_calculate_delays_dpcm_store
 
 sound_driver_calculate_delays_dpcm_store:
