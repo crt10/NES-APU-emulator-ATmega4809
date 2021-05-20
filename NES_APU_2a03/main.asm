@@ -1488,6 +1488,12 @@ sound_driver_fx_Bxx_routine_loop_exit:
 	rol r27
 	sts noise_pattern, r26
 	sts noise_pattern+1, r27
+	lpm r26, Z+
+	lpm r27, Z+
+	lsl r26
+	rol r27
+	sts dpcm_pattern, r26
+	sts dpcm_pattern+1, r27
 
 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
 	sts pulse1_pattern_offset+1, zero
@@ -1505,6 +1511,10 @@ sound_driver_fx_Bxx_routine_loop_exit:
 	sts noise_pattern_offset+1, zero
 	sts noise_pattern_delay_rows, zero
 	sts noise_pattern_delay_frames, zero
+	sts dpcm_pattern_offset, zero
+	sts dpcm_pattern_offset, zero
+	sts dpcm_pattern_delay_rows, zero
+	sts dpcm_pattern_delay_frames, zero
 
 	ldi r26, 0xFF
 	sts pulse1_fx_Gxx_pre, r26 //reset all Gxx and Sxx effects. if we don't channels can get desynced
@@ -1523,6 +1533,10 @@ sound_driver_fx_Bxx_routine_loop_exit:
 	sts noise_fx_Gxx_post, r26
 	sts noise_fx_Sxx_pre, r26
 	sts noise_fx_Sxx_post, r26
+	sts dpcm_fx_Gxx_pre, r26
+	sts dpcm_fx_Gxx_post, r26
+	sts dpcm_fx_Sxx_pre, r26
+	sts dpcm_fx_Sxx_post, r26
 
 	sts song_fx_Bxx, r26 //reset all song effects
 	sts song_fx_Cxx, zero
@@ -1579,6 +1593,12 @@ sound_driver_fx_Dxx_routine:
 	rol r27
 	sts noise_pattern, r26
 	sts noise_pattern+1, r27
+	lpm r26, Z+
+	lpm r27, Z+
+	lsl r26
+	rol r27
+	sts dpcm_pattern, r26
+	sts dpcm_pattern+1, r27
 
 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
 	sts pulse1_pattern_offset+1, zero
@@ -1596,6 +1616,10 @@ sound_driver_fx_Dxx_routine:
 	sts noise_pattern_offset+1, zero
 	sts noise_pattern_delay_rows, zero
 	sts noise_pattern_delay_frames, zero
+	sts dpcm_pattern_offset, zero
+	sts dpcm_pattern_offset, zero
+	sts dpcm_pattern_delay_rows, zero
+	sts dpcm_pattern_delay_frames, zero
 
 	ldi r26, 0xFF
 	sts pulse1_fx_Gxx_pre, r26 //reset all Gxx and Sxx effects. if we don't channels can get desynced
@@ -1614,6 +1638,10 @@ sound_driver_fx_Dxx_routine:
 	sts noise_fx_Gxx_post, r26
 	sts noise_fx_Sxx_pre, r26
 	sts noise_fx_Sxx_post, r26
+	sts dpcm_fx_Gxx_pre, r26
+	sts dpcm_fx_Gxx_post, r26
+	sts dpcm_fx_Sxx_pre, r26
+	sts dpcm_fx_Sxx_post, r26
 
 	sts song_fx_Bxx, r26 //reset all song effects
 	sts song_fx_Cxx, zero
