@@ -2142,7 +2142,7 @@ sound_driver_channel0_note:
 
 
 sound_driver_channel0_volume:
-	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+	subi r27, 0x57 //NOTE: the delay values are offset by the highest note value, which is 0x56
 	lds r26, pulse1_param
 	andi r26, 0xF0 //clear previous VVVV volume bits
 	or r26, r27 //move new VVVV bits into pulse1_param
@@ -2898,7 +2898,7 @@ sound_driver_channel1_note:
 
 
 sound_driver_channel1_volume:
-	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+	subi r27, 0x57 //NOTE: the delay values are offset by the highest note value, which is 0x56
 	lds r26, pulse2_param
 	andi r26, 0xF0 //clear previous VVVV volume bits
 	or r26, r27 //move new VVVV bits into pulse2_param
@@ -3614,7 +3614,7 @@ sound_driver_channel2_note:
 
 sound_driver_channel2_volume:
 	rcall sound_driver_channel2_increment_offset
-	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+	subi r27, 0x57 //NOTE: the delay values are offset by the highest note value, which is 0x56
 	breq sound_driver_channel2_volume_disable
 sound_driver_channel2_volume_enable:
 	ldi r27, TCB_CAPT_bm //enable interrupts
@@ -4105,7 +4105,7 @@ sound_driver_channel3_note:
 
 
 sound_driver_channel3_volume:
-	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+	subi r27, 0x57 //NOTE: the delay values are offset by the highest note value, which is 0x56
 	lds r26, noise_param
 	andi r26, 0xF0 //clear previous VVVV volume bits
 	or r26, r27 //move new VVVV bits into noise_param
@@ -8175,7 +8175,7 @@ sound_driver_instrument_routine_channel3_duty_load:
 	lds r28, noise_period
 	andi r28, 0b01111111
 	or r28, r27 //store the new noise mode
-	sts noise_param, r28
+	sts noise_period, r28
 
 	andi noise_sequence_HIGH, 0b01111111
 	or noise_sequence_HIGH, r27

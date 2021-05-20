@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Thu May 20 18:22:22 2021
+AVRASM ver. 2.2.8  C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm Thu May 20 18:55:09 2021
 
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(9): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\avrasm\inc\m4809def.inc'
 C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(357): Including file 'C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\song_data.asm'
@@ -2250,7 +2250,7 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(357): 'C:\U
                                  
                                  
                                  sound_driver_channel0_volume:
-001a1b 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+001a1b 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest note value, which is 0x56
 001a1c 91a0 2800                 	lds r26, pulse1_param
 001a1e 7fa0                      	andi r26, 0xF0 //clear previous VVVV volume bits
 001a1f 2bab                      	or r26, r27 //move new VVVV bits into pulse1_param
@@ -3006,7 +3006,7 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(357): 'C:\U
                                  
                                  
                                  sound_driver_channel1_volume:
-001d09 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+001d09 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest note value, which is 0x56
 001d0a 91a0 2808                 	lds r26, pulse2_param
 001d0c 7fa0                      	andi r26, 0xF0 //clear previous VVVV volume bits
 001d0d 2bab                      	or r26, r27 //move new VVVV bits into pulse2_param
@@ -3722,7 +3722,7 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(357): 'C:\U
                                  
                                  sound_driver_channel2_volume:
 001fce d0fb                      	rcall sound_driver_channel2_increment_offset
-001fcf 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+001fcf 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest note value, which is 0x56
 001fd0 f021                      	breq sound_driver_channel2_volume_disable
                                  sound_driver_channel2_volume_enable:
 001fd1 e0b1                      	ldi r27, TCB_CAPT_bm //enable interrupts
@@ -4213,7 +4213,7 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(357): 'C:\U
                                  
                                  
                                  sound_driver_channel3_volume:
-0021aa 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest volume value, which is 0x56
+0021aa 55b7                      	subi r27, 0x57 //NOTE: the delay values are offset by the highest note value, which is 0x56
 0021ab 91a0 2813                 	lds r26, noise_param
 0021ad 7fa0                      	andi r26, 0xF0 //clear previous VVVV volume bits
 0021ae 2bab                      	or r26, r27 //move new VVVV bits into noise_param
@@ -8283,7 +8283,7 @@ C:\Users\creat\Documents\NES_APU_2a03 - Timers\NES_APU_2a03\main.asm(357): 'C:\U
 002fd4 91c0 2814                 	lds r28, noise_period
 002fd6 77cf                      	andi r28, 0b01111111
 002fd7 2bcb                      	or r28, r27 //store the new noise mode
-002fd8 93c0 2813                 	sts noise_param, r28
+002fd8 93c0 2814                 	sts noise_period, r28
                                  
 002fda 776f                      	andi noise_sequence_HIGH, 0b01111111
 002fdb 2b6b                      	or noise_sequence_HIGH, r27
