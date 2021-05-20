@@ -313,6 +313,7 @@ dpcm_fx_Sxx_post: .byte 1
 //NOTE: same idea with one
 .def zero = r2
 .def one = r3
+.def frame_sequence = r4
 .def pulse_channel_flags = r25 //[pulse1.pulse2] RSlc.RSlc = Reload, Start, Length halt/Loop, Constant volume
 .def pulse1_sequence = r7
 .def pulse1_length_counter = r8
@@ -337,17 +338,8 @@ dpcm_fx_Sxx_post: .byte 1
 reset:
 	jmp init
 
-.org TCA0_OVF_vect
-	jmp sound_driver
-
-.org TCA0_CMP0_vect
-	jmp sequence_0_2
-
-.org TCA0_CMP1_vect
-	jmp sequence_1_3
-
-.org TCA0_CMP2_vect
-	jmp sequence_0_2
+.org RTC_CNT_vect
+	jmp frame_counter_routine
 
 .org TCB0_INT_vect
 	jmp pulse1_sequence_routine
@@ -377,6 +369,8 @@ init:
 	//ONE
 	ldi r28, 1
 	mov one, r28
+	//FRAME SEQUENCE
+	mov frame_sequence, zero
 
 	//MEMORY
 	ldi r28, 0b00110000
@@ -861,37 +855,6 @@ init:
 	out VPORTA_DIR, r28 //set all pins in VPORTA to output
 
 	//TIMERS
-	//Frame Counter
-	//NOTE:The frame counter will be defaulted to NTSC mode (60 Hz, 120 Hz, 240 Hz)
-	//Each interrupt will be setup to interrupt every 240 Hz clock
-	//CMP0 = sequence 0, CMP1 = sequence 1, CMP2 = sequence 2, OVF = sequence 3/sound driver
-	//Sequence 3 will clock the sound driver every 60Hz, in which new audio data is read and written to the registers
-	//Timer period Calculation: (0.00416666666 * 20000000/64)-1 = 1301.08333125 = 0x0515
-	//The ATmega4809 is cofigured to run at 20000000 Hz
-	//0.00416666666 seconds is the period for 240 Hz
-	//The /64 comes from the prescaler divider used
-	ldi r28, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
-	sts TCA0_SINGLE_CTRLB, r28
-	ldi r28, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
-	sts TCA0_SINGLE_INTCTRL, r28
-	ldi r28, 0x15 //set the period for CMP0
-	sts TCA0_SINGLE_CMP0, r28
-	ldi r28, 0x05
-	sts TCA0_SINGLE_CMP0 + 1, r28
-	ldi r28, 0x2B //set the period for CMP1
-	sts TCA0_SINGLE_CMP1, r28
-	ldi r28, 0x0A
-	sts TCA0_SINGLE_CMP1 + 1, r28
-	ldi r28, 0x41 //set the period for CMP2
-	sts TCA0_SINGLE_CMP2, r28
-	ldi r28, 0x0F
-	sts TCA0_SINGLE_CMP2 + 1, r28
-	ldi r28, 0x57 //set the period for OVF
-	sts TCA0_SINGLE_PER, r28
-	ldi r28, 0x14
-	sts TCA0_SINGLE_PER + 1, r28
-	ldi r28, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
-	sts TCA0_SINGLE_CTRLA, r28
 
 	//NOTE: Channel Timers are clocked (20/2)/(0.8948865) = 11.1746014718 times faster than the NES APU
 	//Because of this, we multiply all the NES timer values by 11.1746014718 beforehand
@@ -950,6 +913,51 @@ init:
 	sts TCB3_CCMPH, r27
 	ldi r27, TCB_CLKSEL_CLKDIV2_gc | TCB_ENABLE_bm //use prescaler divider of 2 and enable timer
 	sts TCB3_CTRLA, r27
+
+	//DPCM
+/*	ldi r28, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
+	sts TCA0_SINGLE_CTRLB, r28
+	ldi r28, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
+	sts TCA0_SINGLE_INTCTRL, r28
+	ldi r28, 0x15 //set the period for CMP0
+	sts TCA0_SINGLE_CMP0, r28
+	ldi r28, 0x05
+	sts TCA0_SINGLE_CMP0 + 1, r28
+	ldi r28, 0x2B //set the period for CMP1
+	sts TCA0_SINGLE_CMP1, r28
+	ldi r28, 0x0A
+	sts TCA0_SINGLE_CMP1 + 1, r28
+	ldi r28, 0x41 //set the period for CMP2
+	sts TCA0_SINGLE_CMP2, r28
+	ldi r28, 0x0F
+	sts TCA0_SINGLE_CMP2 + 1, r28
+	ldi r28, 0x57 //set the period for OVF
+	sts TCA0_SINGLE_PER, r28
+	ldi r28, 0x14
+	sts TCA0_SINGLE_PER + 1, r28
+	ldi r28, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
+	sts TCA0_SINGLE_CTRLA, r28*/
+
+	//RTC
+	//Frame Counter
+	//NOTE:The frame counter will be defaulted to NTSC mode (60 Hz, 120 Hz, 240 Hz)
+	//Interrupts will be setup to interrupt every 240 Hz clock
+	//The 4th consecutive interrupt will clock the sound driver every 60Hz, in which new audio data is read and written to the registers
+	//1st and 2nd interrupt will execute sequence 0 and 2. 3rd and 4th interrupt will execute sequence 1 and 3.
+	//Timer period Calculation: (0.00416666666 * 32768/8)-1 = 16.0666666394 = 0x0010
+	//The RTC timer is clocked at 32768 Hz
+	//0.00416666666 seconds is the period for 240 Hz
+	//The /8 comes from the prescaler divider used
+	ldi r27, RTC_CLKSEL_INT32K_gc //internal 32kHz oscillator
+	sts RTC_CLKSEL, r27
+	ldi r27, 0x10
+	ldi r28, 0x00
+	sts RTC_PER, r27
+	sts RTC_PER + 1, r28
+	ldi r27, RTC_OVF_bm //overflow interrupts
+	sts RTC_INTCTRL, r27
+	ldi r27, RTC_PRESCALER_DIV8_gc | RTC_PITEN_bm //use prescaler divider of 2 and enable RTC
+	sts RTC_CTRLA, r27
 
 
 
@@ -1056,26 +1064,33 @@ volume_mixer_output:
 
 
 //FRAME COUNTER/AUDIO SAMPLE ISR
-sequence_0_2:
+frame_counter_routine:
 	in r27, CPU_SREG
 	push r27
 	cli
 
+	mov r26, frame_sequence
+	add frame_sequence, one
+	cpi r26, 0x00
+	breq sequence_0_2
+	cpi r26, 0x01
+	breq sequence_1_3
+	cpi r26, 0x02
+	breq sequence_0_2
+	rjmp sound_driver
+
+sequence_0_2:
 	//ENVELOPE
 	rcall pulse1_envelope_routine
 	rcall pulse2_envelope_routine
 
-	ldi r27, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP2_bm //clear OVF flag
-	sts TCA0_SINGLE_INTFLAGS, r27
+	ldi r27, RTC_CMP_bm | RTC_OVF_bm //clear OVF flag
+	sts RTC_INTFLAGS, r27
 	pop r27
 	out CPU_SREG, r27
 	reti
 
 sequence_1_3:
-	in r27, CPU_SREG
-	push r27
-	cli
-
 	//ENVELOPE
 	rcall pulse1_envelope_routine
 	rcall pulse2_envelope_routine
@@ -1100,8 +1115,8 @@ sequence_1_3_pulse2_length:
 	dec pulse2_length_counter
 
 sequence_1_3_exit:
-	ldi r27, TCA_SINGLE_CMP1_bm | TCA_SINGLE_OVF_bm //clear OVF flag
-	sts TCA0_SINGLE_INTFLAGS, r27
+	ldi r27, RTC_OVF_bm //clear OVF flag
+	sts RTC_INTFLAGS, r27
 	pop r27
 	out CPU_SREG, r27
 	reti
@@ -1401,9 +1416,7 @@ duty_cycle_sequences:
 
 //SOUND DRIVER
 sound_driver:
-	in r27, CPU_SREG
-	push r27
-	cli
+	mov frame_sequence, zero
 	push r28
 	push r29
 	push r30
