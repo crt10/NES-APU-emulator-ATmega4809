@@ -425,7 +425,7 @@ init:
 	sts pulse1_pattern, r28
 	sts pulse1_pattern+1, r29
 	sts pulse1_pattern_delay_rows, zero
-	sts pulse1_pattern_delay_frames, zero
+	sts pulse1_pattern_delay_frames, one
 	sts pulse1_pattern_offset, zero
 	sts pulse1_pattern_offset+1, zero
 
@@ -437,7 +437,7 @@ init:
 	sts pulse2_pattern, r28
 	sts pulse2_pattern+1, r29
 	sts pulse2_pattern_delay_rows, zero
-	sts pulse2_pattern_delay_frames, zero
+	sts pulse2_pattern_delay_frames, one
 	sts pulse2_pattern_offset, zero
 	sts pulse2_pattern_offset+1, zero
 
@@ -449,7 +449,7 @@ init:
 	sts triangle_pattern, r28
 	sts triangle_pattern+1, r29
 	sts triangle_pattern_delay_rows, zero
-	sts triangle_pattern_delay_frames, zero
+	sts triangle_pattern_delay_frames, one
 	sts triangle_pattern_offset, zero
 	sts triangle_pattern_offset+1, zero
 
@@ -461,7 +461,7 @@ init:
 	sts noise_pattern, r28
 	sts noise_pattern+1, r29
 	sts noise_pattern_delay_rows, zero
-	sts noise_pattern_delay_frames, zero
+	sts noise_pattern_delay_frames, one
 	sts noise_pattern_offset, zero
 	sts noise_pattern_offset+1, zero
 
@@ -473,7 +473,7 @@ init:
 	sts dpcm_pattern, r28
 	sts dpcm_pattern+1, r29
 	sts dpcm_pattern_delay_rows, zero
-	sts dpcm_pattern_delay_frames, zero
+	sts dpcm_pattern_delay_frames, one
 	sts dpcm_pattern_offset, zero
 	sts dpcm_pattern_offset+1, zero
 
@@ -956,7 +956,7 @@ init:
 	sts RTC_PER + 1, r28
 	ldi r27, RTC_OVF_bm //overflow interrupts
 	sts RTC_INTCTRL, r27
-	ldi r27, RTC_PRESCALER_DIV8_gc | RTC_PITEN_bm //use prescaler divider of 2 and enable RTC
+	ldi r27, RTC_PRESCALER_DIV8_gc | RTC_PITEN_bm //use prescaler divider of 8 and enable RTC
 	sts RTC_CTRLA, r27
 
 
@@ -1498,23 +1498,23 @@ sound_driver_fx_Bxx_routine_loop_exit:
 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
 	sts pulse1_pattern_offset+1, zero
 	sts pulse1_pattern_delay_rows, zero //reset the delay to 0 as well
-	sts pulse1_pattern_delay_frames, zero
+	sts pulse1_pattern_delay_frames, one
 	sts pulse2_pattern_offset, zero
 	sts pulse2_pattern_offset+1, zero
 	sts pulse2_pattern_delay_rows, zero
-	sts pulse2_pattern_delay_frames, zero
+	sts pulse2_pattern_delay_frames, one
 	sts triangle_pattern_offset, zero
 	sts triangle_pattern_offset+1, zero
 	sts triangle_pattern_delay_rows, zero
-	sts triangle_pattern_delay_frames, zero
+	sts triangle_pattern_delay_frames, one
 	sts noise_pattern_offset, zero
 	sts noise_pattern_offset+1, zero
 	sts noise_pattern_delay_rows, zero
-	sts noise_pattern_delay_frames, zero
+	sts noise_pattern_delay_frames, one
 	sts dpcm_pattern_offset, zero
 	sts dpcm_pattern_offset, zero
 	sts dpcm_pattern_delay_rows, zero
-	sts dpcm_pattern_delay_frames, zero
+	sts dpcm_pattern_delay_frames, one
 
 	ldi r26, 0xFF
 	sts pulse1_fx_Gxx_pre, r26 //reset all Gxx and Sxx effects. if we don't channels can get desynced
@@ -1603,23 +1603,23 @@ sound_driver_fx_Dxx_routine:
 	sts pulse1_pattern_offset, zero //restart the pattern offset back to 0 because we are reading from a new pattern now
 	sts pulse1_pattern_offset+1, zero
 	sts pulse1_pattern_delay_rows, zero //reset the delay to 0 as well
-	sts pulse1_pattern_delay_frames, zero
+	sts pulse1_pattern_delay_frames, one
 	sts pulse2_pattern_offset, zero
 	sts pulse2_pattern_offset+1, zero
 	sts pulse2_pattern_delay_rows, zero
-	sts pulse2_pattern_delay_frames, zero
+	sts pulse2_pattern_delay_frames, one
 	sts triangle_pattern_offset, zero
 	sts triangle_pattern_offset+1, zero
 	sts triangle_pattern_delay_rows, zero
-	sts triangle_pattern_delay_frames, zero
+	sts triangle_pattern_delay_frames, one
 	sts noise_pattern_offset, zero
 	sts noise_pattern_offset+1, zero
 	sts noise_pattern_delay_rows, zero
-	sts noise_pattern_delay_frames, zero
+	sts noise_pattern_delay_frames, one
 	sts dpcm_pattern_offset, zero
 	sts dpcm_pattern_offset, zero
 	sts dpcm_pattern_delay_rows, zero
-	sts dpcm_pattern_delay_frames, zero
+	sts dpcm_pattern_delay_frames, one
 
 	ldi r26, 0xFF
 	sts pulse1_fx_Gxx_pre, r26 //reset all Gxx and Sxx effects. if we don't channels can get desynced
@@ -1653,9 +1653,13 @@ sound_driver_fx_Dxx_routine:
 sound_driver_channel0:
 	lds r26, pulse1_pattern_delay_rows
 	lds r27, pulse1_pattern_delay_frames
+sound_driver_channel0_decrement_frame_delay:
+	dec r27
+	sts pulse1_pattern_delay_frames, r27
+
 	adiw r27:r26, 0
 	breq sound_driver_channel0_main //if the pattern delay is 0, proceed with sound driver procedures
-	rjmp sound_driver_channel0_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+	rjmp sound_driver_channel0_end //if the pattern delay is not 0, end routine
 
 sound_driver_channel0_main:
 	lds ZL, pulse1_pattern //current pattern for pulse 1
@@ -2157,7 +2161,7 @@ sound_driver_channel0_delay:
 	subi r27, 0x66 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts pulse1_pattern_delay_rows, r27
 	rcall sound_driver_channel0_increment_offset
-	rjmp sound_driver_channel1
+	rjmp sound_driver_channel0_end
 
 
 
@@ -2400,18 +2404,32 @@ sound_driver_channel0_increment_offset_twice: //used for data that takes up 2 by
 	sts pulse1_pattern_offset+1, ZH
 	ret
 
-sound_driver_channel0_decrement_frame_delay:
-	dec r27
-	sts pulse1_pattern_delay_frames, r27
-
+sound_driver_channel0_end:
+sound_driver_channel0_check_Sxx_invalid:
+	ldi r27, 0xFF
+	lds r26, pulse1_fx_Sxx_post
+	cp r26, zero //check if routine was called from calculate_delays due to invalid Sxx/Gxx
+	brne sound_driver_channel0_check_Gxx_invalid
+	sts pulse1_fx_Sxx_post, r27
+	ret
+sound_driver_channel0_check_Gxx_invalid:
+	lds r26, pulse1_fx_Gxx_post
+	cp r26, zero
+	brne sound_driver_channel1
+	sts pulse1_fx_Gxx_post, r27
+	ret
 
 
 sound_driver_channel1:
 	lds r26, pulse2_pattern_delay_rows
 	lds r27, pulse2_pattern_delay_frames
+sound_driver_channel1_decrement_frame_delay:
+	dec r27
+	sts pulse2_pattern_delay_frames, r27
+
 	adiw r27:r26, 0
 	breq sound_driver_channel1_main //if the pattern delay is 0, proceed with sound driver procedures
-	rjmp sound_driver_channel1_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+	rjmp sound_driver_channel1_end //if the pattern delay is not 0, end routine
 
 sound_driver_channel1_main:
 	lds ZL, pulse2_pattern //current pattern for pulse 2
@@ -2913,7 +2931,7 @@ sound_driver_channel1_delay:
 	subi r27, 0x66 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts pulse2_pattern_delay_rows, r27
 	rcall sound_driver_channel1_increment_offset
-	rjmp sound_driver_channel2
+	rjmp sound_driver_channel1_end
 
 
 
@@ -3145,18 +3163,32 @@ sound_driver_channel1_increment_offset_twice: //used for data that takes up 2 by
 	sts pulse2_pattern_offset+1, ZH
 	ret
 
-sound_driver_channel1_decrement_frame_delay:
-	dec r27
-	sts pulse2_pattern_delay_frames, r27
-
+sound_driver_channel1_end:
+sound_driver_channel1_check_Sxx_invalid:
+	ldi r27, 0xFF
+	lds r26, pulse2_fx_Sxx_post
+	cp r26, zero //check if routine was called from calculate_delays due to invalid Sxx/Gxx
+	brne sound_driver_channel1_check_Gxx_invalid
+	sts pulse2_fx_Sxx_post, r27
+	ret
+sound_driver_channel1_check_Gxx_invalid:
+	lds r26, pulse2_fx_Gxx_post
+	cp r26, zero
+	brne sound_driver_channel2
+	sts pulse2_fx_Gxx_post, r27
+	ret
 
 
 sound_driver_channel2:
 	lds r26, triangle_pattern_delay_rows
 	lds r27, triangle_pattern_delay_frames
+sound_driver_channel2_decrement_frame_delay:
+	dec r27
+	sts triangle_pattern_delay_frames, r27
+
 	adiw r27:r26, 0
 	breq sound_driver_channel2_main //if the pattern delay is 0, proceed with sound driver procedures
-	rjmp sound_driver_channel2_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+	rjmp sound_driver_channel2_end //if the pattern delay is not 0, end routine
 
 sound_driver_channel2_main:
 	lds ZL, triangle_pattern //current pattern for triangle
@@ -3632,7 +3664,7 @@ sound_driver_channel2_delay:
 	subi r27, 0x66 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts triangle_pattern_delay_rows, r27
 	rcall sound_driver_channel2_increment_offset
-	rjmp sound_driver_channel3
+	rjmp sound_driver_channel2_end
 
 
 
@@ -3864,18 +3896,33 @@ sound_driver_channel2_increment_offset_twice: //used for data that takes up 2 by
 	sts triangle_pattern_offset+1, ZH
 	ret
 
-sound_driver_channel2_decrement_frame_delay:
-	dec r27
-	sts triangle_pattern_delay_frames, r27
+sound_driver_channel2_end:
+sound_driver_channel2_check_Sxx_invalid:
+	ldi r27, 0xFF
+	lds r26, triangle_fx_Sxx_post
+	cp r26, zero //check if routine was called from calculate_delays due to invalid Sxx/Gxx
+	brne sound_driver_channel2_check_Gxx_invalid
+	sts triangle_fx_Sxx_post, r27
+	ret
+sound_driver_channel2_check_Gxx_invalid:
+	lds r26, triangle_fx_Gxx_post
+	cp r26, zero
+	brne sound_driver_channel3
+	sts triangle_fx_Gxx_post, r27
+	ret
 
 
 
 sound_driver_channel3:
 	lds r26, noise_pattern_delay_rows
 	lds r27, noise_pattern_delay_frames
+sound_driver_channel3_decrement_frame_delay:
+	dec r27
+	sts noise_pattern_delay_frames, r27
+
 	adiw r27:r26, 0
 	breq sound_driver_channel3_main //if the pattern delay is 0, proceed with sound driver procedures
-	rjmp sound_driver_channel3_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+	rjmp sound_driver_channel3_end //if the pattern delay is not 0, end routine
 
 sound_driver_channel3_main:
 	lds ZL, noise_pattern //current pattern for noise
@@ -4119,7 +4166,7 @@ sound_driver_channel3_delay:
 	subi r27, 0x66 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts noise_pattern_delay_rows, r27
 	rcall sound_driver_channel3_increment_offset
-	rjmp sound_driver_channel4
+	rjmp sound_driver_channel3_end
 
 
 
@@ -4341,18 +4388,33 @@ sound_driver_channel3_increment_offset_twice: //used for data that takes up 2 by
 	sts noise_pattern_offset+1, ZH
 	ret
 
-sound_driver_channel3_decrement_frame_delay:
-	dec r27
-	sts noise_pattern_delay_frames, r27
+sound_driver_channel3_end:
+sound_driver_channel3_check_Sxx_invalid:
+	ldi r27, 0xFF
+	lds r26, noise_fx_Sxx_post
+	cp r26, zero //check if routine was called from calculate_delays due to invalid Sxx/Gxx
+	brne sound_driver_channel3_check_Gxx_invalid
+	sts noise_fx_Sxx_post, r27
+	ret
+sound_driver_channel3_check_Gxx_invalid:
+	lds r26, noise_fx_Gxx_post
+	cp r26, zero
+	brne sound_driver_channel4
+	sts noise_fx_Gxx_post, r27
+	ret
 
 
 
 sound_driver_channel4:
 	lds r26, dpcm_pattern_delay_rows
 	lds r27, dpcm_pattern_delay_frames
+sound_driver_channel4_decrement_frame_delay:
+	dec r27
+	sts dpcm_pattern_delay_frames, r27
+
 	adiw r27:r26, 0
 	breq sound_driver_channel4_main //if the pattern delay is 0, proceed with sound driver procedures
-	rjmp sound_driver_channel4_decrement_frame_delay //if the pattern delay is not 0, decrement the delay
+	rjmp sound_driver_channel4_end //if the pattern delay is not 0, end routine
 
 sound_driver_channel4_main:
 	lds ZL, dpcm_pattern //current pattern for dpcm
@@ -4545,7 +4607,7 @@ sound_driver_channel4_delay:
 	subi r27, 0x66 //NOTE: the delay values are offset by the highest volume value, which is 0x66
 	sts dpcm_pattern_delay_rows, r27
 	rcall sound_driver_channel4_increment_offset
-	rjmp sound_driver_calculate_delays
+	rjmp sound_driver_channel4_end
 
 
 
@@ -4601,13 +4663,25 @@ sound_driver_channel4_increment_offset_twice: //used for data that takes up 2 by
 	sts dpcm_pattern_offset+1, ZH
 	ret
 
-sound_driver_channel4_decrement_frame_delay:
-	dec r27
-	sts dpcm_pattern_delay_frames, r27
+sound_driver_channel4_end:
+sound_driver_channel4_check_Sxx_invalid:
+	ldi r27, 0xFF
+	lds r26, dpcm_fx_Sxx_post
+	cp r26, zero //check if routine was called from calculate_delays due to invalid Sxx/Gxx
+	brne sound_driver_channel4_check_Gxx_invalid
+	sts dpcm_fx_Sxx_post, r27
+	ret
+sound_driver_channel4_check_Gxx_invalid:
+	lds r26, dpcm_fx_Gxx_post
+	cp r26, zero
+	brne sound_driver_calculate_delays
+	sts dpcm_fx_Gxx_post, r27
+	ret
+
+
+
 sound_driver_calculate_delays:
 	lds r31, song_speed
-	mov r30, r31
-	subi r30, 1
 
 sound_driver_calculate_delays_pulse1:
 	lds r26, pulse1_pattern_delay_frames
@@ -4616,16 +4690,13 @@ sound_driver_calculate_delays_pulse1:
 	rjmp sound_driver_calculate_delays_pulse1_main
 
 sound_driver_calculate_delays_pulse1_main:
-	mov r26, r31 //move the speed to r26
+	mov r26, r31 //move speed into r26
 	lds r27, pulse1_pattern_delay_rows //decrement the delay rows
 	cp r27, zero
 	brne PC+2
 	rjmp sound_driver_calculate_delays_pulse2
 	dec r27
 	sts pulse1_pattern_delay_rows, r27
-	cpse r27, zero
-	rjmp sound_driver_calculate_delays_pulse1_store
-	dec r26
 
 sound_driver_calculate_delays_pulse1_Sxx:
 	ldi r27, 0xFF
@@ -4654,33 +4725,37 @@ sound_driver_calculate_delays_pulse1_Gxx_check_post:
 
 sound_driver_calculate_delays_pulse1_Sxx_pre:
 	sts pulse1_fx_Sxx_pre, r27
-	sts pulse1_fx_Sxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Sxx
+	sts pulse1_fx_Sxx_post, r26
 	sts pulse1_pattern_delay_frames, r28
+	cpse r26, zero
 	rjmp sound_driver_calculate_delays_pulse2
+	rjmp sound_driver_calculate_delays_pulse1_Sxx_Gxx_invalid
 
 sound_driver_calculate_delays_pulse1_Sxx_post:
 	sts pulse1_fx_Sxx_post, r27
-	sub r30, r29 //(song speed)-1-Sxx
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_pulse1_store
 
 sound_driver_calculate_delays_pulse1_Gxx_pre:
 	sts pulse1_fx_Gxx_pre, r27
-	sts pulse1_fx_Gxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Gxx
+	sts pulse1_fx_Gxx_post, r26
 	sts pulse1_pattern_delay_frames, r28
+	cpse r26, zero
 	rjmp sound_driver_calculate_delays_pulse2
+	rjmp sound_driver_calculate_delays_pulse1_Sxx_Gxx_invalid
 	
 sound_driver_calculate_delays_pulse1_Gxx_post:
 	sts pulse1_fx_Gxx_post, r27
-	sub r30, r29 //(song speed)-1-Gxx
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_pulse1_store
+
+sound_driver_calculate_delays_pulse1_Sxx_Gxx_invalid:
+	sts pulse1_pattern_delay_frames, zero
+	call sound_driver_channel0_main
+	lds r31, song_speed
+	rjmp sound_driver_calculate_delays_pulse1
 
 sound_driver_calculate_delays_pulse1_store:
 	sts pulse1_pattern_delay_frames, r26
@@ -4701,9 +4776,6 @@ sound_driver_calculate_delays_pulse2_main:
 	rjmp sound_driver_calculate_delays_triangle
 	dec r27
 	sts pulse2_pattern_delay_rows, r27
-	cpse r27, zero
-	rjmp sound_driver_calculate_delays_pulse2_store
-	dec r26
 
 sound_driver_calculate_delays_pulse2_Sxx:
 	ldi r27, 0xFF
@@ -4732,33 +4804,37 @@ sound_driver_calculate_delays_pulse2_Gxx_check_post:
 
 sound_driver_calculate_delays_pulse2_Sxx_pre:
 	sts pulse2_fx_Sxx_pre, r27
-	sts pulse2_fx_Sxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Sxx
+	sts pulse2_fx_Sxx_post, r26
 	sts pulse2_pattern_delay_frames, r28
-	rjmp sound_driver_calculate_delays_pulse2
+	cpse r26, zero
+	rjmp sound_driver_calculate_delays_triangle
+	rjmp sound_driver_calculate_delays_pulse2_Sxx_Gxx_invalid
 
 sound_driver_calculate_delays_pulse2_Sxx_post:
 	sts pulse2_fx_Sxx_post, r27
-	sub r30, r29 //(song speed)-1-Sxx
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_pulse2_store
 
 sound_driver_calculate_delays_pulse2_Gxx_pre:
 	sts pulse2_fx_Gxx_pre, r27
-	sts pulse2_fx_Gxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-1-Gxx
+	sts pulse2_fx_Gxx_post, r26
 	sts pulse2_pattern_delay_frames, r28
-	rjmp sound_driver_calculate_delays_pulse2
+	cpse r26, zero
+	rjmp sound_driver_calculate_delays_triangle
+	rjmp sound_driver_calculate_delays_pulse2_Sxx_Gxx_invalid
 	
 sound_driver_calculate_delays_pulse2_Gxx_post:
-	sts pulse2_fx_Gxx_post, r27 //(song speed)-1-Gxx
-	sub r30, r29
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	sts pulse2_fx_Gxx_post, r27
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_pulse2_store
+
+sound_driver_calculate_delays_pulse2_Sxx_Gxx_invalid:
+	sts pulse2_pattern_delay_frames, zero
+	call sound_driver_channel1_main
+	lds r31, song_speed
+	rjmp sound_driver_calculate_delays_pulse2
 
 sound_driver_calculate_delays_pulse2_store:
 	sts pulse2_pattern_delay_frames, r26
@@ -4779,9 +4855,6 @@ sound_driver_calculate_delays_triangle_main:
 	rjmp sound_driver_calculate_delays_noise
 	dec r27
 	sts triangle_pattern_delay_rows, r27
-	cpse r27, zero
-	rjmp sound_driver_calculate_delays_triangle_store
-	dec r26
 
 sound_driver_calculate_delays_triangle_Sxx:
 	ldi r27, 0xFF
@@ -4810,33 +4883,37 @@ sound_driver_calculate_delays_triangle_Gxx_check_post:
 
 sound_driver_calculate_delays_triangle_Sxx_pre:
 	sts triangle_fx_Sxx_pre, r27
-	sts triangle_fx_Sxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Sxx
+	sts triangle_fx_Sxx_post, r26
 	sts triangle_pattern_delay_frames, r28
+	cpse r26, zero
 	rjmp sound_driver_calculate_delays_noise
+	rjmp sound_driver_calculate_delays_triangle_Sxx_Gxx_invalid
 
 sound_driver_calculate_delays_triangle_Sxx_post:
 	sts triangle_fx_Sxx_post, r27
-	sub r30, r29 //(song speed)-1-Sxx
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_triangle_store
 
 sound_driver_calculate_delays_triangle_Gxx_pre:
 	sts triangle_fx_Gxx_pre, r27
-	sts triangle_fx_Gxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Gxx
+	sts triangle_fx_Gxx_post, r26
 	sts triangle_pattern_delay_frames, r28
+	cpse r26, zero
 	rjmp sound_driver_calculate_delays_noise
+	rjmp sound_driver_calculate_delays_triangle_Sxx_Gxx_invalid
 	
 sound_driver_calculate_delays_triangle_Gxx_post:
-	sts triangle_fx_Gxx_post, r27 //(song speed)-1-Gxx
-	sub r30, r29
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	sts triangle_fx_Gxx_post, r27
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_triangle_store
+
+sound_driver_calculate_delays_triangle_Sxx_Gxx_invalid:
+	sts triangle_pattern_delay_frames, zero
+	call sound_driver_channel2_main
+	lds r31, song_speed
+	rjmp sound_driver_calculate_delays_triangle
 
 sound_driver_calculate_delays_triangle_store:
 	sts triangle_pattern_delay_frames, r26
@@ -4857,9 +4934,6 @@ sound_driver_calculate_delays_noise_main:
 	rjmp sound_driver_calculate_delays_dpcm
 	dec r27
 	sts noise_pattern_delay_rows, r27
-	cpse r27, zero
-	rjmp sound_driver_calculate_delays_noise_store
-	dec r26
 
 sound_driver_calculate_delays_noise_Sxx:
 	ldi r27, 0xFF
@@ -4888,33 +4962,37 @@ sound_driver_calculate_delays_noise_Gxx_check_post:
 
 sound_driver_calculate_delays_noise_Sxx_pre:
 	sts noise_fx_Sxx_pre, r27
-	sts noise_fx_Sxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Sxx
+	sts noise_fx_Sxx_post, r26
 	sts noise_pattern_delay_frames, r28
+	cpse r26, zero
 	rjmp sound_driver_calculate_delays_dpcm
+	rjmp sound_driver_calculate_delays_noise_Sxx_Gxx_invalid
 
 sound_driver_calculate_delays_noise_Sxx_post:
 	sts noise_fx_Sxx_post, r27
-	sub r30, r29 //(song speed)-1-Sxx
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_noise_store
 
 sound_driver_calculate_delays_noise_Gxx_pre:
 	sts noise_fx_Gxx_pre, r27
-	sts noise_fx_Gxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Gxx
+	sts noise_fx_Gxx_post, r26
 	sts noise_pattern_delay_frames, r28
+	cpse r26, zero
 	rjmp sound_driver_calculate_delays_dpcm
+	rjmp sound_driver_calculate_delays_noise_Sxx_Gxx_invalid
 	
 sound_driver_calculate_delays_noise_Gxx_post:
-	sts noise_fx_Gxx_post, r27 //(song speed)-1-Gxx
-	sub r30, r29
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	sts noise_fx_Gxx_post, r27
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_noise_store
+
+sound_driver_calculate_delays_noise_Sxx_Gxx_invalid:
+	sts noise_pattern_delay_frames, zero
+	call sound_driver_channel3_main
+	lds r31, song_speed
+	rjmp sound_driver_calculate_delays_noise
 
 sound_driver_calculate_delays_noise_store:
 	sts noise_pattern_delay_frames, r26
@@ -4935,9 +5013,6 @@ sound_driver_calculate_delays_dpcm_main:
 	rjmp sound_driver_instrument_fx_routine
 	dec r27
 	sts dpcm_pattern_delay_rows, r27
-	cpse r27, zero
-	rjmp sound_driver_calculate_delays_dpcm_store
-	dec r26
 
 sound_driver_calculate_delays_dpcm_Sxx:
 	ldi r27, 0xFF
@@ -4966,33 +5041,37 @@ sound_driver_calculate_delays_dpcm_Gxx_check_post:
 
 sound_driver_calculate_delays_dpcm_Sxx_pre:
 	sts dpcm_fx_Sxx_pre, r27
-	sts dpcm_fx_Sxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Sxx
+	sts dpcm_fx_Sxx_post, r26
 	sts dpcm_pattern_delay_frames, r28
+	cpse r26, zero
 	rjmp sound_driver_instrument_fx_routine
+	rjmp sound_driver_calculate_delays_dpcm_Sxx_Gxx_invalid
 
 sound_driver_calculate_delays_dpcm_Sxx_post:
 	sts dpcm_fx_Sxx_post, r27
-	sub r30, r29 //(song speed)-1-Sxx
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_dpcm_store
 
 sound_driver_calculate_delays_dpcm_Gxx_pre:
 	sts dpcm_fx_Gxx_pre, r27
-	sts dpcm_fx_Gxx_post, r28
-	dec r28
+	sub r26, r28 //(song speed)-Gxx
+	sts dpcm_fx_Gxx_post, r26
 	sts dpcm_pattern_delay_frames, r28
+	cpse r26, zero
 	rjmp sound_driver_instrument_fx_routine
+	rjmp sound_driver_calculate_delays_dpcm_Sxx_Gxx_invalid
 	
 sound_driver_calculate_delays_dpcm_Gxx_post:
-	sts dpcm_fx_Gxx_post, r27 //(song speed)-1-Gxx
-	sub r30, r29
-	mov r26, r30
-	mov r30, r31
-	subi r30, 1
+	sts dpcm_fx_Gxx_post, r27
+	mov r26, r29
 	rjmp sound_driver_calculate_delays_dpcm_store
+
+sound_driver_calculate_delays_dpcm_Sxx_Gxx_invalid:
+	sts dpcm_pattern_delay_frames, zero
+	call sound_driver_channel4_main
+	lds r31, song_speed
+	rjmp sound_driver_calculate_delays_dpcm
 
 sound_driver_calculate_delays_dpcm_store:
 	sts dpcm_pattern_delay_frames, r26
