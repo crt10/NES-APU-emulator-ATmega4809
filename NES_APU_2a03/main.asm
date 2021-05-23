@@ -43,6 +43,7 @@ noise_adjusted_note: .byte 1 //the resultant note index after the arpeggio macro
 song_frames: .byte 2
 song_frame_offset: .byte 2
 song_size: .byte 2
+song_tempo: .byte 2
 song_speed: .byte 1
 //song_channel_delay_reload: .byte 1 //bit 0-4 represents channels 0-4. a set bit means that there is a delay that needs to be calculated for that channel.
 song_fx_Bxx: .byte 1
@@ -400,7 +401,7 @@ init:
 	ldi r28, 0b00001111
 	sts noise_period, r28
 
-	ldi r28, 0x02
+	ldi r28, 0x04
 	sts song_frame_offset, r28
 	sts song_frame_offset+1, zero
 	ldi r28, 0xFF
@@ -415,6 +416,10 @@ init:
 	lpm r29, Z+
 	sts song_size, r28
 	sts song_size+1, r29
+	lpm r28, Z+ //load the song tempo
+	lpm r29, Z+
+	sts song_tempo, r28
+	sts song_tempo+1, r29
 	sts song_speed, zero
 
 	//CHANNEL 0
@@ -944,19 +949,19 @@ init:
 	//Interrupts will be setup to interrupt every 240 Hz clock
 	//The 4th consecutive interrupt will clock the sound driver every 60Hz, in which new audio data is read and written to the registers
 	//1st and 2nd interrupt will execute sequence 0 and 2. 3rd and 4th interrupt will execute sequence 1 and 3.
-	//Timer period Calculation: (0.00416666666 * 32768/8)-1 = 16.0666666394 = 0x0010
+	//Timer period Calculation: (0.00416666666 * 32768/16)-1 = 7.53333333333 = 0x0007
 	//The RTC timer is clocked at 32768 Hz
 	//0.00416666666 seconds is the period for 240 Hz
 	//The /8 comes from the prescaler divider used
 	ldi r27, RTC_CLKSEL_INT32K_gc //internal 32kHz oscillator
 	sts RTC_CLKSEL, r27
-	ldi r27, 0x10
-	ldi r28, 0x00
+	lds r27, song_tempo
+	lds r28, song_tempo+1
 	sts RTC_PER, r27
 	sts RTC_PER + 1, r28
 	ldi r27, RTC_OVF_bm //overflow interrupts
 	sts RTC_INTCTRL, r27
-	ldi r27, RTC_PRESCALER_DIV8_gc | RTC_PITEN_bm //use prescaler divider of 8 and enable RTC
+	ldi r27, RTC_PRESCALER_DIV2_gc | RTC_PITEN_bm //use prescaler divider of 16 and enable RTC
 	sts RTC_CTRLA, r27
 
 
@@ -1458,7 +1463,7 @@ sound_driver_fx_Bxx_routine_loop:
 	rjmp sound_driver_fx_Bxx_routine_loop
 
 sound_driver_fx_Bxx_routine_loop_exit:
-	adiw r29:r28, 2 //add 2 to skip the first 2 bytes (first 2 bytes is the song size)
+	adiw r29:r28, 4 //add 4 to skip the first 4 bytes (first 4 bytes is the song size and tempo)
 	sts song_frame_offset, r28
 	sts song_frame_offset+1, r29
 	add ZL, r28
@@ -8461,7 +8466,7 @@ sound_driver_exit:
 	pop r30
 	pop r29
 	pop r28
-	jmp sequence_1_3 + 3 //+3 is to skip the stack instructions since we already pushed them
+	jmp sequence_1_3
 
 
 
