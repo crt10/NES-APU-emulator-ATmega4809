@@ -6083,6 +6083,7 @@ sound_driver_channel0_fx_Qxy_routine_end:
 	sts pulse1_fx_Qxy_target+1, zero
 	lds r27, pulse1_fx_Qxy_target_note
 	sts pulse1_note, r27 //replace the note with the final target note
+	sts pulse1_fx_Rxy_target_note, r27
 	rjmp sound_driver_channel0_fx_Rxy_routine
 
 sound_driver_channel0_fx_Qxy_routine_add:
@@ -6118,6 +6119,7 @@ sound_driver_channel0_fx_Rxy_routine_end:
 	sts pulse1_fx_Rxy_target+1, zero
 	lds r27, pulse1_fx_Rxy_target_note
 	sts pulse1_note, r27 //replace the note with the final target note
+	sts pulse1_fx_Qxy_target_note, r27
 	rjmp sound_driver_instrument_routine_channel1_volume
 
 sound_driver_channel0_fx_Rxy_routine_add:
@@ -7050,6 +7052,7 @@ sound_driver_channel1_fx_Qxy_routine_end:
 	sts pulse2_fx_Qxy_target+1, zero
 	lds r27, pulse2_fx_Qxy_target_note
 	sts pulse2_note, r27 //replace the note with the final target note
+	sts pulse2_fx_Rxy_target_note, r27
 	rjmp sound_driver_channel1_fx_Rxy_routine
 
 sound_driver_channel1_fx_Qxy_routine_add:
@@ -7085,6 +7088,7 @@ sound_driver_channel1_fx_Rxy_routine_end:
 	sts pulse2_fx_Rxy_target+1, zero
 	lds r27, pulse2_fx_Rxy_target_note
 	sts pulse2_note, r27 //replace the note with the final target note
+	sts pulse2_fx_Qxy_target_note, r27
 	rjmp sound_driver_instrument_routine_channel2_volume
 
 sound_driver_channel1_fx_Rxy_routine_add:
@@ -7819,6 +7823,7 @@ sound_driver_channel2_fx_Qxy_routine_end:
 	sts triangle_fx_Qxy_target+1, zero
 	lds r27, triangle_fx_Qxy_target_note
 	sts triangle_note, r27 //replace the note with the final target note
+	sts triangle_fx_Rxy_target_note, r27
 	rjmp sound_driver_channel2_fx_Rxy_routine
 
 sound_driver_channel2_fx_Qxy_routine_add:
@@ -7854,6 +7859,7 @@ sound_driver_channel2_fx_Rxy_routine_end:
 	sts triangle_fx_Rxy_target+1, zero
 	lds r27, triangle_fx_Rxy_target_note
 	sts triangle_note, r27 //replace the note with the final target note
+	sts triangle_fx_Qxy_target_note, r27
 	rjmp sound_driver_instrument_routine_channel3_volume
 
 sound_driver_channel2_fx_Rxy_routine_add:
