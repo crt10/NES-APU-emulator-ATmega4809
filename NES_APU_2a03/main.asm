@@ -36,7 +36,7 @@ triangle_note: .byte 1 //the current note index in the note table
 noise_param: .byte 1 //$400C 00lc.vvvv = Length counter halt/Loop flag, Constant volume flag, Volume
 noise_period: .byte 1 //$400E M000.PPPP = Mode, Period
 noise_fractional_volume: .byte 1 //used with the Axy effect to calculate volume. represents the VVVV bits in $4000, but with fractional data in bits 0 to 3.
-noise_output_volume: .byte 1 //this is the final output volume of pulse 2
+noise_output_volume: .byte 1 //this is the final output volume of noise
 noise_note: .byte 1 //the current note index in the period table
 noise_adjusted_note: .byte 1 //the resultant note index after the arpeggio macro
 
@@ -334,6 +334,7 @@ dpcm_fx_Sxx_post: .byte 1
 .def dpcm_period = r15
 .def dpcm_length_LOW = r23
 .def dpcm_length_HIGH = r24
+.def dpcm_output_volume = r5
 
 
 reset:
@@ -341,6 +342,9 @@ reset:
 
 .org RTC_CNT_vect
 	jmp frame_counter_routine
+
+.org TCA0_OVF_vect
+	jmp dpcm_sequence_routine
 
 .org TCB0_INT_vect
 	jmp pulse1_sequence_routine
@@ -838,6 +842,9 @@ init:
 	sts noise_fx_Sxx_pre, r28
 	sts noise_fx_Sxx_post, r28
 
+	//CHANNEL 4 VOLUME
+	mov dpcm_output_volume, zero
+
 	//CHANNEL 4 SAMPLE
 	sts dpcm_sample, zero
 	sts dpcm_sample+1, zero
@@ -920,39 +927,23 @@ init:
 	sts TCB3_CTRLA, r27
 
 	//DPCM
-/*	ldi r28, TCA_SINGLE_CMP0EN_bm | TCA_SINGLE_CMP1EN_bm | TCA_SINGLE_CMP2EN_bm | TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
+	ldi r28, TCA_SINGLE_WGMODE_NORMAL_gc //interrupt mode
 	sts TCA0_SINGLE_CTRLB, r28
-	ldi r28, TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm | TCA_SINGLE_OVF_bm //enable overflow and compare interrupts
+	ldi r28, TCA_SINGLE_OVF_bm //enable overflow interrupts
 	sts TCA0_SINGLE_INTCTRL, r28
-	ldi r28, 0x15 //set the period for CMP0
-	sts TCA0_SINGLE_CMP0, r28
-	ldi r28, 0x05
-	sts TCA0_SINGLE_CMP0 + 1, r28
-	ldi r28, 0x2B //set the period for CMP1
-	sts TCA0_SINGLE_CMP1, r28
-	ldi r28, 0x0A
-	sts TCA0_SINGLE_CMP1 + 1, r28
-	ldi r28, 0x41 //set the period for CMP2
-	sts TCA0_SINGLE_CMP2, r28
-	ldi r28, 0x0F
-	sts TCA0_SINGLE_CMP2 + 1, r28
-	ldi r28, 0x57 //set the period for OVF
-	sts TCA0_SINGLE_PER, r28
-	ldi r28, 0x14
-	sts TCA0_SINGLE_PER + 1, r28
-	ldi r28, TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 64 and enable timer
-	sts TCA0_SINGLE_CTRLA, r28*/
+	ldi r28, TCA_SINGLE_CLKSEL_DIV2_gc //use prescaler divider of 2
+	sts TCA0_SINGLE_CTRLA, r28
 
 	//RTC
 	//Frame Counter
 	//NOTE:The frame counter will be defaulted to NTSC mode (60 Hz, 120 Hz, 240 Hz)
 	//Interrupts will be setup to interrupt every 240 Hz clock
-	//The 4th consecutive interrupt will clock the sound driver every 60Hz, in which new audio data is read and written to the registers
+	//The 4th consecutive interrupt will clock the sound driver every 60 Hz, in which new audio data is read and written to the registers
 	//1st and 2nd interrupt will execute sequence 0 and 2. 3rd and 4th interrupt will execute sequence 1 and 3.
-	//Timer period Calculation: (0.00416666666 * 32768/16)-1 = 7.53333333333 = 0x0007
+	//Timer period Calculation: ((1/(tempo*4)) * 32768/2)
 	//The RTC timer is clocked at 32768 Hz
-	//0.00416666666 seconds is the period for 240 Hz
-	//The /8 comes from the prescaler divider used
+	//The /2 comes from the prescaler divider used
+	//NOTE: The frame counter clock will not always be 60 Hz, and will depend on the song_tempo.
 	ldi r27, RTC_CLKSEL_INT32K_gc //internal 32kHz oscillator
 	sts RTC_CLKSEL, r27
 	lds r27, song_tempo
@@ -1046,6 +1037,9 @@ volume_mixer_tnd_triangle:
 	mov r30, r29
 	add r29, r30 //multiply the triangle volume by 3
 	add r29, r30
+
+volume_mixer_tnd_dpcm:
+	add r29, dpcm_output_volume
 
 volume_mixer_tnd_noise:
 	sbrs noise_sequence_LOW, 0 //check 0th bit, skip if set
@@ -1394,6 +1388,77 @@ noise_sequence_routine_mode_set_EOR_set:
 noise_sequence_exit:
 	ldi r27, TCB_CAPT_bm //clear OVF flag
 	sts TCB3_INTFLAGS, r27
+	pop r27
+	out CPU_SREG, r27
+	reti
+
+//DPCM ROUTINES
+dpcm_sequence_routine:
+	in r27, CPU_SREG
+	push r27
+	cli
+
+	lds ZL, dpcm_sample
+	lds ZH, dpcm_sample+1
+
+dpcm_check_counter:
+	cp dpcm_bit_counter, zero
+	breq dpcm_check_length
+	rjmp dpcm_shift_register
+dpcm_check_length:
+	cp dpcm_length_LOW, zero
+	cpc dpcm_length_HIGH, zero
+	breq dpcm_stop
+	rjmp dpcm_next_byte
+
+dpcm_shift_register:
+	sub dpcm_bit_counter, one
+	sbrc dpcm_shift, 0
+	rjmp dpcm_volume_add
+	rjmp dpcm_volume_sub
+
+dpcm_next_byte:
+	lds r26, dpcm_sample_offset
+	lds r27, dpcm_sample_offset+1
+	add r26, one //increment sample offset
+	adc r27, zero
+	sub dpcm_length_LOW, one //decrement dpcm sample length
+	sbc dpcm_length_HIGH, zero
+	sts dpcm_sample_offset, r26
+	sts dpcm_sample_offset+1, r27
+
+	add ZL, r26 //offset data in sample table
+	adc ZH, r27
+	lpm dpcm_shift, Z //load data byte into dpcm shift register
+	ldi r26, 0x08
+	mov dpcm_bit_counter, r26 //reset bit counter to 8
+	rjmp dpcm_shift_register
+
+dpcm_volume_add:
+	lsr dpcm_shift //right shift
+	ldi r26, 0x7E //0x7E + 0x02 is the highest volume DPCM can have
+	cp dpcm_output_volume, r26
+	brsh dpcm_sequence_exit //exit dpcm sequence if needed to prevent overflow
+	add dpcm_output_volume, one //add 2
+	add dpcm_output_volume, one
+	rjmp dpcm_sequence_exit
+dpcm_volume_sub:
+	lsr dpcm_shift //right shift
+	ldi r26, 0x02 // 0x02 - 0x02 is the lowest volume DPCM can have
+	cp dpcm_output_volume, r26
+	brlo dpcm_sequence_exit //exit dpcm sequence if needed to prevent overflow
+	sub dpcm_output_volume, one //subtract 2
+	sub dpcm_output_volume, one
+	rjmp dpcm_sequence_exit
+
+dpcm_stop:
+	ldi r26, TCA_SINGLE_CLKSEL_DIV2_gc //use prescale divider of 2 and disable timer
+	sts TCA0_SINGLE_CTRLA, r26
+	rjmp dpcm_sequence_exit
+
+dpcm_sequence_exit:
+	ldi r27, TCA_SINGLE_OVF_bm //clear OVF flag
+	sts TCA0_SINGLE_INTFLAGS, r27
 	pop r27
 	out CPU_SREG, r27
 	reti
@@ -4594,8 +4659,22 @@ sound_driver_channel4_note:
 
 	sts dpcm_sample, ZL //store address to sample
 	sts dpcm_sample+1, ZH
-	sts dpcm_sample_offset, one //start sample offset at 1 (0th byte was used for sample length)
+	sts dpcm_sample_offset, one //reset sample offset to 1 (0th byte contains length)
 	sts dpcm_sample_offset+1, zero
+
+	mov dpcm_bit_counter, zero
+
+	ldi ZL, LOW(dpcm_period_table << 1) //load in dpcm period table
+	ldi ZH, HIGH(dpcm_period_table << 1)
+	lsl dpcm_period //double the offset for the period table because we are getting byte data
+	add ZL, dpcm_period //add offset
+	adc ZH, zero
+	lpm r26, Z+ //load bytes
+	lpm r27, Z
+	sts TCA0_SINGLE_PER, r26 //load the LOW bits for timer
+	sts TCA0_SINGlE_PER + 1, r27 //load the HIGH bits for timer
+	ldi r26, TCA_SINGLE_CLKSEL_DIV2_gc | TCA_SINGLE_ENABLE_bm //use prescale divider of 2 and enable timer
+	sts TCA0_SINGLE_CTRLA, r26
 
 	rcall sound_driver_channel4_increment_offset_twice
 	rjmp sound_driver_channel4_main
