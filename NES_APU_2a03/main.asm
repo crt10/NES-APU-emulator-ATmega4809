@@ -44,6 +44,8 @@ song_frames: .byte 2
 song_frame_offset: .byte 2
 song_size: .byte 2
 song_tempo: .byte 2
+song_tempo_correction: .byte 2
+song_tempo_correction_cycles: .byte 1
 song_speed: .byte 1
 //song_channel_delay_reload: .byte 1 //bit 0-4 represents channels 0-4. a set bit means that there is a delay that needs to be calculated for that channel.
 song_fx_Bxx: .byte 1
@@ -405,7 +407,7 @@ init:
 	ldi r28, 0b00001111
 	sts noise_period, r28
 
-	ldi r28, 0x04
+	ldi r28, 0x06
 	sts song_frame_offset, r28
 	sts song_frame_offset+1, zero
 	ldi r28, 0xFF
@@ -424,6 +426,11 @@ init:
 	lpm r29, Z+
 	sts song_tempo, r28
 	sts song_tempo+1, r29
+	lpm r28, Z+
+	lpm r29, Z+
+	sts song_tempo_correction, r28
+	sts song_tempo_correction+1, r29
+	sts song_tempo_correction_cycles, r29
 	sts song_speed, zero
 
 	//CHANNEL 0
@@ -1068,6 +1075,16 @@ frame_counter_routine:
 	push r27
 	cli
 
+	lds r27, song_tempo_correction+1
+	lds r26, song_tempo_correction_cycles
+	cp r26, r27
+	breq frame_counter_routine_clear_offset
+	cp r26, zero
+	breq frame_counter_routine_offset
+
+frame_counter_routine_sequence:
+	dec r26
+	sts song_tempo_correction_cycles, r26
 	mov r26, frame_sequence
 	add frame_sequence, one
 	cpi r26, 0x00
@@ -1077,6 +1094,28 @@ frame_counter_routine:
 	cpi r26, 0x02
 	breq sequence_0_2
 	rjmp sound_driver
+
+frame_counter_routine_clear_offset:
+	dec r26
+	sts song_tempo_correction_cycles, r26
+	lds r26, song_tempo
+	lds r27, song_tempo+1
+	sts RTC_PER, r26
+	sts RTC_PER + 1, r27
+	rjmp frame_counter_routine_sequence+3
+
+frame_counter_routine_offset:
+	push r28
+	sts song_tempo_correction_cycles, r27
+	lds r26, song_tempo
+	lds r27, song_tempo+1
+	lds r28, song_tempo_correction
+	add r26, r28
+	adc r27, zero
+	sts RTC_PER, r26
+	sts RTC_PER + 1, r27
+	pop r28
+	rjmp frame_counter_routine_sequence+3
 
 sequence_0_2:
 	//ENVELOPE
@@ -1454,6 +1493,7 @@ dpcm_volume_sub:
 dpcm_stop:
 	ldi r26, TCA_SINGLE_CLKSEL_DIV2_gc //use prescale divider of 2 and disable timer
 	sts TCA0_SINGLE_CTRLA, r26
+	//clr dpcm_output_volume
 	rjmp dpcm_sequence_exit
 
 dpcm_sequence_exit:
@@ -1528,7 +1568,7 @@ sound_driver_fx_Bxx_routine_loop:
 	rjmp sound_driver_fx_Bxx_routine_loop
 
 sound_driver_fx_Bxx_routine_loop_exit:
-	adiw r29:r28, 4 //add 4 to skip the first 4 bytes (first 4 bytes is the song size and tempo)
+	adiw r29:r28, 6 //add 6 to skip the first 6 bytes (first 6 bytes is the song size, tempo and tempo correction)
 	sts song_frame_offset, r28
 	sts song_frame_offset+1, r29
 	add ZL, r28
